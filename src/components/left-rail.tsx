@@ -6,8 +6,8 @@ const sections = [
   { id: "station", numeral: "I", label: "Station" },
   { id: "watchlist", numeral: "II", label: "Watchlist" },
   { id: "fresh-finds", numeral: "III", label: "Fresh Finds" },
-  { id: "specimens", numeral: "IV", label: "Specimens" },
-  { id: "archive", numeral: "V", label: "Archive" },
+  { id: "archive", numeral: "IV", label: "Archive" },
+  { id: "methodology", numeral: "V", label: "Method" },
 ];
 
 export function LeftRail() {

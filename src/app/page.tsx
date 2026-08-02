@@ -9,11 +9,10 @@ import { RelativeTime } from "@/components/relative-time";
 import { NavBar } from "@/components/nav-bar";
 import { LeftRail } from "@/components/left-rail";
 import { HeroSection } from "@/components/hero-section";
+import { ProjectGrid } from "@/components/project-grid";
 import { ScoringSection } from "@/components/scoring-section";
-import { FeaturedSection } from "@/components/featured-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
-import { ProjectGrid } from "@/components/project-grid";
 
 export default function Home() {
   const data = getProjects();
@@ -48,8 +47,6 @@ export default function Home() {
 
       <div className="section-divider" />
 
-      <ScoringSection />
-
       {/* Zone 1 — Your Watchlist (most important, top) */}
       <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} />
 
@@ -60,13 +57,13 @@ export default function Home() {
 
       <div className="section-divider" />
 
-      {/* Featured / Specimen Gallery */}
-      <FeaturedSection projects={data.projects} genres={genres.genres} />
+      {/* Zone 3 — The rest of the archive with pagination */}
+      <ProjectGrid projects={data.projects} genres={genres.genres} />
 
       <div className="section-divider" />
 
-      {/* Zone 3 — Full Archive (complete catalog, collapsed by default) */}
-      <ProjectGrid projects={data.projects} genres={genres.genres} />
+      {/* Scoring methodology — at the bottom, after the data */}
+      <ScoringSection />
 
       <footer
         className="border-t py-12 px-4"

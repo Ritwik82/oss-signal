@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, startTransition } from "react";
+import { useState, useMemo, useEffect, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Project, Genre, GenreId } from "@/lib/data";
 
@@ -89,6 +89,8 @@ export function ProjectGrid({
   );
 
   const [collapsed, setCollapsed] = useState(true);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 12;
   const [lang, setLang] = useState("all");
   const [minScore, setMinScore] = useState("all");
   const [minStars, setMinStars] = useState("all");
@@ -104,6 +106,11 @@ export function ProjectGrid({
     const langs = projects.map((p) => p.language).filter(Boolean) as string[];
     return [...new Set(langs)].sort();
   }, [projects]);
+
+  // Reset to page 1 whenever the user changes any filter/sort/search
+  useEffect(() => {
+    setPage(0);
+  }, [search, lang, minScore, minStars, genreFilter, shizukuFilter, activeDays, showGeneric, sort, sortDir]);
 
   const filtered = useMemo(() => {
     let list = projects;
@@ -444,13 +451,47 @@ export function ProjectGrid({
                     No specimens match your criteria
                   </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filtered.map((p, i) => (
-                    <SpecimenCard key={p.id} project={p} index={i} genreMap={genreMap} />
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+                const clampedPage = Math.min(page, totalPages - 1);
+                const visible = filtered.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
+                return (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {visible.map((p, i) => (
+                        <SpecimenCard key={p.id} project={p} index={clampedPage * PAGE_SIZE + i} genreMap={genreMap} />
+                      ))}
+                    </div>
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between border mt-8 p-4"
+                        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+                      >
+                        <button
+                          onClick={() => setPage((p) => Math.max(0, p - 1))}
+                          disabled={clampedPage === 0}
+                          aria-disabled={clampedPage === 0}
+                          className="font-mono text-[10px] tracking-wider px-3 py-1.5 border disabled:opacity-40 transition-colors"
+                          style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                        >
+                          ← Prev
+                        </button>
+                        <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "var(--color-text-dim)" }}>
+                          {clampedPage + 1} / {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                          disabled={clampedPage >= totalPages - 1}
+                          aria-disabled={clampedPage >= totalPages - 1}
+                          className="font-mono text-[10px] tracking-wider px-3 py-1.5 border disabled:opacity-40 transition-colors"
+                          style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                        >
+                          Next →
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </motion.div>
           )}
         </AnimatePresence>

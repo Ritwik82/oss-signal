@@ -63,7 +63,7 @@ const signals = [
 export function ScoringSection() {
   return (
     <ScrollSection
-      id="notebook"
+      id="methodology"
       className="relative py-24 md:py-32 px-4"
     >
       <div className="max-w-4xl mx-auto">

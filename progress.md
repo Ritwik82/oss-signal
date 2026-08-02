@@ -63,5 +63,8 @@ This is the day OSS Signal changed direction from a generic GitHub repo list to 
 ### Next actions
 - [x] Update docs after deploy (status.md)
 - [x] Git init + first commit (`bd2b5f0`) — push kept local per user choice
-- [x] Live audit: scoring inversion bug fixed (was adding risk as positive score — abandoned repos got higher scores; now rs = 1 − risk, rescored all 744 offline), methodology corrected (6 signals, real formulas), left rail synced, copy refreshed, 6th signal bar labeled
+- [x] Live audit: scoring inversion bug fixed, methodology corrected, left rail synced, copy refreshed
+- [x] Layout restructure: pagination (12/page with Prev/Next) in Fresh Finds + Project Grid; removed redundant "Specimens" section; methodology moved below archive; left rail updated to match
+- [ ] Future: refine `other` genre (258/744 ≈ 35%)
+- [ ] Optional: `FeaturedSection` component still exists in repo but unused — safe to delete or repurpose later
 - [ ] Future: refine `other` genre (258/744 ≈ 35%)

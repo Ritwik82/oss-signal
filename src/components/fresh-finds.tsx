@@ -18,6 +18,11 @@ function abandonLabel(risk: number) {
 
 export function FreshFinds({ projects, genres }: { projects: Project[]; genres: Genre[] }) {
   const genreMap = new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label]));
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 12;
+  const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, totalPages - 1);
+  const visible = projects.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <section id="fresh-finds" className="py-16 px-4">
@@ -66,11 +71,41 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((p) => (
-              <FreshCard key={p.id} project={p} genreLabel={genreMap.get(p.genre) ?? p.genre_label} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {visible.map((p) => (
+                <FreshCard key={p.id} project={p} genreLabel={genreMap.get(p.genre) ?? p.genre_label} />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <div
+                className="flex items-center justify-between border mt-8 p-4"
+                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+              >
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={clampedPage === 0}
+                  aria-disabled={clampedPage === 0}
+                  className="font-mono text-[10px] tracking-wider px-3 py-1.5 border disabled:opacity-40 transition-colors"
+                  style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                >
+                  ← Prev
+                </button>
+                <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "var(--color-text-dim)" }}>
+                  {clampedPage + 1} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={clampedPage >= totalPages - 1}
+                  aria-disabled={clampedPage >= totalPages - 1}
+                  className="font-mono text-[10px] tracking-wider px-3 py-1.5 border disabled:opacity-40 transition-colors"
+                  style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
