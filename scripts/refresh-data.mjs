@@ -112,6 +112,15 @@ function daysSince(iso) {
   return (Date.now() - new Date(iso).getTime()) / 86_400_000;
 }
 
+// Compare versions tolerant of format noise: "v13.6.0" == "13.6.0", "2.1.4-beta" vs "2.1.4".
+function versionKey(v) {
+  return (String(v ?? "").toLowerCase().replace(/^v/, "").match(/\d+/g) ?? []).join(".");
+}
+function sameVersion(a, b) {
+  if (!a || !b) return false;
+  return versionKey(a) === versionKey(b) && versionKey(a) !== "";
+}
+
 function clamp(v, min = 0, max = 1) {
   return Math.max(min, Math.min(max, v));
 }
@@ -254,11 +263,16 @@ async function main() {
         const days = app.days_since_push;
         app.staleness = days < 14 ? "fresh" : days < 30 ? "warning" : days < 90 ? "stale" : "abandoned";
         const release = await fetchJSON(`https://api.github.com/repos/${app.repo}/releases?per_page=1`)
-          .then((rs) => rs?.[0]?.published_at ?? null)
+          .then((rs) => rs?.[0] ? { published_at: rs[0].published_at ?? null, tag: rs[0].tag_name ?? null } : null)
           .catch(() => null);
-        app.last_release_at = release;
-        app.update_available = app.installedVersion !== app.latestVersion;
-        console.log(`  ${app.name}: ${app.staleness} (${days}d)`);
+        app.last_release_at = release?.published_at ?? null;
+        // Update detection: compare the actual latest GitHub release tag against what's installed.
+        // Tags with no parseable version (e.g. "pre-release") leave the state unknown, not "update".
+        app.latestVersion = release?.tag ?? app.latestVersion ?? null;
+        app.update_available = app.installedVersion && app.latestVersion && versionKey(app.latestVersion)
+          ? !sameVersion(app.installedVersion, app.latestVersion)
+          : null;
+        console.log(`  ${app.name}: ${app.staleness} (${days}d)${app.update_available ? ` — update ${app.installedVersion} → ${app.latestVersion}` : ""}`);
       } catch (e) {
         console.error(`  ERROR ${app.repo}: ${e?.message ?? e}`);
         app.staleness = "unknown";
