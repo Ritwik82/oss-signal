@@ -193,7 +193,7 @@ export function FeaturedSection({
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
             style={{ color: "var(--color-text)" }}
           >
-            The healthiest repos
+            Highest-scoring fresh finds
             <br />
             <span style={{ color: "var(--color-text-muted)" }}>right now</span>
           </motion.h2>

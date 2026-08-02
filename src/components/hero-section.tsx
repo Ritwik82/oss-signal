@@ -103,17 +103,17 @@ export function HeroSection({
               className="serif-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight leading-[0.9] mb-8"
               style={{ color: "var(--bone)" }}
             >
-              Discover
+              Never install
               <br />
               <span className="serif-display-swash text-6xl sm:text-7xl md:text-8xl lg:text-[6.5rem]" style={{ color: "var(--gold)" }}>
-                Promising
+                Abandonware
               </span>
               <br />
               <span
                 className="serif-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal"
                 style={{ color: "var(--dusty-blue)" }}
               >
-                Open Source
+                again
               </span>
             </motion.h1>
 

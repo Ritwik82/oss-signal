@@ -8,6 +8,7 @@ const signalMeta: Record<string, { label: string; dotClass: string }> = {
   issue_health: { label: "Issue Health", dotClass: "signal-dot-purple" },
   contributors: { label: "Contributors", dotClass: "signal-dot-orange" },
   license: { label: "License", dotClass: "signal-dot-pink" },
+  abandonment_risk: { label: "Abandonment Risk ↓", dotClass: "signal-dot-red" },
 };
 
 function BreakdownBar({ label, value }: { label: string; value: number }) {

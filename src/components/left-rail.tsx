@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 
 const sections = [
   { id: "station", numeral: "I", label: "Station" },
-  { id: "notebook", numeral: "II", label: "Notebook" },
-  { id: "specimens", numeral: "III", label: "Specimens" },
-  { id: "archive", numeral: "IV", label: "Archive" },
+  { id: "watchlist", numeral: "II", label: "Watchlist" },
+  { id: "fresh-finds", numeral: "III", label: "Fresh Finds" },
+  { id: "specimens", numeral: "IV", label: "Specimens" },
+  { id: "archive", numeral: "V", label: "Archive" },
 ];
 
 export function LeftRail() {

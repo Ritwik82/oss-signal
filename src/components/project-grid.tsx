@@ -167,7 +167,7 @@ export function ProjectGrid({
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
             style={{ color: "var(--color-text)" }}
           >
-            Every tracked specimen
+            Everything we're tracking
           </h2>
           <p
             className="text-base max-w-xl leading-relaxed"

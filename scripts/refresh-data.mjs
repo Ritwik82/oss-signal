@@ -15,7 +15,9 @@ const LOOKBACK_DAYS_WATCHLIST = 90;
 const FRESH_FIND_MIN_AGE_DAYS = 14;
 const FRESH_FIND_MAX_AGE_DAYS = 274; // ~9 months
 
-// Existing 5 signals scaled to 0.80, abandonment_risk = new 0.20 weight
+// Existing 5 signals scaled to 0.80, abandonment_risk = new 0.20 weight.
+// In score_breakdown, abandonment_risk stores the GUARD (1 − raw risk) so all six
+// signals contribute positively to the composite; raw risk lives at p.abandonment_risk.
 const SCORE_WEIGHTS = { recency: 0.24, momentum: 0.20, issue_health: 0.16, license: 0.08, contributors: 0.12, abandonment_risk: 0.20 };
 
 const MIN_STARS = 80;
@@ -357,8 +359,7 @@ async function main() {
     if (!repoData) return null;
 
     const issueScore = scoreIssueHealth(repoData);
-    const abandonmentRisk = computeAbandonmentRisk(repoData.pushed_at);
-    const last_release_at = await fetchJSON(`https://api.github.com/repos/${owner}/${name}/releases?per_page=1`)
+    const abandonmentRisk = computeAbandonmentRisk(repoData.pushed_at);    const last_release_at = await fetchJSON(`https://api.github.com/repos/${owner}/${name}/releases?per_page=1`)
       .then((rs) => rs?.[0]?.published_at ?? null)
       .catch(() => null);
 
@@ -383,7 +384,7 @@ async function main() {
       license_name: repoData.license?.spdx_id ?? null,
       contributor_count: contribResult.raw,
       _momentumRaw: momentumRaw,
-      score_breakdown: { recency, momentum: 0, issue_health: issueScore, license, contributors: contribResult.normalized, abandonment_risk: abandonmentRisk },
+      score_breakdown: { recency, momentum: 0, issue_health: issueScore, license, contributors: contribResult.normalized, abandonment_risk: 1 - abandonmentRisk },
       discussion_links: social.links,
       genre: genreId,
       genre_label: genreLabel,

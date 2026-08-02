@@ -7,47 +7,56 @@ const signals = [
   {
     id: "S-01",
     name: "Recency",
-    weight: "0.30",
+    weight: "0.24",
     dotClass: "signal-dot-green",
     description:
-      "How recently the repo was pushed to. Fresh activity signals a living project.",
-    formula: "recency = f(last_push, 90d_window)",
+      "Days since the last push, decaying to zero over a 90-day window. Fresh activity signals a living project.",
+    formula: "recency = 1 − days_since_push / 90, clamped [0, 1]",
   },
   {
     id: "S-02",
     name: "Momentum",
-    weight: "0.25",
+    weight: "0.20",
     dotClass: "signal-dot-blue",
     description:
-      "Stars relative to repo age. Rewards sustained growth over flash-in-the-pan spikes.",
-    formula: "momentum = stars / max(age_months, 1)",
+      "Star velocity relative to repo age — rewards sustained growth over flash-in-the-pan spikes. Normalized against the run's best performer.",
+    formula: "momentum = ln(1 + stars) / ln(1 + age_days), scaled to run max",
   },
   {
     id: "S-03",
     name: "Issue Health",
-    weight: "0.20",
+    weight: "0.16",
     dotClass: "signal-dot-purple",
     description:
-      "What fraction of recent issues get closed. Healthy teams resolve problems.",
-    formula: "issue_health = closed_30d / total_30d",
+      "Open-issue load as a maintenance proxy. Zero open issues is ideal; a large backlog drags the signal down.",
+    formula: "issue_health = steps(open_issues): 0 → 1.0 · <10 → 0.8 · <50 → 0.6 · <100 → 0.4 · else 0.2",
   },
   {
     id: "S-04",
     name: "Contributors",
-    weight: "0.15",
+    weight: "0.12",
     dotClass: "signal-dot-orange",
     description:
-      "More contributors means a healthier, bus-factor-resistant community.",
-    formula: "contributors = log2(contributor_count + 1)",
+      "More contributors means a healthier, bus-factor-resistant community. Capped at 20 for scoring.",
+    formula: "contributors = min(count, 20) / 20",
   },
   {
     id: "S-05",
     name: "License",
-    weight: "0.10",
+    weight: "0.08",
     dotClass: "signal-dot-pink",
     description:
-      "Whether the project has a declared open-source license. Legal clarity matters.",
-    formula: "license = has_osi_approved ? 1 : 0",
+      "Whether the project declares an open-source license. Legal clarity matters for actually using the code.",
+    formula: "license = 1 if SPDX present, else 0",
+  },
+  {
+    id: "S-06",
+    name: "Abandonment Risk ↓",
+    weight: "0.20",
+    dotClass: "signal-dot-red",
+    description:
+      "Inverted: starts costing points once a repo sits idle past 14 days, fully consumed by day 90. Your time is the resource this signal protects — stale apps don't get to ride on moment.",
+    formula: "risk = 0 (<14d) ramping to 1 (≥90d) · score uses (1 − risk)",
   },
 ];
 
@@ -83,7 +92,7 @@ export function ScoringSection() {
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
             style={{ color: "var(--color-text)" }}
           >
-            Five signals.
+            Six signals.
             <br />
             <span style={{ color: "var(--color-text-muted)" }}>One honest score.</span>
           </motion.h2>
@@ -95,9 +104,10 @@ export function ScoringSection() {
             className="text-base max-w-xl leading-relaxed"
             style={{ color: "var(--color-text-muted)" }}
           >
-            No black boxes. Each project is scored on five weighted health
+            No black boxes. Each project is scored on six weighted health
             signals, combined into a single 1–10 score you can actually reason
-            about.
+            about. Weight #6 inverts abandonment risk — stale repos score lower,
+            not hidden.
           </motion.p>
         </div>
 
@@ -194,7 +204,7 @@ export function ScoringSection() {
             className="font-mono text-sm"
             style={{ color: "var(--color-text)" }}
           >
-            score = Σ(signal_i × weight_i) × 10 → normalized to [1, 10]
+            score = Σ(signal_i × weight_i) × 10 → normalized to [0, 10]
           </p>
         </motion.div>
       </div>

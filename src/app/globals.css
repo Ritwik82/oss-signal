@@ -28,6 +28,7 @@
   --color-signal-purple: #9b72cf;
   --color-signal-orange: #e08040;
   --color-signal-pink: #cf7298;
+  --color-signal-red: #c05050;
   --color-paper: #1e1b17;
   --color-ink: #c8bfb0;
   --color-ruled: #2a2520;
@@ -60,6 +61,7 @@
   --color-signal-purple: #7a52af;
   --color-signal-orange: #c06830;
   --color-signal-pink: #af5278;
+  --color-signal-red: #a04040;
   --color-paper: #faf7f0;
   --color-ink: #4a4440;
   --color-ruled: #ddd4c4;
@@ -222,6 +224,7 @@ button, a, [role="button"] {
 .signal-dot-purple { background-color: var(--color-signal-purple); }
 .signal-dot-orange { background-color: var(--color-signal-orange); }
 .signal-dot-pink { background-color: var(--color-signal-pink); }
+.signal-dot-red { background-color: var(--color-signal-red); }
 
 /* ── View transition timing ── */
 :root {
