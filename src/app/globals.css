@@ -1,0 +1,364 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+}
+
+/* ── Dark theme (default) ── */
+.dark {
+  color-scheme: dark;
+}
+
+:root {
+  --color-bg: #1a1714;
+  --color-surface: #211e1a;
+  --color-surface-hover: #2a2621;
+  --color-border: #332e28;
+  --color-border-hover: #443e36;
+  --color-text: #e8e0d4;
+  --color-text-muted: #a09888;
+  --color-text-dim: #6b6358;
+  --color-accent: #d4a030;
+  --color-accent-dim: rgba(212, 160, 48, 0.08);
+  --color-accent-border: rgba(212, 160, 48, 0.18);
+  --color-signal-green: #5cb85c;
+  --color-signal-blue: #5b9bd5;
+  --color-signal-purple: #9b72cf;
+  --color-signal-orange: #e08040;
+  --color-signal-pink: #cf7298;
+  --color-paper: #1e1b17;
+  --color-ink: #c8bfb0;
+  --color-ruled: #2a2520;
+  --color-margin: #3a342c;
+  /* Renaissance palette — sampled from Turner's Fighting Temeraire */
+  --bone: #c8c0ae;
+  --dusty-blue: #7a8a9e;
+  --terracotta: #a07050;
+  --sage: #7a8070;
+  --gold: #b89030;
+  --ink: #3a2a1e;
+  --color-hero-scrim: rgba(26, 23, 20, 0.72);
+}
+
+/* Light theme */
+:root:not(.dark) {
+  --color-bg: #f5f0e8;
+  --color-surface: #faf7f0;
+  --color-surface-hover: #efe8da;
+  --color-border: #d8cfc0;
+  --color-border-hover: #c4b8a4;
+  --color-text: #2a2420;
+  --color-text-muted: #6b6050;
+  --color-text-dim: #9a8e7e;
+  --color-accent: #b8860b;
+  --color-accent-dim: rgba(184, 134, 11, 0.08);
+  --color-accent-border: rgba(184, 134, 11, 0.2);
+  --color-signal-green: #3a8a3a;
+  --color-signal-blue: #3a72b5;
+  --color-signal-purple: #7a52af;
+  --color-signal-orange: #c06830;
+  --color-signal-pink: #af5278;
+  --color-paper: #faf7f0;
+  --color-ink: #4a4440;
+  --color-ruled: #ddd4c4;
+  --color-margin: #c8bfb0;
+  /* Renaissance palette (light) — sampled from Turner's Fighting Temeraire */
+  --bone: #d8d0c0;
+  --dusty-blue: #6a7a8e;
+  --terracotta: #906040;
+  --sage: #6a7060;
+  --gold: #a07820;
+  --ink: #2a1e14;
+  --color-hero-scrim: rgba(245, 240, 232, 0.78);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Graph paper background ── */
+.graph-paper {
+  background-image:
+    linear-gradient(var(--color-ruled) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-ruled) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Ruled lines background ── */
+.ruled-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 31px,
+    var(--color-ruled) 31px,
+    var(--color-ruled) 32px
+  );
+  background-position: 0 8px;
+}
+
+/* ── Margin line ── */
+.margin-line {
+  border-left: 2px solid var(--color-margin);
+  padding-left: 1.5rem;
+}
+
+/* ── Calibration marks ── */
+.calibration-marks {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-margin) 0px,
+    var(--color-margin) 1px,
+    transparent 1px,
+    transparent 48px
+  );
+  background-size: 48px 4px;
+  background-repeat: no-repeat;
+  background-position: top left;
+  height: 4px;
+}
+
+/* ── Noise texture overlay ── */
+.noise-overlay {
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ── Section dividers ── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-border) 50%, transparent 100%);
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+/* ── Ruled divider ── */
+.ruled-divider {
+  height: 1px;
+  background: var(--color-ruled);
+  width: 100%;
+}
+
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-accent);
+  color: #000;
+  font-weight: 500;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* ── State layer overlays ── */
+.state-layer {
+  position: relative;
+  overflow: hidden;
+}
+.state-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: currentColor;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+.state-layer:hover::after { opacity: 0.08; }
+.state-layer:active::after { opacity: 0.12; }
+.state-layer:focus-visible::after { opacity: 0.08; }
+
+/* ── Specimen number ── */
+.specimen-number {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+/* ── Status indicator dot ── */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  box-shadow: 0 0 6px 2px rgba(212, 160, 48, 0.4);
+}
+
+/* ── Score accent text ── */
+.accent-text {
+  color: var(--color-accent);
+}
+
+/* ── Score glow ── */
+.score-glow {
+  box-shadow: 0 0 10px 1px rgba(212, 160, 48, 0.25);
+}
+
+/* ── Breakdown bar fill ── */
+.breakdown-bar-fill {
+  background: linear-gradient(90deg, var(--color-accent) 0%, #e8c050 100%);
+}
+
+/* ── Signal dot colors ── */
+.signal-dot-green { background-color: var(--color-signal-green); }
+.signal-dot-blue { background-color: var(--color-signal-blue); }
+.signal-dot-purple { background-color: var(--color-signal-purple); }
+.signal-dot-orange { background-color: var(--color-signal-orange); }
+.signal-dot-pink { background-color: var(--color-signal-pink); }
+
+/* ── View transition timing ── */
+:root {
+  --duration-exit: 150ms;
+  --duration-enter: 210ms;
+  --duration-move: 400ms;
+}
+
+@keyframes fade {
+  from { filter: blur(3px); opacity: 0; }
+  to { filter: blur(0); opacity: 1; }
+}
+
+::view-transition-old(.fade-out) {
+  animation: var(--duration-exit) ease-in fade reverse;
+}
+::view-transition-new(.fade-in) {
+  animation: var(--duration-enter) ease-out var(--duration-exit) both fade;
+}
+
+/* ── Editorial type scale ── */
+.md-headline-large { font-size: 2rem; line-height: 2.5rem; letter-spacing: -0.01em; font-weight: 600; }
+.md-title-large { font-size: 1.375rem; line-height: 1.75rem; letter-spacing: -0.005em; font-weight: 600; }
+.md-title-medium { font-size: 1rem; line-height: 1.5rem; letter-spacing: 0; font-weight: 500; }
+.md-body-large { font-size: 1rem; line-height: 1.6rem; letter-spacing: 0.005em; font-weight: 400; }
+.md-body-medium { font-size: 0.875rem; line-height: 1.3rem; letter-spacing: 0.005em; font-weight: 400; }
+.md-body-small { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.01em; font-weight: 400; }
+.md-label-large { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.006em; font-weight: 500; }
+.md-label-medium { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.031em; font-weight: 500; }
+
+/* ── Renaissance hero ── */
+.hero-painting-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-painting-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: saturate(0.85) contrast(0.95) brightness(0.9);
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--color-hero-scrim) 0%,
+    rgba(26, 23, 20, 0.45) 40%,
+    rgba(26, 23, 20, 0.3) 65%,
+    var(--color-hero-scrim) 100%
+  );
+}
+
+/* Solid text backdrop — guarantees WCAG AA contrast over any painting region */
+.hero-text-backdrop {
+  background-color: rgba(26, 23, 20, 0.95);
+  padding: 2.5rem 2rem 2rem 0;
+  border-radius: 2px;
+}
+
+/* ── Serif display headings ── */
+.serif-display {
+  font-family: var(--font-serif), "Playfair Display", Georgia, "Times New Roman", serif;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.serif-display-swash {
+  font-family: var(--font-serif), "Playfair Display", Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 700;
+}
+
+/* ── Left-rail navigation ── */
+.left-rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.5rem;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  pointer-events: none;
+}
+
+.left-rail > * {
+  pointer-events: auto;
+}
+
+.left-rail-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.left-rail-numeral {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  font-style: italic;
+}
+
+.left-rail-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+@media (max-width: 1023px) {
+  .left-rail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accent-text { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
