@@ -61,6 +61,6 @@ This is the day OSS Signal changed direction from a generic GitHub repo list to 
 - **Hydration fix** (React #418 on prod): `RelativeTime` was computing `Date.now()` in a `useState` initializer (server/client drift); now renders empty until mounted. Same for the "New" badge in fresh-finds (moved into `useEffect`; component marked `"use client"`)
 
 ### Next actions
-1. Update docs after deploy (status.md)
-2. Git init + first commit + push (when ready)
-3. Future: refine `other` genre (258/744 ≈ 35%)
+- [x] Update docs after deploy (status.md)
+- [x] Git init + first commit (`bd2b5f0`) — push kept local per user choice
+- [ ] Future: refine `other` genre (258/744 ≈ 35%)

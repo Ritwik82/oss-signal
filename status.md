@@ -37,8 +37,8 @@ None — milestone complete.
 
 ## What's queued
 
-- [ ] Git init + first commit + push (deferred until you say go)
-- [ ] Refine `other` genre (258/744 ≈ 35% of fresh finds)
+- [x] Git init + first commit (`bd2b5f0`) — push kept local per user choice
+- [ ] Refine `other` genre (258/744 ≈ 35% of fresh finds) — future polish, not a blocker
 
 ## Live data
 
@@ -51,4 +51,3 @@ None — milestone complete.
 
 - `other` genre is 258/744 (~35%) — classifier could be refined later
 - `scoring.ts` doesn't exist as a separate file in repo (weights are inline in refresh-data.mjs)
-- Repo is all untracked; first commit not yet done
