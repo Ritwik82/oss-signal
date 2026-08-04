@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Project, Genre, GenreId } from "@/lib/data";
-import { RelativeTime } from "./relative-time";
 
 function abandonColor(risk: number) {
   if (risk < 0.2) return "var(--color-signal-green)";
@@ -16,13 +15,36 @@ function abandonLabel(risk: number) {
   return "Abandoned risk";
 }
 
+function daysSince(iso: string | null): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+}
+
 export function FreshFinds({ projects, genres }: { projects: Project[]; genres: Genre[] }) {
   const genreMap = new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label]));
   const [page, setPage] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
   const PAGE_SIZE = 12;
   const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages - 1);
   const visible = projects.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const copyLink = useCallback(async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setToast("Obtainium link copied.");
+    } catch {
+      setToast("Copy failed — grab the URL from the card.");
+    }
+  }, []);
 
   return (
     <section id="fresh-finds" className="py-16 px-4">
@@ -39,7 +61,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
             </span>
           </div>
           <h2
-            className="text-3xl md:text-4xl font-bold tracking-tight"
+            className="text-3xl md:text-4xl font-bold tracking-tight serif-display"
             style={{ color: "var(--color-text)" }}
           >
             New &amp; actively maintained
@@ -56,8 +78,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
         {/* Grid */}
         {projects.length === 0 ? (
           <div
-            className="border p-12 text-center"
-            style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+            className="glass p-12 text-center"
           >
             <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
               No fresh finds today. Run{" "}
@@ -74,13 +95,17 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {visible.map((p) => (
-                <FreshCard key={p.id} project={p} genreLabel={genreMap.get(p.genre) ?? p.genre_label} />
+                <FreshCard
+                  key={p.id}
+                  project={p}
+                  genreLabel={genreMap.get(p.genre) ?? p.genre_label}
+                  onCopy={copyLink}
+                />
               ))}
             </div>
             {totalPages > 1 && (
               <div
-                className="flex items-center justify-between border mt-8 p-4"
-                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+                className="glass flex items-center justify-between mt-8 p-4"
               >
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -108,12 +133,37 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
           </>
         )}
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] glass px-4 py-2 font-mono text-[11px] tracking-wider"
+          style={{
+            color: "var(--color-text)",
+            borderColor: "var(--color-accent-border)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+          }}
+        >
+          {toast}
+        </div>
+      )}
     </section>
   );
 }
 
-function FreshCard({ project, genreLabel }: { project: Project; genreLabel: string }) {
+function FreshCard({
+  project,
+  genreLabel,
+  onCopy,
+}: {
+  project: Project;
+  genreLabel: string;
+  onCopy: (url: string) => void;
+}) {
   const [isNew, setIsNew] = useState(false);
+  const days = daysSince(project.last_release_at);
 
   useEffect(() => {
     if (project.last_release_at) {
@@ -122,15 +172,9 @@ function FreshCard({ project, genreLabel }: { project: Project; genreLabel: stri
   }, [project.last_release_at]);
 
   return (
-    <a
-      href={project.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group relative border p-5 flex flex-col justify-between transition-colors hover:bg-[var(--color-surface-hover)]"
-      style={{
-        borderColor: "var(--color-border)",
-        backgroundColor: "var(--color-surface)",
-      }}
+    <div
+      className="glass group relative p-5 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)]"
+      style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
     >
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -168,33 +212,43 @@ function FreshCard({ project, genreLabel }: { project: Project; genreLabel: stri
         </div>
       </div>
 
-      {/* Score bar */}
-      <div
-        className="w-full h-0.5 mb-4 overflow-hidden"
-        style={{ backgroundColor: "var(--color-ruled)" }}
-      >
+      {/* Score bar (10px track, decision #40) + number beside */}
+      <div className="flex items-center gap-2 mb-4">
         <div
-          className="h-full transition-[width] duration-500"
-          style={{
-            width: `${project.score * 100}%`,
-            backgroundColor: "var(--color-accent)",
-          }}
-        />
+          className="h-[10px] flex-1 overflow-hidden rounded-sm"
+          style={{ backgroundColor: "var(--color-ruled)" }}
+        >
+          <div
+            className="h-full transition-[width] duration-500"
+            style={{
+              width: `${project.score * 100}%`,
+              backgroundColor: "var(--color-accent)",
+            }}
+          />
+        </div>
+        <span className="font-mono text-[10px] font-bold" style={{ color: "var(--color-accent)" }}>
+          {(project.score * 10).toFixed(1)}/10
+        </span>
       </div>
 
-      {/* Name + owner */}
-      <h4
-        className="font-semibold text-sm tracking-tight line-clamp-1 mb-0.5"
-        style={{ color: "var(--color-text)" }}
+      {/* Name + owner — internal link */}
+      <a
+        href={`/project/${encodeURIComponent(project.id)}`}
+        className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
       >
-        {project.name}
-      </h4>
-      <p
-        className="font-mono text-[10px] mb-3"
-        style={{ color: "var(--color-text-dim)" }}
-      >
-        {project.owner}/{project.name}
-      </p>
+        <h4
+          className="font-semibold text-sm tracking-tight line-clamp-1 mb-0.5 transition-colors group-hover:text-[var(--color-accent)]"
+          style={{ color: "var(--color-text)" }}
+        >
+          {project.name}
+        </h4>
+        <p
+          className="font-mono text-[10px] mb-3"
+          style={{ color: "var(--color-text-dim)" }}
+        >
+          {project.owner}/{project.name}
+        </p>
+      </a>
 
       {/* Description */}
       <p
@@ -206,43 +260,57 @@ function FreshCard({ project, genreLabel }: { project: Project; genreLabel: stri
 
       {/* Footer */}
       <div
-        className="flex items-center justify-between text-xs pt-3 border-t"
+        className="flex items-center justify-between gap-2 pt-3 border-t"
         style={{ borderColor: "var(--color-ruled)" }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <span
-            className="font-medium"
+            className="font-medium text-xs truncate"
             style={{ color: "var(--color-text)" }}
           >
             {project.language || "—"}
           </span>
           <span
-            className="font-mono"
+            className="font-mono text-xs whitespace-nowrap"
             style={{ color: "var(--color-text-muted)" }}
           >
             ★ {project.stars.toLocaleString()}
           </span>
-        </div>
-        <div className="flex items-center gap-2">
-          {isNew && (
+          {days != null && (
             <span
-              className="font-mono text-[9px] px-1.5 py-0.5"
-              style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
+              className="font-mono text-[9px] whitespace-nowrap"
+              style={{ color: "var(--color-text-dim)" }}
+              title="Updated Xd ago"
             >
-              NEW RELEASE
+              {days}d ago
             </span>
           )}
-          <span
-            className="font-mono text-[9px]"
-            style={{ color: abandonColor(project.abandonment_risk) }}
-            title={`Abandonment risk: ${abandonLabel(project.abandonment_risk)}`}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {isNew && (
+            <span
+              className="badge-pulse font-mono text-[9px] px-1.5 py-0.5"
+              style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
+            >
+              NEW
+            </span>
+          )}
+          <button
+            onClick={() => onCopy(project.url)}
+            aria-label={`Copy Obtainium link for ${project.name}`}
+            className="font-mono text-[9px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            style={{
+              color: "var(--color-accent)",
+              borderColor: "var(--color-accent-border)",
+              backgroundColor: "var(--color-accent-dim)",
+            }}
           >
-            {abandonLabel(project.abandonment_risk)}
-          </span>
+            Copy Obtainium link
+          </button>
         </div>
       </div>
 
-      {/* Corner marks */}
+      {/* Corner ticks */}
       <div
         className="absolute top-0 left-0 w-2 h-2 border-t border-l"
         style={{ borderColor: "var(--color-accent)" }}
@@ -251,6 +319,6 @@ function FreshCard({ project, genreLabel }: { project: Project; genreLabel: stri
         className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
         style={{ borderColor: "var(--color-accent)" }}
       />
-    </a>
+    </div>
   );
 }

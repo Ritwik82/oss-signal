@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import { ScrollSection, StaggerGroup, StaggerItem } from "./scroll-section";
+import { useScoreModal } from "./score-modal";
 
-const signals = [
+export const signals = [
   {
     id: "S-01",
     name: "Recency",
@@ -12,6 +13,8 @@ const signals = [
     description:
       "Days since the last push, decaying to zero over a 90-day window. Fresh activity signals a living project.",
     formula: "recency = 1 − days_since_push / 90, clamped [0, 1]",
+    source: "GitHub `pushed_at`",
+    why: "Stale code is the #1 failure on Android. Anything under 14 days counts as fresh; 90 days of silence reads as gone.",
   },
   {
     id: "S-02",
@@ -21,6 +24,8 @@ const signals = [
     description:
       "Star velocity relative to repo age — rewards sustained growth over flash-in-the-pan spikes. Normalized against the run's best performer.",
     formula: "momentum = ln(1 + stars) / ln(1 + age_days), scaled to run max",
+    source: "GitHub Search API",
+    why: "A busy community keeps a project honest. Normalizing against the run's best repo keeps the scale relative, not arbitrary.",
   },
   {
     id: "S-03",
@@ -30,6 +35,8 @@ const signals = [
     description:
       "Open-issue load as a maintenance proxy. Zero open issues is ideal; a large backlog drags the signal down.",
     formula: "issue_health = steps(open_issues): 0 → 1.0 · <10 → 0.8 · <50 → 0.6 · <100 → 0.4 · else 0.2",
+    source: "GitHub Issues API (last 90 days)",
+    why: "Repos with <5 recent issues default to 0.5 to avoid punishing new or quiet repos.",
   },
   {
     id: "S-04",
@@ -39,6 +46,8 @@ const signals = [
     description:
       "More contributors means a healthier, bus-factor-resistant community. Capped at 20 for scoring.",
     formula: "contributors = min(count, 20) / 20",
+    source: "GitHub Contributors API",
+    why: "One-maintainer projects are one bad week away from abandonment; the cap stops 200-contributor mega-repos from walloping the scale.",
   },
   {
     id: "S-05",
@@ -48,6 +57,8 @@ const signals = [
     description:
       "Whether the project declares an open-source license. Legal clarity matters for actually using the code.",
     formula: "license = 1 if SPDX present, else 0",
+    source: "GitHub `license` field",
+    why: "No license = can't legally use or redistribute the app. Small weight because it's binary, but it's a hard gate to trust.",
   },
   {
     id: "S-06",
@@ -55,12 +66,14 @@ const signals = [
     weight: "0.20",
     dotClass: "signal-dot-red",
     description:
-      "Inverted: starts costing points once a repo sits idle past 14 days, fully consumed by day 90. Your time is the resource this signal protects — stale apps don't get to ride on moment.",
+      "Inverted: starts costing points once a repo sits idle past 14 days, fully consumed by day 90. Your time is the resource this signal protects — stale apps don't get to ride on momentum.",
     formula: "risk = 0 (<14d) ramping to 1 (≥90d) · score uses (1 − risk)",
+    why: "Warns within 14 days but isn't a false-positive on normal release cadence (<7d would cry wolf); 90 days is the loss limit.",
   },
 ];
 
 export function ScoringSection() {
+  const { openScoreModal } = useScoreModal();
   return (
     <ScrollSection
       id="methodology"
@@ -89,7 +102,7 @@ export function ScoringSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+            className="text-4xl md:text-5xl font-bold tracking-tight mb-4 serif-display"
             style={{ color: "var(--color-text)" }}
           >
             Six signals.
@@ -206,6 +219,16 @@ export function ScoringSection() {
           >
             score = Σ(signal_i × weight_i) × 10 → normalized to [0, 10]
           </p>
+          <button
+            onClick={openScoreModal}
+            className="mt-4 font-mono text-xs border px-3 py-1.5 transition-colors hover:opacity-80"
+            style={{
+              color: "var(--color-accent)",
+              borderColor: "var(--color-accent-border)",
+            }}
+          >
+            Why these weights and thresholds?
+          </button>
         </motion.div>
       </div>
     </ScrollSection>

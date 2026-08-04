@@ -20,7 +20,6 @@ const results = {
   "Zone: Watchlist h2": has("Apps you rely on"),
   "Zone: Fresh Finds h2": has("New & actively maintained"),
   "Zone: Archive h2": has("Everything we're tracking"),
-  "Zone: Specimens h2": has("Highest-scoring fresh finds"),
   "Methodology: Six signals": has("Six signals"),
   "Watchlist: ObtainX shown": has("ObtainX"),
   "Watchlist: Shizuku shown": has("Shizuku"),
@@ -28,7 +27,11 @@ const results = {
   "Fresh Finds: ObtainX top scorer": has("librefind") || has("OeffiSounds"),
   "Shizuku badge present": has("SHIZUKU"),
   "Genre labels present": ["Media", "Utility", "Productivity", "Security", "Customization"].some((g) => has(g)),
-  "Abandonment shown (Device Info HW)": has("Device Info HW"),
+"Abandonment shown (Device Info HW)": has("Device Info HW"),
+  "Score modal opener present": has("How is a score made?"),
+  "Export buttons present": has("Export watchlist JSON") && has("Export projects JSON"),
+  "robots.txt served": (await fetch(`${url}/robots.txt`)).ok,
+  "sitemap.xml served": (await fetch(`${url}/sitemap.xml`)).ok,
   "Console errors": errors.length === 0 ? "PASS (0)" : errors.length,
 };
 

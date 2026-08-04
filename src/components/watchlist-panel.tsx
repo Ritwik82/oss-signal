@@ -31,12 +31,19 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
     return list;
   }, [apps, genreFilter, stalenessFilter]);
 
-  const installed = filtered.filter((a) => a.installed);
-  const considering = filtered.filter((a) => !a.installed);
+  // Needs-attention group first (mockup-v2 rule 3: abandonment is the #1 surface)
+  const attention = useMemo(
+    () =>
+      filtered.filter(
+        (a) => a.staleness === "stale" || a.staleness === "abandoned" || a.staleness === "warning"
+      ),
+    [filtered]
+  );
+  const current = useMemo(
+    () => filtered.filter((a) => !attention.includes(a)),
+    [filtered, attention]
+  );
 
-  const staleCount = filtered.filter((a) =>
-    a.staleness === "stale" || a.staleness === "abandoned"
-  ).length;
   const updateCount = filtered.filter((a) => a.update_available).length;
 
   function GenreChip({ id, label }: { id: GenreId | "all"; label: string }) {
@@ -46,7 +53,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
         role="checkbox"
         aria-checked={selected}
         onClick={() => startTransition(() => setGenreFilter(id as GenreId | "all"))}
-        className="font-mono text-[9px] tracking-wider px-2 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+        className="font-mono text-[9px] tracking-wider px-2 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         style={{
           backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
           color: selected ? "var(--color-accent)" : "var(--color-text-dim)",
@@ -66,11 +73,8 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
         layout
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="group relative border p-4 flex flex-col justify-between transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-        style={{
-          borderColor: "var(--color-border)",
-          backgroundColor: "var(--color-surface)",
-        }}
+        className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
         whileHover={{ y: -1 }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
@@ -80,14 +84,24 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
           >
             {genreMap.get(app.genre) ?? app.genre}
           </span>
-          {badge && (
+          <div className="flex items-center gap-2">
             <span
-              className="font-mono text-[9px] px-1.5 py-0.5 whitespace-nowrap"
-              style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
+              className="font-mono text-[8px] tracking-widest uppercase px-1.5 py-0.5"
+              style={{
+                color: app.installed ? "var(--color-text-muted)" : "var(--color-text-dim)",
+              }}
             >
-              UPDATE
+              {app.installed ? "INSTALLED" : "WATCHING"}
             </span>
-          )}
+            {badge && (
+              <span
+                className="badge-pulse font-mono text-[9px] px-1.5 py-0.5 whitespace-nowrap"
+                style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
+              >
+                UPDATE
+              </span>
+            )}
+          </div>
         </div>
 
         <h4
@@ -154,7 +168,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
               </span>
             </div>
             <h2
-              className="text-3xl md:text-4xl font-bold tracking-tight"
+              className="text-3xl md:text-4xl font-bold tracking-tight serif-display"
               style={{ color: "var(--color-text)" }}
             >
               Apps you rely on
@@ -163,8 +177,8 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
               className="text-sm max-w-lg mt-2 leading-relaxed"
               style={{ color: "var(--color-text-muted)" }}
             >
-              {staleCount > 0
-                ? `${staleCount} stale, ${updateCount} update${updateCount !== 1 ? "s" : ""} ready.`
+              {attention.length > 0
+                ? `${attention.length} need attention, ${updateCount} update${updateCount !== 1 ? "s" : ""} ready.`
                 : `${apps.length} tracked apps. All clear.`}
             </p>
           </div>
@@ -172,7 +186,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
             onClick={() => setCollapsed(!collapsed)}
             aria-expanded={!collapsed}
             aria-label={collapsed ? "Expand watchlist" : "Collapse watchlist"}
-            className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+            className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               borderColor: "var(--color-border)",
               color: "var(--color-text-dim)",
@@ -209,31 +223,31 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              {installed.length > 0 && (
+              {attention.length > 0 && (
                 <>
                   <p
                     className="font-mono text-[9px] tracking-widest uppercase mb-3"
-                    style={{ color: "var(--color-text-dim)" }}
+                    style={{ color: "var(--terracotta)" }}
                   >
-                    Installed ({installed.length})
+                    Needs attention ({attention.length})
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    {installed.map((app) => (
+                    {attention.map((app) => (
                       <AppCard key={app.id} app={app} />
                     ))}
                   </div>
                 </>
               )}
-              {considering.length > 0 && (
+              {current.length > 0 && (
                 <>
                   <p
                     className="font-mono text-[9px] tracking-widest uppercase mb-3"
                     style={{ color: "var(--color-text-dim)" }}
                   >
-                    Considering ({considering.length})
+                    Current ({current.length})
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {considering.map((app) => (
+                    {current.map((app) => (
                       <AppCard key={app.id} app={app} />
                     ))}
                   </div>

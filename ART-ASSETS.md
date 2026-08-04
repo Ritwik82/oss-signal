@@ -1,5 +1,10 @@
 # OSS Signal — Renaissance Art Assets (Public Domain)
 
+> **DEPRECATED 2026-08-04** — the Renaissance art direction was replaced by the
+> "Modern Calibration" reskin (decisions.md #57–66). `hero-sky.webp` was deleted; the hero
+> now uses an inline SVG circuit graphic. Do not add paintings back.
+
+
 All pieces below are pre-1900 European works, **public domain worldwide**. Source them from
 **Wikimedia Commons** (or the owning museum's open-access portal). For each: open the
 Commons file page, CONFIRM the license reads "public domain / PD-old / PD-art", then

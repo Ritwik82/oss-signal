@@ -21,7 +21,7 @@ function FilterChip({
       aria-checked={selected}
       aria-label={ariaLabel}
       onClick={onClick}
-      className="font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+      className="font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
       style={{
         backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
         color: selected ? "var(--color-accent)" : "var(--color-text-dim)",
@@ -69,6 +69,110 @@ function OptionChipGroup<T extends string>({
 
 type SortField = "score" | "stars" | "newest" | "recency" | "abandonment";
 
+function daysSince(iso: string | null): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+}
+
+function ArchiveRow({
+  project,
+  index,
+  genreMap,
+}: {
+  project: Project;
+  index: number;
+  genreMap: Map<string, string>;
+}) {
+  const specimenId = `SP-${String(index + 1).padStart(3, "0")}`;
+  const days = daysSince(project.last_release_at);
+
+  return (
+    <motion.a
+      href={`/project/${encodeURIComponent(project.id)}`}
+      initial={{ opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.5 }}
+      transition={{ duration: 0.35 }}
+      className="glass group relative flex items-center gap-3 px-4 min-h-[44px] transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-accent)]"
+    >
+      {/* Corner tick */}
+      <span
+        className="absolute left-0 top-1/2 -translate-y-1/2 h-3 w-0.5"
+        style={{ backgroundColor: "var(--color-accent)" }}
+      />
+
+      {/* Specimen code */}
+      <span
+        className="hidden sm:block font-mono text-[10px] tracking-[0.15em] uppercase w-14 shrink-0"
+        style={{ color: "var(--color-text-dim)" }}
+      >
+        {specimenId}
+      </span>
+
+      {/* Name + owner */}
+      <span className="min-w-0 flex-1 flex items-baseline gap-2">
+        <span
+          className="text-sm font-semibold tracking-tight truncate transition-colors group-hover:text-[var(--color-accent)]"
+          style={{ color: "var(--color-text)" }}
+        >
+          {project.name}
+        </span>
+        <span
+          className="hidden md:inline font-mono text-[10px] truncate"
+          style={{ color: "var(--color-text-dim)" }}
+        >
+          {project.owner}
+        </span>
+      </span>
+
+      {/* Genre chip */}
+      <span
+        className="hidden lg:inline font-mono text-[9px] tracking-widest uppercase px-1.5 py-0.5 shrink-0"
+        style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
+      >
+        {genreMap.get(project.genre) ?? project.genre}
+      </span>
+
+      {/* Score bar + number */}
+      <span className="flex items-center gap-2 shrink-0">
+        <span
+          className="hidden md:block w-20 h-[10px] overflow-hidden rounded-sm"
+          style={{ backgroundColor: "var(--color-ruled)" }}
+        >
+          <span
+            className="block h-full transition-[width] duration-500"
+            style={{ width: `${project.score * 100}%`, backgroundColor: "var(--color-accent)" }}
+          />
+        </span>
+        <span
+          className="font-mono text-xs font-bold w-9 text-right"
+          style={{ color: "var(--color-accent)" }}
+        >
+          {(project.score * 10).toFixed(1)}
+        </span>
+      </span>
+
+      {/* Last release */}
+      <span
+        className="hidden lg:inline font-mono text-[10px] w-16 text-right shrink-0"
+        style={{ color: "var(--color-text-dim)" }}
+      >
+        {days != null ? `${days}d ago` : "—"}
+      </span>
+
+      {/* Stars */}
+      <span
+        className="hidden sm:inline font-mono text-[10px] w-12 text-right shrink-0"
+        style={{ color: "var(--color-text-muted)" }}
+      >
+        ★{project.stars >= 1000 ? `${(project.stars / 1000).toFixed(1)}k` : project.stars}
+      </span>
+    </motion.a>
+  );
+}
+
 export function ProjectGrid({
   projects,
   genres,
@@ -90,7 +194,7 @@ export function ProjectGrid({
 
   const [collapsed, setCollapsed] = useState(true);
   const [page, setPage] = useState(0);
-  const PAGE_SIZE = 12;
+  const PAGE_SIZE = 24;
   const [lang, setLang] = useState("all");
   const [minScore, setMinScore] = useState("all");
   const [minStars, setMinStars] = useState("all");
@@ -171,7 +275,7 @@ export function ProjectGrid({
             </span>
           </div>
           <h2
-            className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+            className="text-4xl md:text-5xl font-bold tracking-tight mb-4 serif-display"
             style={{ color: "var(--color-text)" }}
           >
             Everything we're tracking
@@ -187,14 +291,15 @@ export function ProjectGrid({
         </div>
 
         {/* Collapse toggle */}
-        <div className="border mb-8"
-          style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+        <div
+          className="glass mb-8"
+          style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
         >
           <button
             onClick={() => setCollapsed((c) => !c)}
             aria-expanded={!collapsed}
             aria-label={collapsed ? "Expand archive" : "Collapse archive"}
-            className="w-full flex items-center justify-between p-5 font-mono text-[10px] tracking-[0.2em] uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+            className="w-full flex items-center justify-between p-5 font-mono text-[10px] tracking-[0.2em] uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{ color: "var(--color-text)" }}
           >
             <span>{collapsed ? `Archived Instruments (${projects.length})` : "Collapse Archive"}</span>
@@ -227,10 +332,7 @@ export function ProjectGrid({
               className="overflow-hidden"
             >
               {/* Controls */}
-              <div
-                className="mb-8 border p-5"
-                style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
-              >
+              <div className="glass mb-8 p-5">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="status-dot" />
                   <span
@@ -288,7 +390,7 @@ export function ProjectGrid({
                     placeholder="Search by name or description..."
                     value={search}
                     onChange={(e) => startTransition(() => setSearch(e.target.value))}
-                    className="w-full border py-2 pl-9 pr-4 font-mono text-xs outline-none transition-colors focus-visible:ring-1 focus-visible:ring-amber-600/50"
+                    className="w-full border py-2 pl-9 pr-4 font-mono text-xs outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[var(--color-accent)]/50"
                     style={{
                       borderColor: "var(--color-border)",
                       backgroundColor: "var(--color-bg)",
@@ -422,11 +524,10 @@ export function ProjectGrid({
                 </p>
               </div>
 
-              {/* Grid */}
+              {/* Rows */}
               {filtered.length === 0 ? (
                 <div
-                  className="flex flex-col items-center gap-4 py-20 text-center border"
-                  style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+                  className="flex flex-col items-center gap-4 py-20 text-center glass"
                 >
                   <svg
                     aria-hidden="true"
@@ -457,15 +558,18 @@ export function ProjectGrid({
                 const visible = filtered.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
                 return (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-2">
                       {visible.map((p, i) => (
-                        <SpecimenCard key={p.id} project={p} index={clampedPage * PAGE_SIZE + i} genreMap={genreMap} />
+                        <ArchiveRow
+                          key={p.id}
+                          project={p}
+                          index={clampedPage * PAGE_SIZE + i}
+                          genreMap={genreMap}
+                        />
                       ))}
                     </div>
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-between border mt-8 p-4"
-                        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
-                      >
+                      <div className="glass flex items-center justify-between mt-8 p-4">
                         <button
                           onClick={() => setPage((p) => Math.max(0, p - 1))}
                           disabled={clampedPage === 0}
@@ -497,203 +601,5 @@ export function ProjectGrid({
         </AnimatePresence>
       </div>
     </section>
-  );
-}
-
-const signalColors: Record<string, string> = {
-  recency: "var(--color-signal-green)",
-  momentum: "var(--color-signal-blue)",
-  issue_health: "var(--color-signal-purple)",
-  contributors: "var(--color-signal-orange)",
-  license: "var(--color-signal-pink)",
-  abandonment_risk: "var(--color-signal-pink)",
-};
-
-function SpecimenCard({
-  project,
-  index,
-  genreMap,
-}: {
-  project: Project;
-  index: number;
-  genreMap: Map<string, string>;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const specimenId = `SP-${String(index + 1).padStart(3, "0")}`;
-
-  return (
-    <motion.a
-      href={`/project/${encodeURIComponent(project.id)}`}
-      className="group relative border p-5 flex flex-col justify-between transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-      style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
-      whileHover={{ y: -2 }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span
-            className="font-mono text-[9px] tracking-[0.15em] uppercase"
-            style={{ color: "var(--color-text-dim)" }}
-          >
-            {specimenId}
-          </span>
-          <span
-            className="font-mono text-[9px]"
-            style={{ color: "var(--color-text-dim)" }}
-          >
-            {project.owner}/{project.name}
-          </span>
-        </div>
-        <span
-          className="font-mono text-xs font-bold px-2 py-0.5 border"
-          style={{
-            color: "var(--color-accent)",
-            borderColor: "var(--color-accent-border)",
-            backgroundColor: "var(--color-accent-dim)",
-          }}
-        >
-          {(project.score * 10).toFixed(1)}
-        </span>
-      </div>
-
-      <div
-        className="w-full h-0.5 mb-4 overflow-hidden"
-        style={{ backgroundColor: "var(--color-ruled)" }}
-      >
-        <div
-          className="h-full transition-[width] duration-500"
-          style={{ width: `${project.score * 100}%`, backgroundColor: "var(--color-accent)" }}
-        />
-      </div>
-
-      <div className="flex items-center gap-1.5 mb-3">
-        <span
-          className="font-mono text-[9px] tracking-widest uppercase px-1.5 py-0.5"
-          style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
-        >
-          {genreMap.get(project.genre) ?? project.genre}
-        </span>
-        {project.shizuku && (
-          <span
-            className="font-mono text-[9px] tracking-wider px-1.5 py-0.5"
-            style={{ backgroundColor: "var(--color-signal-purple)", color: "var(--color-bg)" }}
-          >
-            SHIZUKU
-          </span>
-        )}
-      </div>
-
-      <h4
-        className="font-semibold text-sm tracking-tight line-clamp-1 mb-0.5 group-hover:accent-text transition-colors"
-        style={{ color: "var(--color-text)" }}
-      >
-        {project.name}
-      </h4>
-      <p
-        className="font-mono text-[10px] mb-3"
-        style={{ color: "var(--color-text-dim)" }}
-      >
-        {project.owner}
-      </p>
-
-      <p
-        className="text-sm leading-relaxed line-clamp-2 mb-4"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        {project.description || "No description provided."}
-      </p>
-
-      <div
-        className="mb-3 cursor-pointer"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setExpanded(!expanded);
-        }}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setExpanded(!expanded);
-          }
-        }}
-        aria-expanded={expanded}
-        aria-label={expanded ? "Collapse signal breakdown" : "Expand signal breakdown"}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="font-mono text-[9px] tracking-widest uppercase"
-            style={{ color: "var(--color-text-dim)" }}
-          >
-            Signals
-          </span>
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              color: "var(--color-text-dim)",
-              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 200ms ease",
-            }}
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </div>
-        {expanded && (
-          <div className="space-y-1.5 mt-2">
-            {Object.entries(project.score_breakdown).map(([key, value]) => (
-              <div key={key} className="flex items-center gap-2">
-                <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: signalColors[key] || "var(--color-text-dim)" }}
-                />
-                <span
-                  className="font-mono text-[9px] tracking-wide uppercase flex-1"
-                  style={{ color: "var(--color-text-dim)" }}
-                >
-                  {key.replace("_", " ")}
-                </span>
-                <span
-                  className="font-mono text-[9px] font-bold"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  {((value as number) * 10).toFixed(1)}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div
-        className="flex items-center justify-between text-xs pt-3 border-t"
-        style={{ borderColor: "var(--color-ruled)" }}
-      >
-        <span className="font-medium" style={{ color: "var(--color-text)" }}>
-          {project.language || "Unspecified"}
-        </span>
-        <span
-          className="flex items-center gap-1 font-mono"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          ★ {project.stars.toLocaleString()}
-        </span>
-      </div>
-
-      <div
-        className="absolute top-0 left-0 w-2 h-2 border-t border-l"
-        style={{ borderColor: "var(--color-accent)" }}
-      />
-      <div
-        className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
-        style={{ borderColor: "var(--color-accent)" }}
-      />
-    </motion.a>
   );
 }

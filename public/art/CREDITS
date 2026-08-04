@@ -1,32 +1,9 @@
-AI-Generated Art Assets — OSS Signal "Renaissance Edition"
+Art Assets — OSS Signal "Modern Calibration"
 
-All images in this directory are AI-generated originals created for this project.
-They are not reproductions of existing artworks and carry no licensing restrictions
-beyond this project's license.
+No image assets ship with the project. The hero uses an inline SVG circuit-board
+graphic (defined in src/components/hero-section.tsx) drawn with CSS palette tokens
+(--color-accent / --color-text-muted) so it follows light/dark theme.
 
-Art direction: Classical Renaissance style — oil-on-canvas aesthetic, aged pigment
-palette, muted and desaturated. Used as background textures behind UI content.
-
----
-
-## Hero background
-  File:           hero-sky.webp
-  Title:          The Fighting Temeraire tugged to her last berth to be broken up
-  Artist:         J. M. W. Turner (1775–1851)
-  Date:           1839
-  Medium:         Oil on canvas, 90.7 × 121.6 cm
-  Collection:     National Gallery, London (NG524)
-  License:        Public Domain (PD-old-100-expired, CC-PD-Mark 1.0)
-                  Author died 1851, life+100 years expired.
-                  Published before 1931 in the US.
-  Commons URL:    https://commons.wikimedia.org/wiki/File:The_Fighting_Temeraire,_JMW_Turner,_National_Gallery.jpg
-  Downloaded:     1920px wide thumbnail, converted to WebP q80, 303 KB
-  Credited to:    Wikimedia Commons / Crisco 1492 (photographer of reproduction)
-
-## Palette tokens sampled from this painting:
-  --bone:       #c8c0ae  (top 5% average luminance — warm aged parchment)
-  --dusty-blue: #7a8a9e  (most blue pixels — muted sky shadow)
-  --terracotta: #a07050  (warm midtone — drapery/rust)
-  --sage:       #7a8070  (muted green-grey — foliage undertone)
-  --gold:       #b89030  (most gold pixels — aged gold leaf)
-  --ink:        #3a2a1e  (bottom 5% average — deepest warm shadow)
+Historical: the previous "Renaissance Edition" used hero-sky.webp, a Public Domain
+reproduction of Turner's "The Fighting Temeraire" (1839, National Gallery NG524).
+Deleted 2026-08-04 as part of the Modern Calibration reskin (decisions.md #57-66).

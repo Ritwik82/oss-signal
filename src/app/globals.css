@@ -12,68 +12,77 @@
 }
 
 :root {
-  --color-bg: #1a1714;
-  --color-surface: #211e1a;
-  --color-surface-hover: #2a2621;
-  --color-border: #332e28;
-  --color-border-hover: #443e36;
-  --color-text: #e8e0d4;
-  --color-text-muted: #a09888;
-  --color-text-dim: #6b6358;
-  --color-accent: #d4a030;
-  --color-accent-dim: rgba(212, 160, 48, 0.08);
-  --color-accent-border: rgba(212, 160, 48, 0.18);
-  --color-signal-green: #5cb85c;
-  --color-signal-blue: #5b9bd5;
-  --color-signal-purple: #9b72cf;
-  --color-signal-orange: #e08040;
-  --color-signal-pink: #cf7298;
-  --color-signal-red: #c05050;
-  --color-paper: #1e1b17;
-  --color-ink: #c8bfb0;
-  --color-ruled: #2a2520;
-  --color-margin: #3a342c;
-  /* Renaissance palette — sampled from Turner's Fighting Temeraire */
-  --bone: #c8c0ae;
-  --dusty-blue: #7a8a9e;
-  --terracotta: #a07050;
-  --sage: #7a8070;
-  --gold: #b89030;
-  --ink: #3a2a1e;
-  --color-hero-scrim: rgba(26, 23, 20, 0.72);
+  /* Modern Calibration core palette (dark) */
+  --color-bg: #0a0a0a;
+  --color-surface: #121212;
+  --color-surface-hover: #1a1a1a;
+  --color-border: #232323;
+  --color-border-hover: #333333;
+  --color-text: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-text-dim: #8a8a8a;
+  --color-accent: #00f5d4;
+  --color-accent-magenta: #ff2d95;
+  --color-accent-dim: rgba(0, 245, 212, 0.08);
+  --color-accent-border: rgba(0, 245, 212, 0.28);
+  --color-signal-green: #00e0b8;
+  --color-signal-blue: #7dd3fc;
+  --color-signal-purple: #c084fc;
+  --color-signal-orange: #fb923c;
+  --color-signal-pink: #f472b6;
+  --color-signal-red: #ff2d95;
+  --color-paper: #101010;
+  --color-ink: #d0d0d0;
+  --color-ruled: #1e1e1e;
+  --color-margin: #2e2e2e;
+  /* Legacy palette aliases → Modern Calibration */
+  --bone: #e0e0e0;
+  --dusty-blue: #8fa3b8;
+  --terracotta: #ff2d95;
+  --sage: #00e0b8;
+  --gold: #00f5d4;
+  --ink: #0a0a0a;
+  --color-hero-scrim: rgba(10, 10, 10, 0.62);
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* Light theme */
 :root:not(.dark) {
-  --color-bg: #f5f0e8;
-  --color-surface: #faf7f0;
-  --color-surface-hover: #efe8da;
-  --color-border: #d8cfc0;
-  --color-border-hover: #c4b8a4;
-  --color-text: #2a2420;
-  --color-text-muted: #6b6050;
-  --color-text-dim: #9a8e7e;
-  --color-accent: #b8860b;
-  --color-accent-dim: rgba(184, 134, 11, 0.08);
-  --color-accent-border: rgba(184, 134, 11, 0.2);
-  --color-signal-green: #3a8a3a;
-  --color-signal-blue: #3a72b5;
-  --color-signal-purple: #7a52af;
-  --color-signal-orange: #c06830;
-  --color-signal-pink: #af5278;
-  --color-signal-red: #a04040;
-  --color-paper: #faf7f0;
-  --color-ink: #4a4440;
-  --color-ruled: #ddd4c4;
-  --color-margin: #c8bfb0;
-  /* Renaissance palette (light) — sampled from Turner's Fighting Temeraire */
-  --bone: #d8d0c0;
-  --dusty-blue: #6a7a8e;
-  --terracotta: #906040;
-  --sage: #6a7060;
-  --gold: #a07820;
-  --ink: #2a1e14;
-  --color-hero-scrim: rgba(245, 240, 232, 0.78);
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0f0f0;
+  --color-border: #e3e3e3;
+  --color-border-hover: #cccccc;
+  --color-text: #1a1a1a;
+  --color-text-muted: #555555;
+  --color-text-dim: #6f6f6f;
+  --color-accent: #00796b;
+  --color-accent-magenta: #c2185b;
+  --color-accent-dim: rgba(0, 121, 107, 0.08);
+  --color-accent-border: rgba(0, 121, 107, 0.25);
+  --color-signal-green: #0e8a62;
+  --color-signal-blue: #2563eb;
+  --color-signal-purple: #7a3bc8;
+  --color-signal-orange: #b45309;
+  --color-signal-pink: #b53970;
+  --color-signal-red: #c2185b;
+  --color-paper: #ffffff;
+  --color-ink: #333333;
+  --color-ruled: #ececec;
+  --color-margin: #dddddd;
+  /* Legacy palette aliases → Modern Calibration (light) */
+  --bone: #2a2a2a;
+  --dusty-blue: #5b6b7c;
+  --terracotta: #c2185b;
+  --sage: #0e8a62;
+  --gold: #00796b;
+  --ink: #f5f5f5;
+  --color-hero-scrim: rgba(250, 250, 250, 0.66);
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(0, 0, 0, 0.06);
 }
 
 body {
@@ -81,6 +90,32 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Ambient aurora (what glass blurs) ── */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(720px 460px at 12% 8%, rgba(0, 245, 212, 0.16), transparent 62%),
+    radial-gradient(780px 540px at 88% 24%, rgba(255, 45, 149, 0.11), transparent 62%),
+    radial-gradient(560px 440px at 50% 92%, rgba(0, 245, 212, 0.07), transparent 60%);
+}
+
+/* ── Glass surface ── */
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Focus ring (both themes) ── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* ── Graph paper background ── */
@@ -130,6 +165,124 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
+}
+
+/* ── Signature sweep (hero load) ── */
+@keyframes sweep {
+  0% { transform: scaleX(0); opacity: 1; }
+  92% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+.sweep-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  transform-origin: left center;
+  animation: sweep 1.1s ease-in-out 0.15s forwards;
+}
+
+/* ── Badge pulse (one shot on mount) ── */
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.5; }
+  75% { opacity: 0.8; }
+}
+.badge-pulse {
+  animation: badge-pulse 1.2s ease-out 1;
+}
+
+/* ── Daily briefing ── */
+.briefing {
+  max-width: 72rem;
+  margin: 1.5rem auto 0;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--gold);
+  background: var(--glass-bg);
+  position: relative;
+}
+.briefing::before,
+.briefing::after {
+  content: "";
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+}
+.briefing::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+.briefing::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+.briefing .salutation {
+  font-family: var(--font-serif), "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+}
+.briefing-date {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+  margin-bottom: 0.75rem;
+}
+.briefing ul {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.briefing li {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  padding-left: 1rem;
+  position: relative;
+}
+.briefing li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+.briefing-meta {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+.briefing-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.briefing-btn {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.briefing-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.briefing-btn[aria-pressed="true"] {
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 /* ── Section dividers ── */
@@ -200,7 +353,7 @@ button, a, [role="button"] {
   height: 6px;
   border-radius: 50%;
   background-color: var(--color-accent);
-  box-shadow: 0 0 6px 2px rgba(212, 160, 48, 0.4);
+  box-shadow: 0 0 6px 2px rgba(0, 245, 212, 0.4);
 }
 
 /* ── Score accent text ── */
@@ -210,12 +363,12 @@ button, a, [role="button"] {
 
 /* ── Score glow ── */
 .score-glow {
-  box-shadow: 0 0 10px 1px rgba(212, 160, 48, 0.25);
+  box-shadow: 0 0 10px 1px rgba(0, 245, 212, 0.25);
 }
 
 /* ── Breakdown bar fill ── */
 .breakdown-bar-fill {
-  background: linear-gradient(90deg, var(--color-accent) 0%, #e8c050 100%);
+  background: linear-gradient(90deg, var(--color-accent) 0%, #00d9b5 100%);
 }
 
 /* ── Signal dot colors ── */
@@ -255,40 +408,6 @@ button, a, [role="button"] {
 .md-label-large { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.006em; font-weight: 500; }
 .md-label-medium { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.031em; font-weight: 500; }
 
-/* ── Renaissance hero ── */
-.hero-painting-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.hero-painting-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 30%;
-  filter: saturate(0.85) contrast(0.95) brightness(0.9);
-}
-
-.hero-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--color-hero-scrim) 0%,
-    rgba(26, 23, 20, 0.45) 40%,
-    rgba(26, 23, 20, 0.3) 65%,
-    var(--color-hero-scrim) 100%
-  );
-}
-
-/* Solid text backdrop — guarantees WCAG AA contrast over any painting region */
-.hero-text-backdrop {
-  background-color: rgba(26, 23, 20, 0.95);
-  padding: 2.5rem 2rem 2rem 0;
-  border-radius: 2px;
-}
-
 /* ── Serif display headings ── */
 .serif-display {
   font-family: var(--font-serif), "Playfair Display", Georgia, "Times New Roman", serif;
@@ -301,7 +420,7 @@ button, a, [role="button"] {
   font-weight: 700;
 }
 
-/* ── Left-rail navigation ── */
+/* ── Left-rail navigation (icon rail) ── */
 .left-rail {
   position: fixed;
   left: 0;
@@ -313,7 +432,7 @@ button, a, [role="button"] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.5rem;
   pointer-events: none;
 }
 
@@ -322,29 +441,54 @@ button, a, [role="button"] {
 }
 
 .left-rail-link {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--color-text-dim);
   text-decoration: none;
-  transition: color 200ms ease;
+  transition: color 200ms ease, border-color 200ms ease, background-color 200ms ease;
 }
 
-.left-rail-numeral {
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 0.75rem;
-  line-height: 1;
-  letter-spacing: 0.05em;
-  font-style: italic;
+.left-rail-link:hover,
+.left-rail-link:focus-visible {
+  color: var(--color-accent);
+  border-color: var(--color-accent-border);
+  background-color: var(--color-accent-dim);
+}
+
+.left-rail-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .left-rail-label {
+  position: absolute;
+  left: calc(100% + 0.75rem);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
   font-family: var(--font-mono), monospace;
-  font-size: 0.5rem;
+  font-size: 0.625rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+  white-space: nowrap;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.3rem 0.55rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.left-rail-link:hover .left-rail-label,
+.left-rail-link:focus-visible .left-rail-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
 }
 
 @media (max-width: 1023px) {
@@ -353,8 +497,155 @@ button, a, [role="button"] {
   }
 }
 
+/* ── Right-edge scroll tracker ── */
+.scroll-tracker {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(10, 10, 10, 0.4);
+  z-index: 80;
+  pointer-events: none;
+  transform-origin: top center;
+}
+.scroll-tracker-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px rgba(0, 245, 212, 0.6);
+  transform-origin: top center;
+}
+/* ── Data pulse riding the tracker line ── */
+@keyframes pulse-ride {
+  0% { top: 0; opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { top: calc(100% - 6px); opacity: 0; }
+}
+.scroll-tracker::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 6px var(--color-accent);
+  animation: pulse-ride 3.2s linear infinite;
+}
+
+/* ── Calibration scan (global, one-shot on load) ── */
+.calibration-scan {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  overflow: hidden;
+}
+.calibration-sweep {
+  position: absolute;
+  top: 42%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  animation: sweep 1.1s ease-in-out 0.15s forwards;
+  box-shadow: 0 0 24px 4px rgba(0, 245, 212, 0.35);
+}
+
+/* Content "materializes" as the scan passes — collapse-proof:
+   bare content is fully visible; this only runs while #main-content
+   carries the transient .calibrating class added after mount. */
+@keyframes materialize {
+  0% { opacity: 0.35; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+#main-content.calibrating {
+  animation: materialize 1.2s ease-out 0.3s both;
+}
+
+/* ── Fixed graph-paper grid overlay for telemetry texture ── */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--color-ruled) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-ruled) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.55;
+}
+
+/* ── Pulse wordmark (nav identity) ── */
+@keyframes wave-draw {
+  from { stroke-dasharray: 0 100; }
+  to { stroke-dasharray: 40 60; }
+}
+.wordmark-wave path {
+  stroke-dasharray: 40 60;
+  animation: wave-draw 0.8s ease-out 0.1s both;
+}
+@keyframes wordmark-flicker {
+  0%, 100% { opacity: 1; }
+  31% { opacity: 0.2; }
+  33% { opacity: 1; }
+  51% { opacity: 0.2; }
+  53% { opacity: 1; }
+}
+.wordmark-text {
+  animation: wordmark-flicker 0.9s ease-out 0.5s both;
+}
+
+/* ── System status indicator ── */
+@keyframes sys-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px 2px rgba(0, 245, 212, 0.4); }
+  50% { opacity: 0.5; box-shadow: 0 0 2px 0 rgba(0, 245, 212, 0.15); }
+}
+.sys-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  animation: sys-pulse 2.4s ease-in-out infinite;
+}
+
+/* ── Data pulse on the nav bottom hairline ── */
+@keyframes pulse-ride-x {
+  0% { left: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: calc(100% - 6px); opacity: 0; }
+}
+.nav-pulse {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 6px;
+  height: 2px;
+  background: var(--color-accent);
+  box-shadow: 0 0 6px var(--color-accent);
+  animation: pulse-ride-x 6s linear infinite;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .accent-text { animation: none; }
+  .sweep-line { animation: none; opacity: 0; }
+  .badge-pulse { animation: none; }
+  .wordmark-wave path,
+  .wordmark-text,
+  .sys-dot,
+  .nav-pulse,
+  .scroll-tracker::before {
+    animation: none !important;
+  }
+  #main-content.calibrating {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -363,5 +654,27 @@ button, a, [role="button"] {
   ::view-transition-group(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+}
+
+/* ── Print: hide telemetry chrome, force content visible ── */
+@media print {
+  .aurora,
+  .grid-overlay,
+  .calibration-scan,
+  .scroll-tracker,
+  .nav-pulse {
+    display: none !important;
+  }
+  .wordmark-text { animation: none !important; opacity: 1 !important; }
+  .wordmark-wave path { animation: none !important; }
+  #main-content.calibrating {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

@@ -1,12 +1,18 @@
 # OSS Signal — Project Status
 
-**Last updated:** 2026-08-02
+# OSS Signal — Project Status
+
+**Last updated:** 2026-08-03
 
 ---
 
 ## Current state
 
-**Pivot complete (locally verified).** Personal FOSS Android app dashboard with two surfaces: Watchlist (35 apps) and Fresh Finds (744 repos from F-Droid, last 274 days).
+**Overhaul complete (Sprints 0–7) AND deployed.** Personal FOSS Android app
+dashboard: Watchlist (35 apps, needs-attention-first), Fresh Finds (744 F-Droid repos),
+Archive (filterable catalog), daily briefing, shared score modal, data exports, WCAG AA
+a11y, SEO metadata. Live at **https://oss-signal.vercel.app** — verified 19/19
+check-live + axe 0 violations both themes.
 
 ## What's done
 
@@ -16,38 +22,39 @@
 | Watchlist seed (`data/watchlist.json` — 35 apps) | ✅ Done | 2026-08-02 |
 | Data layer update (`src/lib/data.ts`) | ✅ Done | 2026-08-02 |
 | Two-pipeline refresh script (`scripts/refresh-data.mjs`) | ✅ Done | 2026-08-02 |
-| WatchlistPanel component (Zone 1) | ✅ Done | 2026-08-02 |
-| FreshFinds component (Zone 2) | ✅ Done | 2026-08-02 |
-| ProjectGrid adapted (Zone 3, collapsible + new schema fields) | ✅ Done | 2026-08-02 |
-| FeaturedSection adapted (genre labels + Shizuku badge) | ✅ Done | 2026-08-02 |
-| HeroSection adapted (subtitle, 6 signals, Shizuku count) | ✅ Done | 2026-08-02 |
-| `page.tsx` restructured (3 zones: Watchlist → Fresh → Archive) | ✅ Done | 2026-08-02 |
-| `tsc --noEmit` — zero errors | ✅ Done | 2026-08-02 |
-| `npm run build` — clean build, all routes prerender | ✅ Done | 2026-08-02 |
-| Fresh Finds pipeline run (768 raw → 744 deduped repos) | ✅ Done | 2026-08-02 |
-| Network resilience (retry + timeout + cache + batches) | ✅ Done | 2026-08-02 |
-| Playwright local verify (3 zones, 773 cards, 0 console errors) | ✅ Done | 2026-08-02 |
-| Project page route fixed (`[id]` → `[...id]` catch-all) | ✅ Done | 2026-08-02 |
-| Hydration mismatch fixed (RelativeTime + New badge) | ✅ Done | 2026-08-02 |
-| **Deploy to Vercel + Playwright live verify (749 cards, 0 errors)** | ✅ **Done** | 2026-08-02 |
+| Offline genre re-classifier (`scripts/classify-only.mjs`) | ✅ Done | 2026-08-03 |
+| Genre classifier refinement (`other` 35% → 12.2%) | ✅ Done | 2026-08-03 |
+| Renaissance visual pass (Sprint 1) | ✅ Done | 2026-08-03 |
+| Daily briefing + watchlist regrouping (Sprint 2) | ✅ Done | 2026-08-03 |
+| WCAG AA audit script + contrast fixes, both themes (Sprint 3) | ✅ Done | 2026-08-03 |
+| Shared score modal (Sprint 4a) | ✅ Done | 2026-08-03 |
+| Export buttons — watchlist JSON/CSV + projects JSON (Sprint 4b) | ✅ Done | 2026-08-03 |
+| SEO: robots.txt, sitemap.xml, OG/Twitter metadata (Sprint 6) | ✅ Done | 2026-08-03 |
+| `tsc --noEmit` — zero errors | ✅ Done | 2026-08-03 |
+| `npm run build` — clean build, all routes prerender | ✅ Done | 2026-08-03 |
+| **DEPLOY: overhaul live on Vercel (CLI deploy, aliased)** | ✅ **Done** | 2026-08-03 |
+| Live verify: `check-live.mjs` 19/19 + a11y both themes (Live URL) | ✅ Done | 2026-08-03 |
 
 ## What's pending
 
-None — milestone complete.
-
 ## What's queued
 
-- [x] Git init + first commit (`bd2b5f0`) — push kept local per user choice
-- [ ] Refine `other` genre (258/744 ≈ 35% of fresh finds) — future polish, not a blocker
+- [x] Git init + first commit — push kept local per user choice
+- [x] Refine `other` genre (was 258/744 ≈ 35%) — now 91/744 ≈ 12.2%
+- [ ] Opt-in Vercel Analytics (only if user wants; no third-party by default)
+- [ ] First user-survey (one question, not a form) after deploy
+- [ ] `userscript/` (Phase 6 `/api/score/[owner]/[repo]`) — deferred (decision #22)
 
 ## Live data
 
-- **Site:** https://oss-signal.vercel.app (pivot live)
+- **Site:** https://oss-signal.vercel.app (overhaul LIVE, verified 2026-08-03)
 - **Data last refreshed:** 2026-08-02 (Fresh Finds: 744 repos)
 - **Watchlist count:** 35 apps
 - **Fresh finds count:** 744 repos
 
 ## Known issues
 
-- `other` genre is 258/744 (~35%) — classifier could be refined later
-- `scoring.ts` doesn't exist as a separate file in repo (weights are inline in refresh-data.mjs)
+- `scoring.ts` doesn't exist as a separate file in repo (weights are inline in
+  refresh-data.mjs + shared `signals` array in scoring-section.tsx)
+- Lint: 7 pre-existing `react-hooks/*` errors in committed files (same hydration-gate
+  idiom across the codebase); build + tsc + axe all clean

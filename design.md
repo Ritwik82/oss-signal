@@ -1,5 +1,10 @@
 # OSS Signal — "Renaissance Edition" Redesign Brief
 
+> **DEPRECATED 2026-08-04** — superseded by the "Modern Calibration" reskin
+> (decisions.md #57–66): glass surfaces, near-black + teal/magenta, inline SVG circuit
+> hero. Painting hero, gold-on-ink palette, and Renaissance art direction are retired.
+> This file is kept for history only; do not reintroduce paintings or the old palette.
+
 Target reference: **Shopify Editions Winter '26 (Renaissance Edition)**. This is a full
 visual rebuild of OSS Signal in that style. Keep all existing data, routes, scoring logic,
 and the bug fixes already shipped — this is a **reskin of presentation only**, not a

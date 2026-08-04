@@ -92,6 +92,18 @@ When a bug had a non-obvious root cause, append a one-line lesson to the
 ## Known Patterns (project-specific, learned the hard way)
 - Self-reported DOM inspection has been wrong before. Confirm UI state with Playwright
   against the DEPLOYED url, never from source.
+- Stale `next start` processes survive `.next` wipes and keep serving OLD build HTML from
+  memory — symptoms look like app bugs (500s on chunks that don't exist on disk,
+  skip-links vanishing after reload). Always check server StartTime vs BUILD_ID mtime
+  (`Get-Process -Id <pid> | select StartTime` vs `(Get-Item .next/BUILD_ID).LastWriteTime`)
+  before debugging "phantom" build issues; kill by PID and restart fresh. When a new
+  component "isn't in the DOM", first verify the server isn't pre-build: kill by owning
+  PORT (`Get-NetTCPConnection -LocalPort 3100` → OwningProcess), NOT by command-line
+  substring — `*next start -p 3100*` silently misses the real cmdline (`start  -p`,
+  double space) and the stale server survives to serve the old build.
+- The layout `themeScript` re-applies `dark` on EVERY page load from localStorage. For
+  theme tests, set `oss-signal-theme` via `context.addInitScript` BEFORE navigation —
+  removing the class post-load is racy and gives flaky results.
 - `display: contents` generates no box → framer-motion `whileInView` never fires → element
   stranded at `opacity: 0` (invisible but still clickable). Watch for this on animated
   wrappers with `className="contents"`.
@@ -105,6 +117,10 @@ When a bug had a non-obvious root cause, append a one-line lesson to the
 - `data/projects.json` will NOT match the new schema until you run
   `scripts/refresh-data.mjs`. Type errors that look like Project-vs-schema mismatches are
   usually just missing fields — regenerate data before debugging components.
+- Genre keyword additions are substring matches — a new keyword that is a substring of
+  another word (e.g. `board` ⊂ `keyboard`, `dashboard`) silently misclassifies. After
+  editing `data/genres.json`, run `node scripts/classify-only.mjs` and grep the results
+  for the collision pattern (e.g. keyboard/dashboard apps landing in `media`).
 
 ---
 

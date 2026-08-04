@@ -58,3 +58,4 @@ run.log
 run.err
 dev.log
 pipeline.log
+server.log

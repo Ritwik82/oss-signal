@@ -13,22 +13,22 @@
     {
       "id": "media",
       "label": "Media",
-      "keywords": ["video", "audio", "music", "player", "downloader", "stream", "podcast", "radio", "gallery", "photo", "image", "yt-dlp", "spotify", "manga", "reader", "ebook", "comic", "anime"]
+      "keywords": ["video", "audio", "music", "player", "downloader", "stream", "podcast", "radio", "gallery", "photo", "image", "yt-dlp", "spotify", "manga", "reader", "ebook", "comic", "anime", "game", "gaming", "arcade", "puzzle", "rpg", "chess", "board game", "simulator", "idle", "dungeon", "torrent", "qbittorrent", "screencast", "screen recorder", "wallpaper", "live wallpaper", "youtube", "lyrics", "song", "ringtone", "flac", "text-to-speech", "chord", "brick", "runner", "shooter", "astronomy", "nasa", "night sky", "star map", "android tv", "media content"]
     },
     {
       "id": "utility",
       "label": "Utility",
-      "keywords": ["tool", "clean", "backup", "file", "manager", "scanner", "clipboard", "share", "transfer", "converter", "editor", "calculator", "recorder", "extractor", "compressor", "battery", "network", "wifi", "filter", "automation", "shortcut"]
+      "keywords": ["tool", "clean", "backup", "file", "manager", "scanner", "clipboard", "share", "transfer", "converter", "editor", "calculator", "recorder", "extractor", "compressor", "battery", "network", "wifi", "filter", "automation", "shortcut", "weather", "forecast", "keyboard", "ime", "input method", "ir blaster", "infrared", "printer", "bluetooth", "forward", "sms", "mirror", "monitor", "device control", "sensor", "stopwatch", "countdown", "unit converter", "magnifier", "notification", "volume", "qr code", "barcode", "sim card", "usb", "otg", "hdr", "exif", "syncthing", "sync", "send", "remote", "nas", "unraid", "gas station", "signal strength", "wall stud", "magnetometer", "screen awake", "keep awake", "alarm clock", "timer widget", "pantry", "food waste", "pomodoro widget"]
     },
     {
       "id": "productivity",
       "label": "Productivity",
-      "keywords": ["note", "todo", "task", "timer", "pomodoro", "calendar", "reminder", "journal", "diary", "bookmark", "expense", "track", "habit", "clock", "alarm", "reader", "rss", "news"]
+      "keywords": ["note", "todo", "task", "timer", "pomodoro", "calendar", "reminder", "journal", "diary", "bookmark", "expense", "track", "habit", "clock", "alarm", "reader", "rss", "news", "email", "mail", "chat", "messenger", "browser", "search", "prayer", "islamic", "finance", "budget", "money", "invoice", "receipt", "shopping list", "grocery", "recipe", "workout", "fitness", "meditation", "mood", "sleep", "telegram", "lemmy", "fediverse", "itinerary", "travel", "project management", "focus", "documents", "voice memo", "logbook", "dialer", "calling", "phone call"]
     },
     {
       "id": "security",
       "label": "Security & Privacy",
-      "keywords": ["privacy", "vpn", "firewall", "password", "encrypt", "adblock", "blocker", "dns", "2fa", "authenticator", "tracker", "permission", "scan"]
+      "keywords": ["privacy", "vpn", "firewall", "password", "encrypt", "adblock", "blocker", "dns", "2fa", "authenticator", "tracker", "permission", "scan", "wallet", "crypto", "bitcoin", "ethereum", "seed", "multisig", "ledger", "mnemonic", "custodial", "onion", "tor", "secret", "signer", "deepfake", "screenshot", "spoof", "verify", "shamir"]
     },
     {
       "id": "store",
@@ -38,12 +38,12 @@
     {
       "id": "education",
       "label": "Education",
-      "keywords": ["learn", "course", "tutorial", "study", "reference", "guide", "wiki", "documentation", "flashcard", "quiz", "language learn"]
+      "keywords": ["learn", "course", "tutorial", "study", "reference", "guide", "wiki", "documentation", "flashcard", "quiz", "language learn", "dictionary", "translate", "translation", "vocabulary", "word", "spell", "math", "alphabet", "geography", "history", "science", "reading", "fact check", "ancient", "egyptian", "practic", "guitar lesson", "song sheet"]
     },
     {
       "id": "dev-tools",
       "label": "Dev Tools",
-      "keywords": ["developer", "adb", "terminal", "ide", "editor", "git", "debug", "ssh", "http", "api client", "json", "regex", "emulator", "device info", "system info"]
+      "keywords": ["developer", "adb", "terminal", "ide", "editor", "git", "debug", "ssh", "http", "api client", "json", "regex", "emulator", "device info", "system info", "coding", "programming", "linux", "desktop", "cad", "nvr", "openclaw", "rpi", "raspberry", "homelab", "docker", "container"]
     },
     {
       "id": "other",

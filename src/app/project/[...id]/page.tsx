@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getProjects } from "@/lib/data";
 
 const signalMeta: Record<string, { label: string; dotClass: string }> = {
@@ -37,6 +38,27 @@ function BreakdownBar({ label, value }: { label: string; value: number }) {
       </div>
     </div>
   );
+}
+
+export function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string[] }>;
+}): Promise<Metadata> {
+  return params.then(async ({ id: segments }) => {
+    const decoded = decodeURIComponent(segments.join("/"));
+    const project = getProjects().projects.find((p) => p.id === decoded);
+    if (!project) return { title: "Not found" };
+    return {
+      title: `${project.name} — score ${(project.score * 10).toFixed(1)}/10`,
+      description: project.description,
+      openGraph: {
+        title: `${project.name} — OSS Signal`,
+        description: project.description,
+        type: "website",
+      },
+    };
+  });
 }
 
 export default async function ProjectPage({
@@ -91,7 +113,7 @@ export default async function ProjectPage({
 
         {/* Name */}
         <h1
-          className="text-3xl md:text-4xl font-bold tracking-tight scroll-mt-24 mb-4"
+          className="text-3xl md:text-4xl font-bold tracking-tight scroll-mt-24 mb-4 serif-display"
           style={{ color: "var(--color-text)" }}
         >
           {project.name}
@@ -120,7 +142,7 @@ export default async function ProjectPage({
             href={project.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono transition-colors hover:opacity-80"
+            className="font-mono underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
             style={{ color: "var(--color-accent)" }}
           >
             GitHub ↗
@@ -141,11 +163,8 @@ export default async function ProjectPage({
         </div>
 
         <div
-          className="relative border p-6"
-          style={{
-            borderColor: "var(--color-border)",
-            backgroundColor: "var(--color-surface)",
-          }}
+          className="glass relative p-6"
+          style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
         >
           {/* Corner marks */}
           <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2" style={{ borderColor: "var(--color-accent)" }} />
@@ -235,11 +254,10 @@ export default async function ProjectPage({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs inline-flex items-center gap-2 border px-3 py-2 transition-colors"
+                  className="font-mono text-xs inline-flex items-center gap-2 border px-3 py-2 glass transition-colors"
                   style={{
                     color: "var(--color-accent)",
                     borderColor: "var(--color-border)",
-                    backgroundColor: "var(--color-surface)",
                   }}
                 >
                   {link.source === "hn" ? "Hacker News" : "Reddit"}

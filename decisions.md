@@ -4,6 +4,30 @@ Every architectural choice and why. Updated when decisions are made. Newest at t
 
 ---
 
+## Modern Calibration reskin (2026-08-04)
+
+Complete visual overhaul — "Modern Calibration": dark-first minimal data instrument with
+glass surfaces, teal/magenta accent, serif section display. Replaces the Renaissance
+Edition look (painting hero, gold-on-ink, calibration marks were kept as a motif only).
+
+| # | Decision | Rationale |
+|---|----------|-------------|
+| 57 | New token palette: `#0A0A0A` bg / `#121212` surface / teal `#00F5D4` accent / magenta `#FF2D95` alerts / `#E0E0E0` text / `#A0A0A0` muted | User-driven redesign ("Modern Calibration"); teal-on-near-black ≈ 15:1, muted `#A0A0A0` passes AA (the draft's `#555` failed at 2.7:1) |
+| 58 | Legacy palette aliases (`--bone`, `--gold`, `--sage`, `--terracotta`, `--dusty-blue`, `--ink`) remapped onto the new palette | Components reference them directly; remap rather than churn every component. Hero swash, status bar, needs-attention label all go teal/magenta automatically |
+| 59 | Glass surfaces via `.glass` utility (rgba white ~5% + blur(8px) + hairline border) + a fixed `.aurora` ambient layer | Glass over flat black renderseels invisible; aurora (two soft teal/magenta radial gradients) gives blur something to catch |
+| 60 | Hero painting replaced by inline SVG circuit-board art; `hero-sky.webp` (310KB) deleted; OG/twitter images dropped | SVG is ~2KB, theme-aware (CSS vars), no remotePatterns work; a pure look change |
+| 61 | Signature motion: right-edge scroll tracker (2px teal, `useSpring(scrollYProgress)`), hero sweep hairline (`@keyframes`), View Transitions crossfade, card `whileInView` reveals | "Calibrating instrument" language; all gated by `prefers-reduced-motion` (tracker doesn't render, sweep/no animations off) |
+| 62 | Left rail → icon-only buttons with hover/focus tooltips (`aria-label="II — Watchlist"`), numerals kept | Old 0.5rem *vertical* rail labels were unreadable; icons + tooltip fix it with no content loss |
+| 63 | Mobile: top-nav section links collapse into a hamburger drawer (framer `AnimatePresence`); theme toggle moved into top bar (ghost button); search stays hidden `<sm` | Phone width previously overflowed; nav features preserved, search was already `<sm`-hidden |
+| 64 | Archive renders as compact glass rows (44px, 24/page); per-row signal breakdown removed (detail lives on project page) | 744 specimens scan faster as rows; cards stay for Watchlist/Fresh discovery (mockup-v2 §4 intended rows) |
+| 65 | Fresh Finds cards: 10px score bar with `X/10` label beside, "Copy Obtainium link" button (clipboard + toast), "Xd ago" chip from `last_release_at`, cards link to internal `/project/[...]` instead of GitHub | Ships flagship actions that were specced but never landed (decision #36/#39/#14); internal links keep the section in the app |
+| 66 | Watchlist/Fresh/Archive badges pulse once on mount (`@keyframes badge-pulse`, disabled under reduced-motion) | Life without distraction; one-shot, not looping |
+
+Per-task verification notes are in `progress.md`. Visual verification per AGENTS.md DoD
+(via Playwright, values pasted) will be logged there too.
+
+---
+
 ## Pivot decisions (2026-08-02)
 
 | # | Decision | Rationale |
@@ -45,6 +69,40 @@ Every architectural choice and why. Updated when decisions are made. Newest at t
 | 23 | 4 doc files (README, status, progress, decisions) | Keeps project context preserved across sessions; prevents re-explaining on next visit |
 
 ---
+
+## Mockup v2 review (2026-08-03)
+
+| # | Decision | Rationale |
+|---|----------|-------------|
+| 33 | Mockup v2 (`mockup-v2.md`) supersedes the v1 template brief | v1 was a generic SaaS template (accounts/comments/carousel) contradicting #21 (no DB) and #13 (not public) and clashing with `design.md`; v2 keeps the personal-instrument stance |
+| 34 | Score breakdown is one shared modal reachable from hero + every card + methodology | Transparency is the product; footer-only placement hid it |
+| 35 | Remove all hover-only interactions (flip/tilt/carousel) | a11y-hostile (no touch/keyboard path) and off the Renaissance motion language |
+| 36 | "Add to Watchlist" CTA becomes "Copy import" (Obtainium URL) | No backend; copying an import URL is the honest single-user action |
+| 37 | Daily greeting is fact-based + time-aware ("daily briefing"), not "awaiting your review" | The queue copy promised a review workflow that doesn't exist |
+| 38 | Watchlist status-ordered with "Needs attention" group first | Abandonment risk is the #1 pain point (#6) — must lead the surface, not be a badge |
+| 39 | "Copy import" renamed "Copy Obtainium link" + success toast | External review (Hermes): label the real action; per-repo URL, clipboard + toast confirm |
+| 40 | Score bar: track ≥10px, honest proportional fill with tiny visible floor, number always beside it | Low-vision review point; rejected the literal "20% of card width" floor — it would misrepresent a 5/100 score |
+| 41 | "How is a score made?" opens the shared score modal from the top bar | Transparency at a glance (rule 2); same modal component as cards and methodology |
+| 42 | Briefing shows exact date + time-aware salutation; dismiss is prominent + keyboard-accessible; pin persists across sessions | Once-per-day control needs clear, persistent affordances |
+| 43 | Rejected: vibration cue on copy; toast + focus feedback only | Vibration is Android-only gimmick with no cross-platform value |
+| 44 | Pin/unpin confirm via the same toast component | A state change with no feedback reads as a dead button |
+| 45 | Score modal shows weights + data-source URLs + *why* each threshold was chosen | Transparency without the reasoning is still a black box; the choice (<90d vs ≥90d) is method, not magic |
+| 46 | State colors are semantic tokens (`--success/--warn/--danger`), never raw hex in components | Theme changes must not silently break contrast ratios |
+| 47 | WCAG AA is the contract: contrast tokens tuned to ≥4.5:1 in BOTH themes, verified by axe script | Axe found real fails at launch (dim 3.0:1, gold-on-cream 2.87:1); tokens are the enforcement point, not per-element tweaks |
+| 48 | The a11y audit script is the contrast gate (Home + Project + skip-link, both themes via `--light`) | One command re-checks after any token/layout change; caught a theme-race the manual probe missed |
+| 49 | Score modal = context provider + hook (`useScoreModal`), mounted once in `page.tsx` | Openers in hero, nav, and methodology all call the same hook; no prop-drilling through server components |
+| 50 | Signal data lives in one exported `signals` array (`scoring-section.tsx`), enriched with `source` + `why` per signal | Modal and methodology section render the SAME data; a weight change edits one array, not two |
+
+## Mockup v2 review (2026-08-03, continued)
+
+| # | Decision | Rationale |
+|---|----------|-------------|
+| 51 | Genre keywords expanded by observed cluster, enforced by `classify-only.mjs` re-run | `other` 35%→12.2%; the offline script makes keyword iteration a seconds-long data pass, not a 40-min API refresh |
+| 52 | Genre keyword collisions (substring-in-keyword) checked on every keyword addition | `board` ⊂ `keyboard`/`dashboard` silently misclassified 12 apps; a grep pass on new vs existing keywords is the cheap gate |
+| 53 | SEO base URL via `NEXT_PUBLIC_SITE_URL` env, falling back to Vercel URL | Deploy-agnostic metadata; switching to a custom domain later = one env var, no code change |
+| 54 | `check-live.mjs` stays the deploy gate and now covers the new surface (modal, exports, robots, sitemap) | Post-deploy verification must check the whole overhaul, not just the 3-zone layout; 17 checks, all green locally |
+| 55 | Deploy via Vercel CLI (`vercel --prod`), not git push | Repo stays local (decision #13); the CLI deploy is aliased to the production domain and needs no remote. Lifted #13 for deployment only |
+| 56 | Global search in the top bar (prototype → shipped); watchlist tabs rejected | Hermes's static prototype had 3 extras: sort (already shipped), watchlist tabs (rejected — needs-attention grouping already leads), global search (shipped — searching 744 apps should not require expanding the archive). Every new idea from an external prototype gets a yes/no/maybe against the shipped app, never blanket adoption |
 
 ## Post-pivot decisions (2026-08-02, deploy day)
 

@@ -4,45 +4,40 @@ import {
   getGenres,
   type GenreId,
 } from "@/lib/data";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { RelativeTime } from "@/components/relative-time";
 import { NavBar } from "@/components/nav-bar";
 import { LeftRail } from "@/components/left-rail";
-import { HeroSection } from "@/components/hero-section";
+import { CalibrationScan } from "@/components/calibration-scan";
 import { ProjectGrid } from "@/components/project-grid";
 import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
+import { DailyBriefing } from "@/components/daily-briefing";
+import { ScoreModalProvider } from "@/components/score-modal";
+import { ExportButtons } from "@/components/export-buttons";
+import { ScrollTracker } from "@/components/scroll-tracker";
 
 export default function Home() {
   const data = getProjects();
   const watchlistData = getWatchlist();
   const genres = getGenres();
 
-  const topScore = data.projects.reduce(
-    (max, p) => (p.score > max ? p.score : max),
-    0
-  );
-  const shizukuCount = data.projects.filter((p) => p.shizuku).length;
-
   return (
     <div
       id="main-content"
-      className="w-full min-h-screen font-sans"
-      style={{ background: "var(--color-bg)", color: "var(--color-text)" }}
+      className="w-full min-h-screen font-sans relative"
+      style={{ color: "var(--color-text)" }}
     >
-      <div className="fixed top-3 right-4 z-[60]">
-        <ThemeToggle />
-      </div>
+      <ScrollTracker />
+      <CalibrationScan />
+      <ScoreModalProvider>
+        <LeftRail />
+        <NavBar projects={data.projects} />
 
-      <LeftRail />
-      <NavBar />
-
-      <HeroSection
-        topScore={topScore}
-        lastRefresh={data.generated_at}
-        projectCount={data.projects.length}
-        shizukuCount={shizukuCount}
+      <DailyBriefing
+        apps={watchlistData.apps}
+        projects={data.projects}
+        generatedAt={data.generated_at}
       />
 
       <div className="section-divider" />
@@ -65,6 +60,15 @@ export default function Home() {
       {/* Scoring methodology — at the bottom, after the data */}
       <ScoringSection />
 
+      <div className="py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <ExportButtons
+            watchlist={watchlistData.apps}
+            projects={data.projects}
+          />
+        </div>
+      </div>
+
       <footer
         className="border-t py-12 px-4"
         style={{ borderColor: "var(--color-border)" }}
@@ -85,7 +89,7 @@ export default function Home() {
               href="https://github.com/Ritwik82"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:opacity-80"
+              className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
               style={{ color: "var(--color-accent)" }}
             >
               Ritwik
@@ -103,6 +107,7 @@ export default function Home() {
           </p>
         </div>
       </footer>
+      </ScoreModalProvider>
     </div>
   );
 }

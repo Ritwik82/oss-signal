@@ -22,9 +22,27 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "OSS Signal — Discover promising open-source projects",
+  title: {
+    default: "OSS Signal — FOSS Android app health dashboard",
+    template: "%s | OSS Signal",
+  },
   description:
-    "A dashboard that surfaces interesting open-source projects with transparent health scores.",
+    "Prioritize actively maintained FOSS Android apps. Track the ones you rely on and discover the ones worth installing — every score is built from six transparent health signals.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://oss-signal.vercel.app"
+  ),
+  openGraph: {
+    title: "OSS Signal — FOSS Android app health dashboard",
+    description:
+      "Prioritize actively maintained FOSS Android apps. Track the ones you rely on and discover the ones worth installing.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "OSS Signal — FOSS Android app health dashboard",
+    description:
+      "Six transparent health signals. One honest score. Never install abandonware again.",
+  },
 };
 
 const themeScript = `
@@ -50,8 +68,12 @@ export default function RootLayout({
         <meta name="theme-color" content="#1a1714" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col isolate">
         <a href="#main-content" className="skip-link">Skip to main content</a>
+        {/* Ambient aurora — sits behind all content so glass surfaces have something to blur */}
+        <div className="aurora" aria-hidden="true" />
+        {/* Fixed graph-paper grid — telemetry texture behind everything */}
+        <div className="grid-overlay" aria-hidden="true" />
         {children}
       </body>
     </html>
