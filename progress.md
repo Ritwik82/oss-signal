@@ -4,6 +4,24 @@ Chronological log of what's been done, what changed, what's next.
 
 ---
 
+## 2026-08-04 — Modern Calibration reskin DEPLOYED + a11y-audit race fixed
+
+- Committed the reskin + all sprint work (`958f754`) and redeployed via
+  `vercel --prod --yes`. Live @ https://oss-signal.vercel.app now serves the reskin.
+- **Live verify:** `check-live.mjs` **19/19 PASS**, 0 console errors; `a11y-audit.mjs`
+  (now deterministic) 0 violations on Home + Project page, dark AND light.
+- **Real bug found by re-verifying against the live artifact (not self-attestation):**
+  `a11y-audit.mjs` failed dark Home with 169 color-contrast nodes (foregrounds like
+  `#575757`/`#646464`). Those hex values exist NOWHERE in the codebase — axe was sampling
+  framer-motion `whileInView` reveals + `badge-pulse` **mid-fade** (text at ~50% opacity).
+  At rest (2.5s settle) the audit is 0 violations; with `reducedMotion:"reduce"` it is
+  0 violations deterministically with no wait. Fix: audit script now creates the context
+  with `reducedMotion: "reduce"` (site's animations are all reduced-motion-gated, so it
+  audits the settled state) and accepts the URL arg in any position so `--light <url>`
+  works (`c7a07cf`). No app code changed — the site's colors were already ≥4.5:1.
+
+---
+
 ## 2026-08-04 — Modern Calibration reskin (whole-site visual overhaul)
 
 Replaced the Renaissance Edition look with "Modern Calibration": dark-first minimal

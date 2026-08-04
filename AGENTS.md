@@ -121,6 +121,12 @@ When a bug had a non-obvious root cause, append a one-line lesson to the
   another word (e.g. `board` ⊂ `keyboard`, `dashboard`) silently misclassifies. After
   editing `data/genres.json`, run `node scripts/classify-only.mjs` and grep the results
   for the collision pattern (e.g. keyboard/dashboard apps landing in `media`).
+- axe on a page with entry animations (framer-motion `whileInView` reveals, one-shot
+  badge pulses) samples elements MID-FADE — it reports half-opacity text (foregrounds like
+  `#575757` that exist nowhere in the codebase) as color-contrast failures that vanish at
+  rest. Run `a11y-audit.mjs` with the context `reducedMotion:"reduce"` (the site's
+  animations are all reduced-motion-gated, so axe audits the settled state) or settle
+  ~2.5s before `analyze()`. Never "fix" a token for these phantom failures.
 
 ---
 

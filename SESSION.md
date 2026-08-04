@@ -2,7 +2,7 @@
 
 **Purpose:** If this session's context is lost, a fresh agent can resume with zero
 re-discovery. Read this + `progress.md` + `decisions.md` (authoritative) before coding.
-Last updated: 2026-08-03 (ALL sprints done, DEPLOYED to Vercel, verified live).
+Last updated: 2026-08-04 (Modern Calibration reskin DEPLOYED + verified live).
 
 ---
 
@@ -16,6 +16,15 @@ sprints in `progress.md` (newest section at top, under the `---` split).
 
 ## 1. Where things stand (exact)
 
+- **Modern Calibration reskin: DONE + DEPLOYED + VERIFIED LIVE (2026-08-04).**
+  Committed `958f754`, deployed `vercel --prod --yes`. check-live 19/19 PASS, 0 console
+  errors, axe 0 violations dark + light (Home + Project) against
+  https://oss-signal.vercel.app. Audit gotcha (found against live, not self-attestation):
+  axe reported 169 color-contrast nodes with foregrounds (`#575757` etc.) that exist
+  nowhere in the code — it sampled framer-motion reveals / badge-pulse mid-fade. At 2.5s
+  settle = 0 violations; with `reducedMotion:"reduce"` on the context = 0 with no wait.
+  Fixed the audit script (`c7a07cf`), no app code change. Deployed-but-unused API routes
+  `src/app/api/tracked` + `updates` (KV-dependent, no callers) flagged in status.md.
 - **Sprint 6 (SEO/perf): DONE + VERIFIED.** NEW `robots.ts` (allow all + sitemap link),
   `sitemap.ts` (745 static URLs: `/` + 744 projects, capped 1000), layout metadata
   (title template, metadataBase, OG, twitter summary_large_image), per-project
