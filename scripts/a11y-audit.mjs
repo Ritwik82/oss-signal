@@ -2,7 +2,7 @@ import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
 
-const url = (process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "http://localhost:3100") ?? "http://localhost:3100";
+const url = (process.argv.find((a) => a.startsWith("http")) ?? "http://localhost:3100").replace(/\/$/, "");
 const light = process.argv.includes("--light");
 
 const projects = JSON.parse(readFileSync("data/projects.json", "utf-8"));
@@ -10,7 +10,7 @@ const firstProject = projects.projects[0];
 const projectUrl = `${url}/project/${encodeURIComponent(firstProject.id)}`;
 
 const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
 if (light) {
   await context.addInitScript(() => localStorage.setItem("oss-signal-theme", "light"));
 }
