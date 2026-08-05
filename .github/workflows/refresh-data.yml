@@ -20,8 +20,8 @@ jobs:
 
       - run: node scripts/refresh-data.mjs
         env:
-          # Uses the auto-generated GITHUB_TOKEN (not a PAT) — least-privilege, no long-lived secret.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT stored as a repo secret named GH_TOKEN (can't use GITHUB_ prefix).
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - run: |
           git config user.name "github-actions[bot]"
