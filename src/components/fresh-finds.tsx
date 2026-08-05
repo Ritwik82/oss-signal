@@ -3,18 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import type { Project, Genre, GenreId } from "@/lib/data";
 
-function abandonColor(risk: number) {
-  if (risk < 0.2) return "var(--color-signal-green)";
-  if (risk < 0.5) return "var(--color-accent)";
-  return "var(--color-signal-pink)";
-}
-
-function abandonLabel(risk: number) {
-  if (risk < 0.2) return "Fresh";
-  if (risk < 0.5) return "Stale risk";
-  return "Abandoned risk";
-}
-
 function daysSince(iso: string | null): number | null {
   if (!iso) return null;
   const t = new Date(iso).getTime();
@@ -162,14 +150,8 @@ function FreshCard({
   genreLabel: string;
   onCopy: (url: string) => void;
 }) {
-  const [isNew, setIsNew] = useState(false);
   const days = daysSince(project.last_release_at);
-
-  useEffect(() => {
-    if (project.last_release_at) {
-      setIsNew((Date.now() - new Date(project.last_release_at).getTime()) / 1000 / 86400 < 14);
-    }
-  }, [project.last_release_at]);
+  const isFresh = days !== null && days < 14;
 
   return (
     <div
@@ -179,7 +161,7 @@ function FreshCard({
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <span
-          className="font-mono text-[9px] tracking-widest uppercase px-1.5 py-0.5"
+          className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
           style={{
             backgroundColor: "var(--color-accent-dim)",
             color: "var(--color-accent)",
@@ -190,7 +172,7 @@ function FreshCard({
         <div className="flex items-center gap-2">
           {project.shizuku && (
             <span
-              className="font-mono text-[9px] tracking-wider px-1.5 py-0.5"
+              className="font-mono text-[10px] tracking-wider px-1.5 py-0.5"
               style={{
                 backgroundColor: "var(--color-signal-purple)",
                 color: "var(--color-bg)",
@@ -278,7 +260,7 @@ function FreshCard({
           </span>
           {days != null && (
             <span
-              className="font-mono text-[9px] whitespace-nowrap"
+              className="font-mono text-[11px] whitespace-nowrap"
               style={{ color: "var(--color-text-dim)" }}
               title="Updated Xd ago"
             >
@@ -287,9 +269,9 @@ function FreshCard({
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {isNew && (
+          {isFresh && (
             <span
-              className="badge-pulse font-mono text-[9px] px-1.5 py-0.5"
+              className="badge-pulse font-mono text-[11px] px-1.5 py-0.5"
               style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
             >
               NEW
@@ -298,7 +280,7 @@ function FreshCard({
           <button
             onClick={() => onCopy(project.url)}
             aria-label={`Copy Obtainium link for ${project.name}`}
-            className="font-mono text-[9px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               color: "var(--color-accent)",
               borderColor: "var(--color-accent-border)",

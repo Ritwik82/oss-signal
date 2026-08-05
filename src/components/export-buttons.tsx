@@ -4,6 +4,9 @@ import type { WatchlistApp, Project } from "@/lib/data";
 
 function csvEscape(v: unknown): string {
   const s = v == null ? "" : String(v);
+  // CWE-1236: prefix formula-triggering leading chars so Excel/Sheets treats
+  // the cell as text, not an expression. Names come from untrusted repos.
+  if (/^[=+\-@]/.test(s)) return `"'${s}"`;
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

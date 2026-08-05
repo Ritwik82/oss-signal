@@ -7,9 +7,9 @@ import type { WatchlistApp, GenreId, Genre } from "@/lib/data";
 function stalenessColor(staleness?: string) {
   switch (staleness) {
     case "fresh": return "var(--color-signal-green)";
-    case "warning": return "var(--color-accent)";
+    case "warning": return "var(--color-signal-amber)";
     case "stale": return "var(--color-signal-orange)";
-    case "abandoned": return "var(--color-signal-pink)";
+    case "abandoned": return "var(--color-signal-amber)";
     default: return "var(--color-text-dim)";
   }
 }
@@ -18,11 +18,159 @@ function stalenessLabel(s?: string) {
   return s ? s.toUpperCase() : "UNKNOWN";
 }
 
+const STALENESS_OPTIONS: { value: string; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "fresh", label: "Fresh" },
+  { value: "warning", label: "Warning" },
+  { value: "stale", label: "Stale" },
+  { value: "abandoned", label: "Abandoned" },
+];
+
+const chipStyle = (selected: boolean): React.CSSProperties => ({
+  backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
+  color: selected ? "var(--color-accent)" : "var(--color-text-dim)",
+  borderColor: selected ? "var(--color-accent-border)" : "var(--color-border)",
+});
+
+const chipClass =
+  "font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]";
+
+function GenreChip({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      role="checkbox"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={chipClass}
+      style={chipStyle(selected)}
+    >
+      {label.toUpperCase()}
+    </button>
+  );
+}
+
+function StalenessChip({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      role="checkbox"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={chipClass}
+      style={chipStyle(selected)}
+    >
+      {label.toUpperCase()}
+    </button>
+  );
+}
+
+function AppCard({ app, genreLabel }: { app: WatchlistApp; genreLabel: string }) {
+  const color = stalenessColor(app.staleness);
+  const badge = app.update_available;
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
+      whileHover={{ y: -1 }}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <span
+          className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
+          style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
+        >
+          {genreLabel}
+        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
+            style={{
+              color: app.installed ? "var(--color-text-muted)" : "var(--color-text-dim)",
+            }}
+          >
+            {app.installed ? "INSTALLED" : "WATCHING"}
+          </span>
+          {badge && (
+            <span
+              className="badge-pulse font-mono text-[11px] px-1.5 py-0.5 whitespace-nowrap"
+              style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
+            >
+              UPDATE
+            </span>
+          )}
+        </div>
+      </div>
+
+      <h4
+        className="font-semibold text-sm tracking-tight line-clamp-1 mb-1"
+        style={{ color: "var(--color-text)" }}
+      >
+        {app.name}
+      </h4>
+      <p className="font-mono text-[10px] mb-3" style={{ color: "var(--color-text-dim)" }}>
+        {app.repo ?? app.source}
+      </p>
+
+      <div className="flex items-center justify-between mt-auto pt-2 border-t"
+        style={{ borderColor: "var(--color-ruled)" }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ backgroundColor: color }}
+          />
+          <span
+            className="font-mono text-[11px] tracking-wide"
+            style={{ color: "var(--color-text-dim)" }}
+          >
+            {stalenessLabel(app.staleness)}
+          </span>
+        </div>
+        {app.latestVersion && (
+          <span
+            className="font-mono text-[11px]"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            v{app.latestVersion}
+          </span>
+        )}
+      </div>
+
+      {/* Corner marks */}
+      <div
+        className="absolute top-0 left-0 w-2 h-2 border-t border-l"
+        style={{ borderColor: "var(--color-accent)" }}
+      />
+      <div
+        className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
+        style={{ borderColor: "var(--color-accent)" }}
+      />
+    </motion.div>
+  );
+}
+
 export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres: Genre[] }) {
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
   const [collapsed, setCollapsed] = useState(false);
   const [genreFilter, setGenreFilter] = useState<GenreId | "all">("all");
-  const [stalenessFilter, setStalenessFilter] = useState<string>("all");
+  const [stalenessFilter, setStalenessFilter] = useState("all");
 
   const filtered = useMemo(() => {
     let list = apps;
@@ -45,112 +193,6 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
   );
 
   const updateCount = filtered.filter((a) => a.update_available).length;
-
-  function GenreChip({ id, label }: { id: GenreId | "all"; label: string }) {
-    const selected = genreFilter === id;
-    return (
-      <button
-        role="checkbox"
-        aria-checked={selected}
-        onClick={() => startTransition(() => setGenreFilter(id as GenreId | "all"))}
-        className="font-mono text-[9px] tracking-wider px-2 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-        style={{
-          backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
-          color: selected ? "var(--color-accent)" : "var(--color-text-dim)",
-          borderColor: selected ? "var(--color-accent-border)" : "var(--color-border)",
-        }}
-      >
-        {label.toUpperCase()}
-      </button>
-    );
-  }
-
-  function AppCard({ app }: { app: WatchlistApp }) {
-    const color = stalenessColor(app.staleness);
-    const badge = app.update_available;
-    return (
-      <motion.div
-        layout
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-        style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
-        whileHover={{ y: -1 }}
-      >
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <span
-            className="font-mono text-[9px] tracking-widest uppercase px-1.5 py-0.5"
-            style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
-          >
-            {genreMap.get(app.genre) ?? app.genre}
-          </span>
-          <div className="flex items-center gap-2">
-            <span
-              className="font-mono text-[8px] tracking-widest uppercase px-1.5 py-0.5"
-              style={{
-                color: app.installed ? "var(--color-text-muted)" : "var(--color-text-dim)",
-              }}
-            >
-              {app.installed ? "INSTALLED" : "WATCHING"}
-            </span>
-            {badge && (
-              <span
-                className="badge-pulse font-mono text-[9px] px-1.5 py-0.5 whitespace-nowrap"
-                style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
-              >
-                UPDATE
-              </span>
-            )}
-          </div>
-        </div>
-
-        <h4
-          className="font-semibold text-sm tracking-tight line-clamp-1 mb-1"
-          style={{ color: "var(--color-text)" }}
-        >
-          {app.name}
-        </h4>
-        <p className="font-mono text-[10px] mb-3" style={{ color: "var(--color-text-dim)" }}>
-          {app.repo ?? app.source}
-        </p>
-
-        <div className="flex items-center justify-between mt-auto pt-2 border-t"
-          style={{ borderColor: "var(--color-ruled)" }}
-        >
-          <div className="flex items-center gap-1.5">
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: color }}
-            />
-            <span
-              className="font-mono text-[9px] tracking-wide"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              {stalenessLabel(app.staleness)}
-            </span>
-          </div>
-          {app.latestVersion && (
-            <span
-              className="font-mono text-[9px]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              v{app.latestVersion}
-            </span>
-          )}
-        </div>
-
-        {/* Corner marks */}
-        <div
-          className="absolute top-0 left-0 w-2 h-2 border-t border-l"
-          style={{ borderColor: "var(--color-accent)" }}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
-          style={{ borderColor: "var(--color-accent)" }}
-        />
-      </motion.div>
-    );
-  }
 
   return (
     <section id="watchlist" className="py-16 px-4">
@@ -201,14 +243,41 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
         {!collapsed && (
           <div className="mb-6 flex flex-wrap gap-2 items-center">
             <span
-              className="font-mono text-[9px] tracking-widest uppercase mr-1"
+              className="font-mono text-[10px] tracking-widest uppercase mr-1"
               style={{ color: "var(--color-text-dim)" }}
             >
               genre
             </span>
-            <GenreChip id="all" label="All" />
+            <GenreChip
+              label="All"
+              selected={genreFilter === "all"}
+              onSelect={() => startTransition(() => setGenreFilter("all"))}
+            />
             {(["customization", "shizuku", "media", "utility", "productivity", "security", "store", "education", "dev-tools", "other"] as GenreId[]).map((g) => (
-              <GenreChip key={g} id={g} label={genreMap.get(g) ?? g} />
+              <GenreChip
+                key={g}
+                label={genreMap.get(g) ?? g}
+                selected={genreFilter === g}
+                onSelect={() => startTransition(() => setGenreFilter(g))}
+              />
+            ))}
+          </div>
+        )}
+        {!collapsed && (
+          <div className="mb-6 flex flex-wrap gap-2 items-center">
+            <span
+              className="font-mono text-[10px] tracking-widest uppercase mr-1"
+              style={{ color: "var(--color-text-dim)" }}
+            >
+              staleness
+            </span>
+            {STALENESS_OPTIONS.map((o) => (
+              <StalenessChip
+                key={o.value}
+                label={o.label}
+                selected={stalenessFilter === o.value}
+                onSelect={() => startTransition(() => setStalenessFilter(o.value))}
+              />
             ))}
           </div>
         )}
@@ -226,14 +295,14 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
               {attention.length > 0 && (
                 <>
                   <p
-                    className="font-mono text-[9px] tracking-widest uppercase mb-3"
+                    className="font-mono text-[10px] tracking-widest uppercase mb-3"
                     style={{ color: "var(--terracotta)" }}
                   >
                     Needs attention ({attention.length})
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {attention.map((app) => (
-                      <AppCard key={app.id} app={app} />
+                      <AppCard key={app.id} app={app} genreLabel={genreMap.get(app.genre) ?? app.genre} />
                     ))}
                   </div>
                 </>
@@ -241,14 +310,14 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
               {current.length > 0 && (
                 <>
                   <p
-                    className="font-mono text-[9px] tracking-widest uppercase mb-3"
+                    className="font-mono text-[10px] tracking-widest uppercase mb-3"
                     style={{ color: "var(--color-text-dim)" }}
                   >
                     Current ({current.length})
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {current.map((app) => (
-                      <AppCard key={app.id} app={app} />
+                      <AppCard key={app.id} app={app} genreLabel={genreMap.get(app.genre) ?? app.genre} />
                     ))}
                   </div>
                 </>

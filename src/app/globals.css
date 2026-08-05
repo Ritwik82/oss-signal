@@ -22,15 +22,15 @@
   --color-text-muted: #a0a0a0;
   --color-text-dim: #8a8a8a;
   --color-accent: #00f5d4;
-  --color-accent-magenta: #ff2d95;
   --color-accent-dim: rgba(0, 245, 212, 0.08);
   --color-accent-border: rgba(0, 245, 212, 0.28);
   --color-signal-green: #00e0b8;
   --color-signal-blue: #7dd3fc;
   --color-signal-purple: #c084fc;
+  --color-signal-amber: #ff9f43;
   --color-signal-orange: #fb923c;
   --color-signal-pink: #f472b6;
-  --color-signal-red: #ff2d95;
+  --color-signal-red: #ff5d5d;
   --color-paper: #101010;
   --color-ink: #d0d0d0;
   --color-ruled: #1e1e1e;
@@ -38,7 +38,7 @@
   /* Legacy palette aliases → Modern Calibration */
   --bone: #e0e0e0;
   --dusty-blue: #8fa3b8;
-  --terracotta: #ff2d95;
+  --terracotta: #ff9f43;
   --sage: #00e0b8;
   --gold: #00f5d4;
   --ink: #0a0a0a;
@@ -59,15 +59,15 @@
   --color-text-muted: #555555;
   --color-text-dim: #6f6f6f;
   --color-accent: #00796b;
-  --color-accent-magenta: #c2185b;
   --color-accent-dim: rgba(0, 121, 107, 0.08);
   --color-accent-border: rgba(0, 121, 107, 0.25);
   --color-signal-green: #0e8a62;
   --color-signal-blue: #2563eb;
   --color-signal-purple: #7a3bc8;
+  --color-signal-amber: #b45309;
   --color-signal-orange: #b45309;
   --color-signal-pink: #b53970;
-  --color-signal-red: #c2185b;
+  --color-signal-red: #d64545;
   --color-paper: #ffffff;
   --color-ink: #333333;
   --color-ruled: #ececec;
@@ -75,7 +75,7 @@
   /* Legacy palette aliases → Modern Calibration (light) */
   --bone: #2a2a2a;
   --dusty-blue: #5b6b7c;
-  --terracotta: #c2185b;
+  --terracotta: #b45309;
   --sage: #0e8a62;
   --gold: #00796b;
   --ink: #f5f5f5;
@@ -100,7 +100,7 @@ body {
   pointer-events: none;
   background:
     radial-gradient(720px 460px at 12% 8%, rgba(0, 245, 212, 0.16), transparent 62%),
-    radial-gradient(780px 540px at 88% 24%, rgba(255, 45, 149, 0.11), transparent 62%),
+    radial-gradient(780px 540px at 88% 24%, rgba(255, 159, 67, 0.11), transparent 62%),
     radial-gradient(560px 440px at 50% 92%, rgba(0, 245, 212, 0.07), transparent 60%);
 }
 
@@ -631,6 +631,7 @@ button, a, [role="button"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   .accent-text { animation: none; }
   .sweep-line { animation: none; opacity: 0; }
   .badge-pulse { animation: none; }

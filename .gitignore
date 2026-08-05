@@ -44,6 +44,7 @@ next-env.d.ts
 .firecrawl/
 .playwright-mcp/
 .cache/
+test-results/
 
 # media & docs (not code)
 *.mp4

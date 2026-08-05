@@ -94,7 +94,7 @@ export function ScoringSection() {
               className="font-mono text-[10px] tracking-[0.2em] uppercase"
               style={{ color: "var(--color-text-dim)" }}
             >
-              Section 02 / Methodology
+              Section 04 / Methodology
             </span>
           </motion.div>
           <motion.h2

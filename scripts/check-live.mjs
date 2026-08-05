@@ -2,7 +2,6 @@ import { chromium } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
 const url = process.argv[2] ?? "https://oss-signal.vercel.app";
-const watchlist = JSON.parse(readFileSync("data/watchlist.json", "utf-8"));
 const projects = JSON.parse(readFileSync("data/projects.json", "utf-8"));
 
 const browser = await chromium.launch();

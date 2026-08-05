@@ -23,6 +23,9 @@ export function ThemeToggle() {
     const next = !dark;
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("oss-signal-theme", next ? "dark" : "light");
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", next ? "#1a1714" : "#fafafa");
   }
 
   return (

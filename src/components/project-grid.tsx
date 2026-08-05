@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, startTransition } from "react";
+import { useState, useMemo, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Project, Genre, GenreId } from "@/lib/data";
 
@@ -129,7 +129,7 @@ function ArchiveRow({
 
       {/* Genre chip */}
       <span
-        className="hidden lg:inline font-mono text-[9px] tracking-widest uppercase px-1.5 py-0.5 shrink-0"
+        className="hidden lg:inline font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5 shrink-0"
         style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
       >
         {genreMap.get(project.genre) ?? project.genre}
@@ -212,9 +212,23 @@ export function ProjectGrid({
   }, [projects]);
 
   // Reset to page 1 whenever the user changes any filter/sort/search
-  useEffect(() => {
+  const filtersKey = JSON.stringify([
+    search,
+    lang,
+    minScore,
+    minStars,
+    genreFilter,
+    shizukuFilter,
+    activeDays,
+    showGeneric,
+    sort,
+    sortDir,
+  ]);
+  const [prevFilters, setPrevFilters] = useState(filtersKey);
+  if (filtersKey !== prevFilters) {
+    setPrevFilters(filtersKey);
     setPage(0);
-  }, [search, lang, minScore, minStars, genreFilter, shizukuFilter, activeDays, showGeneric, sort, sortDir]);
+  }
 
   const filtered = useMemo(() => {
     let list = projects;
@@ -278,7 +292,7 @@ export function ProjectGrid({
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4 serif-display"
             style={{ color: "var(--color-text)" }}
           >
-            Everything we're tracking
+            Everything we&apos;re tracking
           </h2>
           <p
             className="text-base max-w-xl leading-relaxed"

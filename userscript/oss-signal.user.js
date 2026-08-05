@@ -31,6 +31,7 @@
         method: "GET",
         url: `${API_BASE}/${owner}/${repo}`,
         headers: { Accept: "application/json" },
+        timeout: 8000,
         onload(res) {
           if (res.status === 200) {
             try { resolve(JSON.parse(res.responseText)); } catch { resolve(null); }
@@ -53,6 +54,7 @@
   function injectBadge(project) {
     const heading = document.querySelector("h1");
     if (!heading) return;
+    if (document.querySelector('[data-testid="oss-signal-badge"]')) return;
 
     const score = project.score;
     const colors = scoreColor(score);
@@ -99,8 +101,10 @@
   function injectNotTracked() {
     const heading = document.querySelector("h1");
     if (!heading) return;
+    if (document.querySelector('[data-testid="oss-signal-badge"]')) return;
 
     const badge = document.createElement("span");
+    badge.setAttribute("data-testid", "oss-signal-badge");
     badge.style.cssText = `
       display: inline-flex;
       align-items: center;
@@ -124,6 +128,7 @@
   async function main() {
     const info = getOwnerRepo();
     if (!info) return;
+    if (document.querySelector('[data-testid="oss-signal-badge"]')) return;
 
     const project = await fetchScore(info.owner, info.repo);
     if (project) {

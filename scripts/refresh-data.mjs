@@ -11,8 +11,6 @@ const ONLY_FRESH = process.argv.includes("--fresh-only");
 const ONLY_WATCHLIST = process.argv.includes("--watchlist-only");
 
 const UA = "oss-signal/1.1";
-const LOOKBACK_DAYS_WATCHLIST = 90;
-const FRESH_FIND_MIN_AGE_DAYS = 14;
 const FRESH_FIND_MAX_AGE_DAYS = 274; // ~9 months
 
 // Existing 5 signals scaled to 0.80, abandonment_risk = new 0.20 weight.
@@ -20,60 +18,16 @@ const FRESH_FIND_MAX_AGE_DAYS = 274; // ~9 months
 // signals contribute positively to the composite; raw risk lives at p.abandonment_risk.
 const SCORE_WEIGHTS = { recency: 0.24, momentum: 0.20, issue_health: 0.16, license: 0.08, contributors: 0.12, abandonment_risk: 0.20 };
 
-const MIN_STARS = 80;
-
 const blocklistPath = join(process.cwd(), "blocklist.json");
 const BLOCKED_REPOS = new Set(JSON.parse(readFileSync(blocklistPath, "utf-8")));
 const genres = JSON.parse(readFileSync(join(process.cwd(), "data", "genres.json"), "utf-8"));
 const watchlist = JSON.parse(readFileSync(join(process.cwd(), "data", "watchlist.json"), "utf-8"));
-
-const BLOCKED_NAME_PATTERNS = [
-  /jailbreak/i,
-  /unrestrict/i,
-  /bypass(?!\.js)/i,
-  /spoof/i,
-];
 
 const headers = {
   Authorization: `token ${GITHUB_TOKEN}`,
   Accept: "application/vnd.github.v3+json",
   "User-Agent": UA,
 };
-
-// Increased rate limit buffer — the timeout is the bottleneck, not the API.
-const SEARCH_WINDOW_MS = 60_000;
-const SEARCH_MAX = 12;
-const searchTimestamps = [];
-
-async function waitSearchSlot() {
-  while (true) {
-    const now = Date.now();
-    while (searchTimestamps.length && searchTimestamps[0] <= now - SEARCH_WINDOW_MS) {
-      searchTimestamps.shift();
-    }
-    if (searchTimestamps.length < SEARCH_MAX) break;
-    const wait = searchTimestamps[0] + SEARCH_WINDOW_MS - now + 100;
-    console.log(`  search rate limit — waiting ${Math.ceil(wait / 1000)}s...`);
-    await new Promise((r) => setTimeout(r, wait));
-  }
-  searchTimestamps.push(Date.now());
-}
-
-async function searchFetch(url, retries = 5) {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    await waitSearchSlot();
-    const res = await fetch(url, { headers });
-    if (res.status === 403) {
-      const delay = Math.min(3000 * 2 ** attempt, 60_000);
-      console.log(`  403 on search API, retrying in ${delay / 1000}s (attempt ${attempt + 1}/${retries})...`);
-      await new Promise((r) => setTimeout(r, delay));
-      continue;
-    }
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-    return res.json();
-  }
-  throw new Error(`search API 403 after ${retries} retries for ${url}`);
-}
 
 const RETRYABLE_CODES = new Set(["ECONNRESET", "ENOTFOUND", "ETIMEDOUT", "EPIPE", "EAI_AGAIN", "ECONNREFUSED"]);
 
@@ -114,9 +68,12 @@ function daysSince(iso) {
   return (Date.now() - new Date(iso).getTime()) / 86_400_000;
 }
 
-// Compare versions tolerant of format noise: "v13.6.0" == "13.6.0", "2.1.4-beta" vs "2.1.4".
+// Compare versions tolerant of format noise: "v13.6.0" == "13.6.0", "2.1.4-beta" vs "2.1.4",
+// and "1.0" == "1.0.0" (trailing zero segments normalized away).
 function versionKey(v) {
-  return (String(v ?? "").toLowerCase().replace(/^v/, "").match(/\d+/g) ?? []).join(".");
+  const segs = (String(v ?? "").toLowerCase().replace(/^v/, "").match(/\d+/g) ?? []);
+  while (segs.length > 1 && segs[segs.length - 1] === "0") segs.pop();
+  return segs.join(".");
 }
 function sameVersion(a, b) {
   if (!a || !b) return false;
@@ -232,14 +189,6 @@ function detectShizuku(desc) {
   return /shizuku|adb|xposed|magisk|dhizuku|hiddenapi|privapp|priv-app|write_secure_settings/i.test(`${desc}`.toLowerCase());
 }
 
-function isTemplateOrList(desc, name, topics) {
-  const d = (desc + " " + name).toLowerCase();
-  if (/awesome-[a-z0-9-]+$/.test(d)) return true;
-  if (/cs-fundamentals/.test(d)) return true;
-  if (/template|boilerplate|starter|scaffold|generator|collection/.test(d) && (topics ?? []).some((t) => t.toLowerCase().includes("awesome"))) return true;
-  return false;
-}
-
 async function main() {
   const now = new Date().toISOString();
   console.log(`[${now}] Starting OSS Signal refresh`);
@@ -324,7 +273,7 @@ async function main() {
   const cutoffMs = Date.now() - FRESH_FIND_MAX_AGE_DAYS * 86_400_000;
 
   const fdroidApps = Object.entries(packages)
-    .filter(([pkgName, pkg]) => {
+    .filter(([, pkg]) => {
       const added = pkg?.metadata?.added ?? 0; // epoch millis
       if (!added) return false;
       return added >= cutoffMs;
@@ -335,7 +284,7 @@ async function main() {
       const summary = meta?.summary?.["en-US"] ?? (Array.isArray(meta?.summary) ? meta.summary[0] : null) ?? "";
       const license = meta?.license ?? null;
       const source = meta?.sourceCode ?? null; // string URL, not an object
-      return { pkgName, name, summary, license, sourceCode: source };
+      return { pkgName, name, summary, license, sourceCode: source, addedAt: new Date(added).toISOString() };
     });
 
   const freshProjects = [];
@@ -348,6 +297,8 @@ async function main() {
     const owner = m.groups.owner;
     const name = m.groups.repo;
 
+    if (BLOCKED_REPOS.has(`${owner}/${name}`)) return null;
+
     const isShizuku = detectShizuku(app.summary + " " + name);
     const { id: genreId, label: genreLabel } = classifyGenre(app.summary, name);
     const isGeneric = detectGeneric(name, app.summary);
@@ -357,9 +308,11 @@ async function main() {
       scoreContributors(owner, name).catch(() => ({ normalized: 0, raw: 0 })),
     ]);
     if (!repoData) return null;
+    if (!isRelevantToAndroid(app.summary, name, repoData.topics ?? [], repoData.language)) return null;
 
     const issueScore = scoreIssueHealth(repoData);
-    const abandonmentRisk = computeAbandonmentRisk(repoData.pushed_at);    const last_release_at = await fetchJSON(`https://api.github.com/repos/${owner}/${name}/releases?per_page=1`)
+    const abandonmentRisk = computeAbandonmentRisk(repoData.pushed_at);
+    const last_release_at = await fetchJSON(`https://api.github.com/repos/${owner}/${name}/releases?per_page=1`)
       .then((rs) => rs?.[0]?.published_at ?? null)
       .catch(() => null);
 
@@ -381,6 +334,7 @@ async function main() {
       language: repoData.language ?? "",
       stars: repoData.stargazers_count,
       created_at: repoData.created_at,
+      added_at: app.addedAt ?? null,
       license_name: repoData.license?.spdx_id ?? null,
       contributor_count: contribResult.raw,
       _momentumRaw: momentumRaw,

@@ -32,6 +32,9 @@ export interface Project {
   language: string;
   stars: number;
   created_at: string;
+  // F-Droid catalog entry date (epoch → ISO, written by refresh-data).
+  // "Fresh since last visit" should use this, not GitHub repo creation.
+  added_at?: string | null;
   license_name: string | null;
   contributor_count: number;
   score: number;
@@ -106,36 +109,4 @@ export function getGenres(): GenresData {
   const path = join(process.cwd(), "data", "genres.json");
   cachedGenres = JSON.parse(readFileSync(path, "utf-8")) as GenresData;
   return cachedGenres;
-}
-
-const GENRE_ORDER: GenreId[] = [
-  "customization",
-  "shizuku",
-  "media",
-  "utility",
-  "productivity",
-  "security",
-  "store",
-  "education",
-  "dev-tools",
-  "other",
-];
-
-export function createGenreClassifier(genres: GenresData) {
-  const map = new Map<GenreId, string[]>();
-  for (const g of genres.genres) map.set(g.id as GenreId, g.keywords.map((k) => k.toLowerCase()));
-
-  return function classify(description: string, name: string): { id: GenreId; label: string } {
-    const text = `${name} ${description}`.toLowerCase();
-    for (const id of GENRE_ORDER) {
-      const keywords = map.get(id);
-      if (!keywords) continue;
-      if (keywords.some((kw) => kw && text.includes(kw))) {
-        const meta = genres.genres.find((g) => g.id === id);
-        return { id, label: meta?.label ?? id };
-      }
-    }
-    const meta = genres.genres.find((g) => g.id === "other");
-    return { id: "other", label: meta?.label ?? "Other" };
-  };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
@@ -15,14 +15,19 @@ function relativeTime(iso: string): string {
   return rtf.format(-days, "day");
 }
 
+function subscribe(callback: () => void) {
+  const id = setInterval(callback, 60_000);
+  return () => clearInterval(id);
+}
+
 export function RelativeTime({ iso }: { iso: string }) {
-  const [label, setLabel] = useState<string | null>(null);
+  // Minute-ticks external store: server renders empty, client fills in after
+  // hydration and refreshes each minute — no effect, no hydration mismatch.
+  const minute = useSyncExternalStore(
+    subscribe,
+    () => Math.floor(Date.now() / 60_000),
+    () => 0
+  );
 
-  useEffect(() => {
-    setLabel(relativeTime(iso));
-    const id = setInterval(() => setLabel(relativeTime(iso)), 60_000);
-    return () => clearInterval(id);
-  }, [iso]);
-
-  return <span translate="no">{label ?? ""}</span>;
+  return <span translate="no">{minute === 0 ? "" : relativeTime(iso)}</span>;
 }

@@ -90,6 +90,8 @@ When a bug had a non-obvious root cause, append a one-line lesson to the
 `## Known Patterns` section below so it isn't relearned. Read that section every session.
 
 ## Known Patterns (project-specific, learned the hard way)
+- `proxy.ts` (Next 16's renamed middleware) is only registered by the build when it sits at the SAME level as `app/` or `pages/`. With `src/app`, a root-level `proxy.ts` silently compiles into `.next/server/middleware.js` but registers `functions-config-manifest.json` with an empty `/_middleware` — no headers applied, no error. Put it in `src/proxy.ts`. Symptom to check: `functions-config-manifest.json` empty while the chunk contains your code.
+- A `themeScript`-style pre-paint script can also update `<meta name="theme-color">`; the meta must match the localStorage theme, not OS preference (media-query meta tags are useless when theme is user-forced).
 - Self-reported DOM inspection has been wrong before. Confirm UI state with Playwright
   against the DEPLOYED url, never from source.
 - Stale `next start` processes survive `.next` wipes and keep serving OLD build HTML from
@@ -136,3 +138,16 @@ Prefer these skills; ignore the rest of the catalog to reduce noise:
 `diagnosing-bugs`, `tdd`, `code-review`, `firecrawl-qa` / Playwright (live checks),
 `pre-mortem` / `grill-me` (to red-team your own claims). Reach outside this set only when
 the task genuinely calls for it.
+
+## Open Audit (2026-08-05)
+
+Full code quality + security + UI/UX audit with file:line references lives in
+`AUDIT-2026-08-05.md`. Its Task Tracker section lists 15 pending fixes (tick boxes).
+Rules for sessions working from it:
+- Do NOT re-run the whole audit; findings and evidence are already captured there.
+- Work items from the tracker in priority order; tick a box ONLY after the fix is
+  verified per Definition of Done (artifact, not self-inspection).
+- After completing items, re-run `npm run lint` (must be clean), `npm run build`,
+  and `npm audit` (0 high severity).
+- Known pending brand decision: user dislikes pink/magenta — warning/abandoned/alert
+  states should use warm amber (#ff9f43 family), teal stays the primary accent.

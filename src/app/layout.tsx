@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Space_Grotesk, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import { themeScript } from "@/lib/theme-script";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -45,19 +47,14 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `
-(function() {
-  var t = localStorage.getItem('oss-signal-theme');
-  if (t === 'light') document.documentElement.classList.remove('dark');
-  else document.documentElement.classList.add('dark');
-})()
-`;
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Nonce set by proxy.ts for the CSP; required for the inline theme script.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html
       lang="en"
@@ -66,7 +63,7 @@ export default function RootLayout({
     >
       <head>
         <meta name="theme-color" content="#1a1714" />
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col isolate">
         <a href="#main-content" className="skip-link">Skip to main content</a>

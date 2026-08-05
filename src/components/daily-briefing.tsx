@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { WatchlistApp, Project } from "@/lib/data";
 import { RelativeTime } from "./relative-time";
 
 const DAY_KEY = "oss-signal-briefing-day";
 const PIN_KEY = "oss-signal-briefing-pinned";
 const VISIT_KEY = "oss-signal-last-visit";
+
+const emptySubscribe = () => () => {};
+
+function load(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(key);
+}
 
 export function DailyBriefing({
   apps,
@@ -17,30 +24,31 @@ export function DailyBriefing({
   projects: Project[];
   generatedAt: string;
 }) {
-  const [mounted, setMounted] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const [newSinceVisit, setNewSinceVisit] = useState(0);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [hidden, setHidden] = useState(() => load(DAY_KEY) === new Date().toDateString());
+  const [pinned, setPinned] = useState(() => load(PIN_KEY) === "1");
+  // Cutoff = previous visit time, or "now" on first-ever visit (→ 0 new finds).
+  const [cutoff] = useState(() => Number(load(VISIT_KEY) || 0) || Date.now());
 
   useEffect(() => {
-    setMounted(true);
-    setPinned(localStorage.getItem(PIN_KEY) === "1");
-    if (localStorage.getItem(DAY_KEY) !== new Date().toDateString()) {
-      localStorage.setItem(DAY_KEY, new Date().toDateString());
-    } else {
-      setHidden(true);
-    }
-
-    const lastVisit = Number(localStorage.getItem(VISIT_KEY) || 0);
-    const cutoff = lastVisit || Date.now();
-    setNewSinceVisit(
-      projects.filter((p) => {
-        const t = p.created_at ? new Date(p.created_at).getTime() : 0;
-        return t > cutoff;
-      }).length
-    );
+    localStorage.setItem(DAY_KEY, new Date().toDateString());
     localStorage.setItem(VISIT_KEY, String(Date.now()));
-  }, [projects]);
+  }, []);
+
+  const newSinceVisit = useMemo(
+    () =>
+      projects.filter((p) => {
+        // Catalog entry date (F-Droid `added`) is what "new since visit" means;
+        // fall back to GitHub creation for rows written before the field existed.
+        const t = p.added_at
+          ? new Date(p.added_at).getTime()
+          : p.created_at
+            ? new Date(p.created_at).getTime()
+            : 0;
+        return t > cutoff;
+      }).length,
+    [projects, cutoff]
+  );
 
   if (!mounted) return null;
 

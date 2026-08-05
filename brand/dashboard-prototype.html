@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OSS Signal — FOSS Android App Health Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a;
+  --surface:#121212;
+  --fg:#e0e0e0;
+  --muted:#a0a0a0;
+  --border:#232323;
+  --accent:#00f5d4;
+  --on-accent:#0a0a0a;
+  --accent-ink:#00f5d4;
+  --glass:oklch(0.9 0 0 / 0.04);
+  --glass-border:oklch(0.9 0 0 / 0.08);
+  --nav-bg:oklch(0.9 0 0 / 0.82);
+  --shadow-card:0 8px 24px oklch(0 0 0 / 0.25);
+  --dot-ok:oklch(0.82 0.15 155);
+  --dot-warn:oklch(0.78 0.14 60);
+  --dot-bad:#ff9f43;
+  --dot-info:oklch(0.74 0.11 245);
+  --dot-purple:oklch(0.7 0.15 300);
+  --font-display:'Playfair Display',Georgia,'Times New Roman',serif;
+  --font-body:'Space Grotesk',system-ui,-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'JetBrains Mono','SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;
+}
+[data-theme="light"]{
+  --bg:oklch(0.972 0.003 100);
+  --surface:oklch(0.955 0.003 100);
+  --fg:oklch(0.24 0.005 100);
+  --muted:oklch(0.46 0.006 100);
+  --border:oklch(0.87 0.004 100);
+  --glass:oklch(0.24 0.005 100 / 0.03);
+  --glass-border:oklch(0.24 0.005 100 / 0.12);
+  --nav-bg:oklch(0.972 0.003 100 / 0.82);
+  --shadow-card:0 8px 24px oklch(0.24 0 0 / 0.08);
+  --accent-ink:oklch(0.5 0.13 175);
+  --dot-ok:oklch(0.5 0.14 155);
+  --dot-warn:oklch(0.55 0.13 60);
+  --dot-bad:oklch(0.58 0.17 55);
+  --dot-info:oklch(0.48 0.11 245);
+  --dot-purple:oklch(0.46 0.15 300);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:400 15px/1.55 var(--font-body);-webkit-font-smoothing:antialiased;min-height:100vh}
+::selection{background:var(--accent);color:var(--on-accent)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{display:block}
+.hidden{display:none!important}
+.micro{font-family:var(--font-mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase}
+.mono{font-family:var(--font-mono)}
+.topnav{position:fixed;top:0;left:0;right:0;height:40px;z-index:50;background:var(--nav-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--glass-border)}
+.nav-inner{height:100%;max-width:80rem;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:1rem}
+.logo{display:flex;align-items:center;gap:0.55rem;flex:0 0 auto}
+.logo svg{stroke:var(--accent)}
+.logo-word{font-family:var(--font-mono);font-weight:700;font-size:13px;letter-spacing:0.12em;white-space:nowrap}
+.nav-pulse{position:absolute;left:0;bottom:-1px;height:1.6px;width:120px;background:var(--accent);opacity:0.85;transform:translateX(-140px);animation:pulse 7s linear infinite;will-change:transform}
+@keyframes pulse{0%{transform:translateX(-140px)}100%{transform:translateX(calc(100vw + 20px))}}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:0.75rem}
+.search{position:relative;display:flex;align-items:center}
+.search input{width:190px;height:30px;background:var(--surface);border:1px solid var(--glass-border);border-radius:8px;padding:0 30px 0 10px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.03em;color:var(--fg);transition:width 0.2s,border-color 0.2s}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{width:230px;border-color:var(--accent);outline:0}
+.search .kbd{position:absolute;right:7px;font-family:var(--font-mono);font-size:9px;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:0 4px;pointer-events:none;line-height:1.5}
+.iconbtn{width:30px;height:30px;border:1px solid var(--glass-border);border-radius:8px;display:grid;place-items:center;color:var(--fg);transition:border-color 0.15s,color 0.15s}
+.iconbtn:hover{border-color:var(--fg);color:var(--accent-ink)}
+.iconbtn svg{width:16px;height:16px}
+.status{display:flex;align-items:center;gap:0.45rem;color:var(--muted)}
+.status .dot{width:6px;height:6px;border-radius:50%;background:var(--dot-ok);flex:0 0 auto}
+.rail{position:fixed;top:40px;left:0;bottom:0;width:3.5rem;z-index:40;background:var(--bg);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding-top:1rem}
+.rail-btn{position:relative;width:40px;height:40px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);transition:color 0.15s,background 0.15s}
+.rail-btn svg{width:18px;height:18px}
+.rail-btn .rn{font-family:var(--font-mono);font-size:6px;letter-spacing:0.08em;line-height:1}
+.rail-btn:hover{color:var(--fg);background:var(--glass)}
+.rail-btn.active{color:var(--accent-ink);background:oklch(0.9 0 0 / 0.05)}
+.rail-btn.active::before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:2px;background:var(--accent);border-radius:2px}
+.main{margin-left:3.5rem;padding:2.5rem 1rem 4rem}
+.wrap{max-width:80rem;margin:0 auto}
+.hero{position:relative;padding:2.5rem 0 1.5rem}
+.hero>:not(.hero-gfx){position:relative;z-index:1}
+.hero-gfx{position:absolute;top:0;left:0;right:0;height:120px;pointer-events:none;z-index:0}
+.hero-gfx svg{width:100%;height:120px;color:var(--accent);opacity:0.18}
+.hero-gfx.flip{transform:scaleX(-1)}
+.hero-gfx .wd{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0.55;transform:translate(-50%,-50%)}
+[data-theme="light"] .hero-gfx svg{opacity:0.45}
+.eyebrow{display:flex;align-items:center;gap:0.5rem;color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase}
+.eyebrow .idx{color:var(--accent-ink);font-weight:700}
+.hero h1{font-family:var(--font-display);font-weight:700;font-size:clamp(34px,4.2vw,54px);line-height:1.06;letter-spacing:-0.015em;margin-top:0.6rem;color:var(--fg)}
+.hero .lede{margin-top:0.6rem;color:var(--muted);font-size:15px;max-width:60ch}
+.stats{margin-top:1.1rem;display:flex;flex-wrap:wrap;gap:0.4rem 1.4rem;color:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase}
+.stats .num{color:var(--fg);font-weight:700;font-size:11px}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;margin:1.4rem 0 0.35rem}
+.chips{display:flex;gap:0.35rem;flex-wrap:wrap}
+.chip{min-height:36px;padding:0.35rem 0.8rem;border:1px solid var(--glass-border);border-radius:8px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);transition:color 0.15s,border-color 0.15s,background 0.15s}
+.chip:hover{color:var(--fg);border-color:var(--border)}
+.chip.active{color:var(--accent-ink);border-color:color-mix(in oklab,var(--accent) 55%,var(--glass-border));background:oklch(0.9 0 0 / 0.04)}
+.sort{display:flex;align-items:center;gap:0.15rem;margin-left:auto}
+.sort-label{color:var(--muted);padding:0 0.35rem}
+.sort button{min-height:36px;padding:0.35rem 0.55rem;border-radius:8px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);transition:color 0.15s}
+.sort button:hover{color:var(--fg)}
+.sort button.active{color:var(--accent-ink)}
+.signal-legend{color:var(--muted);margin-bottom:0.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+.app-card{position:relative;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;box-shadow:var(--shadow-card);padding:1rem;transition:border-color 0.2s,box-shadow 0.2s,transform 0.2s}
+body.js .app-card{animation:rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both;animation-delay:calc(var(--i) * 40ms)}
+.app-card:hover{border-color:color-mix(in oklab,var(--accent) 55%,var(--glass-border));box-shadow:0 10px 28px oklch(0 0 0 / 0.3)}
+.app-card::before,.app-card::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--accent);opacity:0.85}
+.app-card::before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-top-left-radius:8px}
+.app-card::after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-bottom-right-radius:8px}
+@keyframes rise{from{opacity:0;transform:translateY(8px);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+.card-top{display:flex;align-items:flex-start;gap:0.75rem}
+.tile{width:36px;height:36px;border-radius:8px;border:1px solid var(--glass-border);background:var(--surface);display:grid;place-items:center;font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--fg);flex:0 0 auto}
+.tile.ok{border-color:color-mix(in oklab,var(--dot-ok) 45%,var(--glass-border))}
+.tile.warn{border-color:color-mix(in oklab,var(--dot-warn) 45%,var(--glass-border))}
+.tile.bad{border-color:color-mix(in oklab,var(--dot-bad) 45%,var(--glass-border))}
+.app-id{min-width:0}
+.app-name{font-family:var(--font-display);font-weight:700;font-size:19px;line-height:1.1;letter-spacing:-0.005em}
+.app-sub{font-family:var(--font-mono);font-size:8px;letter-spacing:0.04em;color:var(--muted);margin-top:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score{margin-left:auto;text-align:right;flex:0 0 auto}
+.score-num{font-family:var(--font-mono);font-weight:700;font-size:22px;line-height:1}
+.score-lbl{display:block;font-family:var(--font-mono);font-size:7px;letter-spacing:0.12em;color:var(--muted);margin-top:2px}
+.score-num.ok{color:var(--dot-ok)}
+.score-num.warn{color:var(--dot-warn)}
+.score-num.bad{color:var(--dot-bad)}
+.sigrow{display:flex;align-items:center;gap:6px;margin-top:0.9rem;position:relative}
+.sdot{width:6px;height:6px;border-radius:50%;position:relative}
+.sdot.ok{background:var(--dot-ok)}
+.sdot.warn{background:var(--dot-warn)}
+.sdot.bad{background:var(--dot-bad)}
+.sdot::after{content:attr(data-tip);position:absolute;bottom:150%;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--bg);border:1px solid var(--border);color:var(--fg);font-family:var(--font-mono);font-size:8px;letter-spacing:0.06em;text-transform:uppercase;padding:3px 6px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:5}
+.sdot:hover::after,.sdot:focus-visible::after{opacity:1}
+.sdot-labels{display:flex;gap:6px;margin-top:4px}
+.sdot-labels span{font-family:var(--font-mono);font-size:6.5px;letter-spacing:0.08em;color:var(--muted);width:6px;text-align:center}
+.card-meta{display:flex;align-items:center;gap:0.5rem;margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid var(--glass-border);color:var(--muted)}
+.card-meta .when{font-family:var(--font-mono);font-size:8px;letter-spacing:0.06em;text-transform:uppercase}
+.tag{display:inline-flex;align-items:center;gap:0.35rem;margin-left:auto;font-family:var(--font-mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;white-space:nowrap}
+.tag i{width:6px;height:6px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.tag.ok{color:var(--dot-ok)}
+.tag.warn{color:var(--dot-warn)}
+.tag.bad{color:var(--dot-bad)}
+.actions{display:flex;align-items:center;margin-top:0.6rem}
+.untrack{margin-left:auto;font-family:var(--font-mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:0.3rem 0.4rem;border-radius:6px;transition:color 0.15s}
+.untrack:hover{color:var(--accent-ink)}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;min-height:34px;padding:0.3rem 0.75rem;border-radius:8px;border:1px solid var(--glass-border);font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg);background:transparent;transition:background 0.15s,border-color 0.15s,color 0.15s}
+.btn:hover{border-color:var(--fg)}
+.btn-add{color:var(--accent-ink);border-color:color-mix(in oklab,var(--accent) 45%,transparent)}
+.btn-add:hover{background:oklch(0.9 0 0 / 0.06)}
+.btn-tracked{color:var(--accent-ink);border-color:color-mix(in oklab,var(--accent) 60%,transparent);background:oklch(0.9 0 0 / 0.07);opacity:0.9}
+.btn svg{width:11px;height:11px}
+.btn:disabled{cursor:default}
+.empty{border:1px dashed var(--border);border-radius:8px;padding:2.5rem 1rem;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;grid-column:1/-1}
+.tbl{border:1px solid var(--glass-border);border-radius:8px;overflow:hidden}
+.tbl .row{display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1.2fr;gap:0.75rem;align-items:center;padding:0.8rem 1rem;border-top:1px solid var(--glass-border)}
+.tbl .row:first-child{border-top:0;background:oklch(0.9 0 0 / 0.03)}
+.tbl .row .h{font-family:var(--font-mono);font-size:8px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase}
+.tbl .row .cell{font-family:var(--font-mono);font-size:9px;letter-spacing:0.03em;color:var(--fg);min-width:0}
+.tbl .row .cell .pkg{display:block;font-size:8px;color:var(--muted);letter-spacing:0.04em;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbl .row .cell .appnm{font-weight:600;font-size:11px}
+.mini-dots{display:flex;gap:4px;align-items:center}
+.mini-dots i{width:6px;height:6px;border-radius:50%}
+.mini-dots i.ok{background:var(--dot-ok)}
+.mini-dots i.warn{background:var(--dot-warn)}
+.mini-dots i.bad{background:var(--dot-bad)}
+.riskbar{display:block;height:4px;background:oklch(0.9 0 0 / 0.08);border-radius:2px;margin-top:4px;overflow:hidden}
+.riskbar i{display:block;height:100%;border-radius:2px;background:var(--dot-bad)}
+.risk-txt{font-weight:600}
+.method-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2rem;align-items:start}
+.sig-list{list-style:none;display:flex;flex-direction:column}
+.sig-list li{display:flex;gap:0.9rem;align-items:flex-start;padding:0.8rem 0.2rem;border-bottom:1px solid var(--glass-border)}
+.sig-list .no{font-family:var(--font-mono);font-size:10px;color:var(--accent-ink);padding-top:2px}
+.sig-list h3{font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;color:var(--fg)}
+.sig-list p{color:var(--muted);font-size:13px;margin-top:0.15rem;max-width:52ch}
+.sig-list .wt{margin-left:auto;font-family:var(--font-mono);font-size:8px;letter-spacing:0.08em;color:var(--muted);white-space:nowrap;padding-top:2px}
+.breakdown-card{position:sticky;top:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;box-shadow:var(--shadow-card);padding:1rem}
+.bd-head{display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.9rem}
+.bd-head .micro{color:var(--muted)}
+.bd-head select{margin-left:auto;max-width:60%;background:var(--surface);border:1px solid var(--glass-border);border-radius:8px;padding:0.35rem 0.5rem;font-family:var(--font-mono);font-size:9px;letter-spacing:0.04em;color:var(--fg)}
+.bd-head select option{background:var(--bg);color:var(--fg)}
+.bd-score{display:flex;align-items:baseline;gap:0.5rem;margin:0.25rem 0 1rem}
+.bd-score .n{font-family:var(--font-mono);font-weight:700;font-size:44px;line-height:1;letter-spacing:-0.02em;color:var(--fg)}
+.bd-score .l{font-family:var(--font-mono);font-size:8px;letter-spacing:0.12em;color:var(--muted)}
+.bd-score .s{margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em}
+.bd-score .s.ok{color:var(--dot-ok)}
+.bd-score .s.warn{color:var(--dot-warn)}
+.bd-score .s.bad{color:var(--dot-bad)}
+.sigrow-bd{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:0.6rem;align-items:center;padding:0.45rem 0;border-top:1px solid var(--glass-border)}
+.sigrow-bd .nm{font-family:var(--font-mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:0.4rem;align-items:baseline}
+.sigrow-bd .nm b{color:var(--fg);font-weight:500}
+.sigrow-bd .bar{height:5px;background:oklch(0.9 0 0 / 0.08);border-radius:3px;overflow:hidden}
+.sigrow-bd .bar i{display:block;height:100%;border-radius:3px}
+.sigrow-bd .vl{font-family:var(--font-mono);font-size:9px;color:var(--muted);text-align:right;letter-spacing:0.04em;white-space:nowrap}
+.sigrow-bd .vl b{font-weight:600}
+.formula{margin-top:0.9rem;padding-top:0.8rem;border-top:1px solid var(--glass-border);font-family:var(--font-mono);font-size:8px;letter-spacing:0.05em;color:var(--muted);line-height:1.8}
+.formula b{color:var(--fg);font-weight:500}
+.note{margin-top:0.7rem;font-size:12px;color:var(--muted)}
+.foot{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--glass-border);display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem;align-items:center;color:var(--muted)}
+.foot .dot{width:6px;height:6px;border-radius:50%;background:var(--dot-ok);flex:0 0 auto}
+.foot .r{margin-left:auto}
+@media (max-width:1024px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .method-grid{grid-template-columns:1fr}
+  .breakdown-card{position:static}
+}
+@media (max-width:768px){
+  .rail{top:auto;bottom:0;width:100%;height:56px;flex-direction:row;justify-content:space-around;padding:0 0.5rem;border-right:0;border-top:1px solid var(--glass-border)}
+  .rail-btn{width:52px;height:44px}
+  .rail-btn.active::before{left:auto;right:auto;bottom:-1px;left:14px;width:calc(100% - 28px);height:2px;top:auto}
+  .main{margin-left:0;padding:1.25rem 0.75rem 6.5rem}
+  .status-nav{display:none}
+  .search input{width:120px}
+  .search input:focus{width:150px}
+  .hero{padding-top:1.5rem}
+  .stats{flex-direction:column;gap:0.25rem}
+  .sort{margin-left:0;width:100%}
+  .controls{gap:0.6rem}
+  .chip{min-height:44px}
+  .sort button{min-height:44px}
+  .btn{min-height:44px}
+  .untrack{min-height:44px;display:flex;align-items:center}
+  .iconbtn{width:36px;height:36px}
+  .search input{height:36px}
+  .tbl .row{grid-template-columns:1fr;padding:0.9rem 1rem;border-top:1px solid var(--glass-border)}
+  .tbl .row:first-child{display:none}
+  .cell::before{content:attr(data-label);display:block;font-family:var(--font-mono);font-size:7px;letter-spacing:0.1em;color:var(--muted);margin-bottom:2px}
+  .sigrow-bd{grid-template-columns:1fr 1fr}
+}
+@media (max-width:480px){
+  .grid{grid-template-columns:1fr}
+  .search .kbd{display:none}
+  .hero h1{font-size:32px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header class="topnav" data-od-id="top-nav">
+  <div class="nav-inner">
+    <div class="logo" data-od-id="logo">
+      <svg width="30" height="15" viewBox="0 0 24 12" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0.5 6H3.5L5.5 2.5 8.5 9.5 11.5 3 14.5 8.5 17.5 5 19 6H23.5"></path></svg>
+      <span class="logo-word">OSS SIGNAL</span>
+    </div>
+    <div class="nav-right">
+      <div class="search">
+        <input id="search-input" type="search" placeholder="SEARCH APPS" aria-label="Search apps" autocomplete="off">
+        <span class="kbd" aria-hidden="true">/</span>
+      </div>
+      <button class="iconbtn" id="theme-toggle" data-od-id="theme-toggle" aria-label="Toggle light and dark theme">
+        <svg id="icon-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 13A6.5 6.5 0 0 1 7 4.5a6.5 6.5 0 1 0 8.5 8.5z"></path></svg>
+        <svg id="icon-sun" class="hidden" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.4"></circle><path d="M10 1.5v2.4M10 16.1v2.4M1.5 10h2.4M16.1 10h2.4M3.9 3.9l1.7 1.7M14.4 14.4l1.7 1.7M16.1 3.9l-1.7 1.7M4.4 14.4l-1.7 1.7"></path></svg>
+      </button>
+      <span class="status status-nav"><span class="dot"></span><span class="micro">SYSTEM ACTIVE · TELEMETRY NOMINAL</span></span>
+    </div>
+  </div>
+  <div class="nav-pulse" aria-hidden="true"></div>
+</header>
+<nav class="rail" data-od-id="nav-rail" aria-label="Sections">
+  <button class="rail-btn active" data-view="watchlist" data-od-id="rail-watchlist" aria-label="Watchlist" title="Watchlist">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.8 10c2.6-4.1 5.2-6.2 8.2-6.2s5.6 2.1 8.2 6.2c-2.6 4.1-5.2 6.2-8.2 6.2S4.4 14.1 1.8 10z"></path><circle cx="10" cy="10" r="2.3"></circle></svg>
+    <span class="rn">I</span>
+  </button>
+  <button class="rail-btn" data-view="fresh-finds" data-od-id="rail-fresh-finds" aria-label="Fresh finds" title="Fresh finds">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.2c.8 4.1 2.5 5.8 6.6 6.6-4.1.8-5.8 2.5-6.6 6.6-.8-4.1-2.5-5.8-6.6-6.6 4.1-.8 5.8-2.5 6.6-6.6z"></path></svg>
+    <span class="rn">II</span>
+  </button>
+  <button class="rail-btn" data-view="archive" data-od-id="rail-archive" aria-label="Archive" title="Archive">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h13v8.2a1.6 1.6 0 0 1-1.6 1.6H5.1a1.6 1.6 0 0 1-1.6-1.6V6.5z"></path><path d="M2.2 3.5h15.6v3H2.2z"></path><path d="M8 10h4"></path></svg>
+    <span class="rn">III</span>
+  </button>
+  <button class="rail-btn" data-view="method" data-od-id="rail-method" aria-label="Method" title="Method">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5h16"></path><path d="M2 14.5h16"></path><circle cx="12" cy="5.5" r="2.2"></circle><circle cx="7.5" cy="14.5" r="2.2"></circle></svg>
+    <span class="rn">IV</span>
+  </button>
+</nav>
+<main class="main">
+  <div class="wrap">
+
+    <section class="view" id="view-watchlist" data-od-id="section-watchlist">
+      <div class="hero">
+        <p class="eyebrow"><span class="idx">I</span> WATCHLIST</p>
+        <h1 data-od-id="watchlist-title">Apps you rely on.</h1>
+        <p class="lede">Six signals. One honest score. Every tracked app is scored from the same transparent signals — nothing hidden, nothing hand-waved.</p>
+        <div class="stats" id="watch-stats" aria-live="polite">
+          <span><span class="num">9</span> TRACKED</span><span><span class="num">6</span> NOMINAL</span><span><span class="num">2</span> WARNING</span><span><span class="num">1</span> ABANDONED</span>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="chips" role="group" aria-label="Filter by status" data-od-id="filter-row">
+          <button class="chip active" data-f="all">ALL</button>
+          <button class="chip" data-f="nominal">NOMINAL</button>
+          <button class="chip" data-f="warning">WARNING</button>
+          <button class="chip" data-f="abandoned">ABANDONED</button>
+        </div>
+        <div class="sort" role="group" aria-label="Sort apps" data-od-id="sort-row">
+          <span class="sort-label micro">SORT</span>
+          <button class="active" data-s="score">SCORE</button>
+          <button data-s="activity">ACTIVITY</button>
+          <button data-s="name">NAME</button>
+        </div>
+      </div>
+      <p class="signal-legend micro" aria-hidden="true">SIGNALS → RECENCY · MOMENTUM · ISSUES · CONTRIBUTORS · LICENSE · RISK</p>
+      <div class="grid" id="watch-grid">
+      <article class="app-card" data-od-id="card-newpipe" style="--i:0" aria-label="NewPipe, score 96, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">N</div>
+            <div class="app-id">
+              <h3 class="app-name">NewPipe</h3>
+              <p class="app-sub">org.schabi.newpipe · v0.27.4 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">96</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 4D AGO</span>
+            <span class="tag ok"><i></i>ACTIVE</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-newpipe" aria-label="Untrack NewPipe">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-termux" style="--i:1" aria-label="Termux, score 95, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">T</div>
+            <div class="app-id">
+              <h3 class="app-name">Termux</h3>
+              <p class="app-sub">com.termux · v0.118.2 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">95</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 6D AGO</span>
+            <span class="tag ok"><i></i>ACTIVE</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-termux" aria-label="Untrack Termux">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-organicmaps" style="--i:2" aria-label="Organic Maps, score 93, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">O</div>
+            <div class="app-id">
+              <h3 class="app-name">Organic Maps</h3>
+              <p class="app-sub">app.organicmaps · v6.0.2 · Apache-2.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">93</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 9D AGO</span>
+            <span class="tag ok"><i></i>ACTIVE</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-organicmaps" aria-label="Untrack Organic Maps">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-aegis" style="--i:3" aria-label="Aegis, score 93, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">A</div>
+            <div class="app-id">
+              <h3 class="app-name">Aegis</h3>
+              <p class="app-sub">com.beemdevelopment.aegis · v3.5 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">93</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 12D AGO</span>
+            <span class="tag ok"><i></i>ACTIVE</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-aegis" aria-label="Untrack Aegis">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-antennapod" style="--i:4" aria-label="AntennaPod, score 89, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">A</div>
+            <div class="app-id">
+              <h3 class="app-name">AntennaPod</h3>
+              <p class="app-sub">de.danoeh.antennapod · v3.7.0 · MIT</p>
+            </div>
+            <div class="score"><span class="score-num ok">89</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 18D AGO</span>
+            <span class="tag ok"><i></i>ACTIVE</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-antennapod" aria-label="Untrack AntennaPod">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-k9" style="--i:5" aria-label="K-9 Mail, score 88, Active. Recency: healthy, Momentum: healthy, Issue health: warning, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">K</div>
+            <div class="app-id">
+              <h3 class="app-name">K-9 Mail</h3>
+              <p class="app-sub">com.fsck.k9 · v8.0.0 · Apache-2.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">88</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot warn" data-tip="Issue health — warning" title="Issue health: warning"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 14D AGO</span>
+            <span class="tag ok"><i></i>ACTIVE</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-k9" aria-label="Untrack K-9 Mail">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-openkeychain" style="--i:6" aria-label="OpenKeychain, score 59, Stalled. Recency: warning, Momentum: warning, Issue health: warning, Contributors: warning, License: healthy, Abandonment risk: warning">
+          <div class="card-top">
+            <div class="tile warn">O</div>
+            <div class="app-id">
+              <h3 class="app-name">OpenKeychain</h3>
+              <p class="app-sub">org.sufficientlysecure.keychain · v3.0 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num warn">59</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot warn" data-tip="Recency — warning" title="Recency: warning"></span><span class="sdot warn" data-tip="Momentum — warning" title="Momentum: warning"></span><span class="sdot warn" data-tip="Issue health — warning" title="Issue health: warning"></span><span class="sdot warn" data-tip="Contributors — warning" title="Contributors: warning"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot warn" data-tip="Abandonment risk — warning" title="Abandonment risk: warning"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 96D AGO</span>
+            <span class="tag warn"><i></i>STALLED</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-openkeychain" aria-label="Untrack OpenKeychain">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-simplekeyboard" style="--i:7" aria-label="Simple Keyboard, score 54, Stalled. Recency: warning, Momentum: warning, Issue health: at risk, Contributors: warning, License: healthy, Abandonment risk: warning">
+          <div class="card-top">
+            <div class="tile warn">S</div>
+            <div class="app-id">
+              <h3 class="app-name">Simple Keyboard</h3>
+              <p class="app-sub">com.rkkrp.keyboard · v1.0 · Apache-2.0</p>
+            </div>
+            <div class="score"><span class="score-num warn">54</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot warn" data-tip="Recency — warning" title="Recency: warning"></span><span class="sdot warn" data-tip="Momentum — warning" title="Momentum: warning"></span><span class="sdot bad" data-tip="Issue health — at risk" title="Issue health: at risk"></span><span class="sdot warn" data-tip="Contributors — warning" title="Contributors: warning"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot warn" data-tip="Abandonment risk — warning" title="Abandonment risk: warning"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 140D AGO</span>
+            <span class="tag warn"><i></i>STALLED</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-simplekeyboard" aria-label="Untrack Simple Keyboard">UNTRACK</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-twidere" style="--i:8" aria-label="Twidere, score 26, Abandoned. Recency: at risk, Momentum: at risk, Issue health: at risk, Contributors: at risk, License: healthy, Abandonment risk: at risk">
+          <div class="card-top">
+            <div class="tile bad">T</div>
+            <div class="app-id">
+              <h3 class="app-name">Twidere</h3>
+              <p class="app-sub">org.mariotaku.twidere · v5.1.0 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num bad">26</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot bad" data-tip="Recency — at risk" title="Recency: at risk"></span><span class="sdot bad" data-tip="Momentum — at risk" title="Momentum: at risk"></span><span class="sdot bad" data-tip="Issue health — at risk" title="Issue health: at risk"></span><span class="sdot bad" data-tip="Contributors — at risk" title="Contributors: at risk"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot bad" data-tip="Abandonment risk — at risk" title="Abandonment risk: at risk"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">LAST COMMIT · 610D AGO</span>
+            <span class="tag bad"><i></i>ABANDONED</span>
+          </div>
+          <div class="actions"><button class="untrack" data-od-id="cta-untrack-twidere" aria-label="Untrack Twidere">UNTRACK</button></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="view hidden" id="view-fresh-finds" data-od-id="section-fresh-finds">
+      <div class="hero">
+        <p class="eyebrow"><span class="idx">II</span> FRESH FINDS</p>
+        <h1 data-od-id="fresh-title">New &amp; actively maintained.</h1>
+        <p class="lede">This cycle's additions pass the maintenance bar before they land. Tracked fresh — stale apps don't get to ride on momentum.</p>
+      </div>
+      <p class="signal-legend micro" aria-hidden="true">SIGNALS → RECENCY · MOMENTUM · ISSUES · CONTRIBUTORS · LICENSE · RISK</p>
+      <div class="grid" id="fresh-grid">
+      <article class="app-card" data-od-id="card-materialfiles" style="--i:0" aria-label="Material Files, score 94, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">M</div>
+            <div class="app-id">
+              <h3 class="app-name">Material Files</h3>
+              <p class="app-sub">me.zhanghai.android.files · v1.7.0 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">94</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">ADDED 2D AGO</span>
+            <span class="tag ok"><i></i>FRESH</span>
+          </div>
+          <div class="actions"><button class="btn btn-add" data-od-id="cta-add-materialfiles" aria-label="Add Material Files to watchlist">ADD TO WATCHLIST</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-jellyfin" style="--i:1" aria-label="Jellyfin, score 91, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">J</div>
+            <div class="app-id">
+              <h3 class="app-name">Jellyfin</h3>
+              <p class="app-sub">org.jellyfin.mobile · v2.7.0 · GPL-2.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">91</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">ADDED 5D AGO</span>
+            <span class="tag ok"><i></i>FRESH</span>
+          </div>
+          <div class="actions"><button class="btn btn-add" data-od-id="cta-add-jellyfin" aria-label="Add Jellyfin to watchlist">ADD TO WATCHLIST</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-briar" style="--i:2" aria-label="Briar, score 88, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">B</div>
+            <div class="app-id">
+              <h3 class="app-name">Briar</h3>
+              <p class="app-sub">org.briarproject.briar.android · v1.5.0 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">88</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">ADDED 6D AGO</span>
+            <span class="tag ok"><i></i>FRESH</span>
+          </div>
+          <div class="actions"><button class="btn btn-add" data-od-id="cta-add-briar" aria-label="Add Briar to watchlist">ADD TO WATCHLIST</button></div>
+        </article>
+      <article class="app-card" data-od-id="card-kiwix" style="--i:3" aria-label="Kiwix, score 86, Active. Recency: healthy, Momentum: healthy, Issue health: healthy, Contributors: healthy, License: healthy, Abandonment risk: healthy">
+          <div class="card-top">
+            <div class="tile ok">K</div>
+            <div class="app-id">
+              <h3 class="app-name">Kiwix</h3>
+              <p class="app-sub">org.kiwix.kiwixmobile · v3.11.0 · GPL-3.0</p>
+            </div>
+            <div class="score"><span class="score-num ok">86</span><span class="score-lbl">SCORE</span></div>
+          </div>
+          <div class="sigrow" role="img" aria-label="Six signals"><span class="sdot ok" data-tip="Recency — healthy" title="Recency: healthy"></span><span class="sdot ok" data-tip="Momentum — healthy" title="Momentum: healthy"></span><span class="sdot ok" data-tip="Issue health — healthy" title="Issue health: healthy"></span><span class="sdot ok" data-tip="Contributors — healthy" title="Contributors: healthy"></span><span class="sdot ok" data-tip="License — healthy" title="License: healthy"></span><span class="sdot ok" data-tip="Abandonment risk — healthy" title="Abandonment risk: healthy"></span></div>
+          <div class="sdot-labels" aria-hidden="true"><span>R</span><span>M</span><span>I</span><span>C</span><span>L</span><span>A</span></div>
+          <div class="card-meta">
+            <span class="when">ADDED 8D AGO</span>
+            <span class="tag ok"><i></i>FRESH</span>
+          </div>
+          <div class="actions"><button class="btn btn-add" data-od-id="cta-add-kiwix" aria-label="Add Kiwix to watchlist">ADD TO WATCHLIST</button></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="view hidden" id="view-archive" data-od-id="section-archive">
+      <div class="hero">
+        <p class="eyebrow"><span class="idx">III</span> ARCHIVE</p>
+        <h1 data-od-id="archive-title">Everything we're tracking.</h1>
+        <p class="lede">Abandoned apps stay on the record. Archival preserves the last known state — recency, license, and the risk score that flagged them.</p>
+      </div>
+      <div class="tbl" data-od-id="archive-table">
+        <div class="row">
+          <span class="h">APP</span>
+          <span class="h">LAST ACTIVITY</span>
+          <span class="h">ARCHIVED</span>
+          <span class="h">SIGNALS</span>
+          <span class="h">RISK</span>
+        </div>
+        <div id="archive-rows">
+      <div class="row" data-od-id="archive-row-twidere">
+            <span class="cell"><span class="appnm">Twidere</span><span class="pkg">org.mariotaku.twidere</span></span>
+            <span class="cell" data-label="LAST ACTIVITY">610D AGO</span>
+            <span class="cell" data-label="ARCHIVED">2023-09</span>
+            <span class="cell mini-dots" data-label="SIGNALS"><i class="bad"></i><i class="bad"></i><i class="bad"></i><i class="bad"></i><i class="ok"></i><i class="bad"></i></span>
+            <span class="cell" data-label="RISK"><span class="risk-txt" style="color:var(--dot-bad)">82%</span><span class="riskbar"><i style="width:82%"></i></span></span>
+          </div>
+      <div class="row" data-od-id="archive-row-frost">
+            <span class="cell"><span class="appnm">Frost</span><span class="pkg">com.pitchedapps.frost</span></span>
+            <span class="cell" data-label="LAST ACTIVITY">780D AGO</span>
+            <span class="cell" data-label="ARCHIVED">2022-11</span>
+            <span class="cell mini-dots" data-label="SIGNALS"><i class="bad"></i><i class="bad"></i><i class="bad"></i><i class="bad"></i><i class="ok"></i><i class="bad"></i></span>
+            <span class="cell" data-label="RISK"><span class="risk-txt" style="color:var(--dot-bad)">86%</span><span class="riskbar"><i style="width:86%"></i></span></span>
+          </div>
+      <div class="row" data-od-id="archive-row-andstatus">
+            <span class="cell"><span class="appnm">AndStatus</span><span class="pkg">org.andstatus</span></span>
+            <span class="cell" data-label="LAST ACTIVITY">1420D AGO</span>
+            <span class="cell" data-label="ARCHIVED">2021-05</span>
+            <span class="cell mini-dots" data-label="SIGNALS"><i class="bad"></i><i class="bad"></i><i class="bad"></i><i class="bad"></i><i class="ok"></i><i class="bad"></i></span>
+            <span class="cell" data-label="RISK"><span class="risk-txt" style="color:var(--dot-bad)">88%</span><span class="riskbar"><i style="width:88%"></i></span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view hidden" id="view-method" data-od-id="section-method">
+      <div class="hero">
+        <p class="eyebrow"><span class="idx">IV</span> METHOD</p>
+        <h1 data-od-id="method-title">Six signals. One honest score.</h1>
+        <p class="lede">No black boxes. Each score is a weighted sum of six transparent signals — open any card, hover a dot, and see exactly what moved.</p>
+      </div>
+      <div class="method-grid">
+        <ol class="sig-list" data-od-id="method-signals">
+          <li><span class="no">01</span><div><h3>Recency</h3><p>How fresh the last release and commit are. Stale code is the first warning.</p></div><span class="wt">WEIGHT 0.20</span></li>
+          <li><span class="no">02</span><div><h3>Momentum</h3><p>Commit velocity trended over quarters — not spikes, not one-off pushes.</p></div><span class="wt">WEIGHT 0.20</span></li>
+          <li><span class="no">03</span><div><h3>Issue health</h3><p>Open versus resolved issues and triage cadence. Slipping triage shows here first.</p></div><span class="wt">WEIGHT 0.15</span></li>
+          <li><span class="no">04</span><div><h3>Contributors</h3><p>Active committers on recent releases — not lifetime contributor totals.</p></div><span class="wt">WEIGHT 0.15</span></li>
+          <li><span class="no">05</span><div><h3>License</h3><p>The project is verifiably free and open — license parsed and checked.</p></div><span class="wt">WEIGHT 0.15</span></li>
+          <li><span class="no">06</span><div><h3>Abandonment risk</h3><p>Composite decay flag. Stale apps don't get to ride on momentum.</p></div><span class="wt">WEIGHT 0.15</span></li>
+        </ol>
+        <div class="breakdown-card" data-od-id="method-breakdown">
+          <div class="bd-head">
+            <span class="micro">SCORE BREAKDOWN</span>
+            <select id="bd-app" aria-label="Example app"></select>
+          </div>
+          <div class="bd-score" id="bd-score">
+            <span class="n">96</span><span class="l">SCORE</span><span class="s ok">ACTIVE</span>
+          </div>
+          <div id="bd-rows">
+          <div class="sigrow-bd">
+                <span class="nm"><b>Recency</b>×0.2</span>
+                <span class="bar"><i style="width:98%;background:var(--dot-ok)"></i></span>
+                <span class="vl"><b>98</b> HEALTHY</span>
+              </div>
+          <div class="sigrow-bd">
+                <span class="nm"><b>Momentum</b>×0.2</span>
+                <span class="bar"><i style="width:96%;background:var(--dot-ok)"></i></span>
+                <span class="vl"><b>96</b> HEALTHY</span>
+              </div>
+          <div class="sigrow-bd">
+                <span class="nm"><b>Issue health</b>×0.15</span>
+                <span class="bar"><i style="width:92%;background:var(--dot-ok)"></i></span>
+                <span class="vl"><b>92</b> HEALTHY</span>
+              </div>
+          <div class="sigrow-bd">
+                <span class="nm"><b>Contributors</b>×0.15</span>
+                <span class="bar"><i style="width:95%;background:var(--dot-ok)"></i></span>
+                <span class="vl"><b>95</b> HEALTHY</span>
+              </div>
+          <div class="sigrow-bd">
+                <span class="nm"><b>License</b>×0.15</span>
+                <span class="bar"><i style="width:100%;background:var(--dot-ok)"></i></span>
+                <span class="vl"><b>100</b> HEALTHY</span>
+              </div>
+          <div class="sigrow-bd">
+                <span class="nm"><b>Abandonment risk</b>×0.15</span>
+                <span class="bar"><i style="width:5%;background:var(--dot-bad)"></i></span>
+                <span class="vl"><b>5%</b> LOW</span>
+              </div>
+          </div>
+          <p class="formula" id="bd-formula">
+            SCORE = <b>0.20</b>·RECENCY + <b>0.20</b>·MOMENTUM + <b>0.15</b>·ISSUE HEALTH + <b>0.15</b>·CONTRIBUTORS + <b>0.15</b>·LICENSE + <b>0.15</b>·(100 − ABANDONMENT RISK)
+          </p>
+          <p class="note">Telemetry in this build is representative sample data for design review.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot" data-od-id="footer-status">
+      <span class="dot"></span>
+      <span class="micro">SYSTEM ACTIVE</span>
+      <span class="micro">SIX SIGNALS · ONE HONEST SCORE</span>
+      <span class="micro">NO BLACK BOXES</span>
+      <span class="micro r">ILLUSTRATIVE TELEMETRY · DESIGN BUILD</span>
+    </footer>
+
+  </div>
+</main>
+<script>
+const $=(s,c=document)=>c.querySelector(s);
+const $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
+document.body.classList.add('js');
+const SIGNALS=[
+  {k:'rec',l:'Recency',w:0.2},
+  {k:'mom',l:'Momentum',w:0.2},
+  {k:'iss',l:'Issue health',w:0.15},
+  {k:'con',l:'Contributors',w:0.15},
+  {k:'lic',l:'License',w:0.15},
+  {k:'risk',l:'Abandonment risk',w:0.15}
+];
+const APPS=[
+  {id:'newpipe',name:'NewPipe',pkg:'org.schabi.newpipe',v:'0.27.4',ln:'GPL-3.0',cat:'VIDEO',last:4,added:'2023-02',rec:98,mom:96,iss:92,con:95,lic:100,risk:5},
+  {id:'termux',name:'Termux',pkg:'com.termux',v:'0.118.2',ln:'GPL-3.0',cat:'TERMINAL',last:6,added:'2022-07',rec:96,mom:94,iss:90,con:93,lic:100,risk:6},
+  {id:'organicmaps',name:'Organic Maps',pkg:'app.organicmaps',v:'6.0.2',ln:'Apache-2.0',cat:'MAPS',last:9,added:'2023-05',rec:94,mom:92,iss:88,con:90,lic:100,risk:8},
+  {id:'aegis',name:'Aegis',pkg:'com.beemdevelopment.aegis',v:'3.5',ln:'GPL-3.0',cat:'2FA',last:12,added:'2023-01',rec:92,mom:90,iss:94,con:88,lic:100,risk:6},
+  {id:'k9',name:'K-9 Mail',pkg:'com.fsck.k9',v:'8.0.0',ln:'Apache-2.0',cat:'MAIL',last:14,added:'2022-11',rec:96,mom:88,iss:70,con:86,lic:100,risk:12},
+  {id:'antennapod',name:'AntennaPod',pkg:'de.danoeh.antennapod',v:'3.7.0',ln:'MIT',cat:'PODCASTS',last:18,added:'2023-06',rec:90,mom:86,iss:84,con:84,lic:100,risk:10},
+  {id:'openkeychain',name:'OpenKeychain',pkg:'org.sufficientlysecure.keychain',v:'3.0',ln:'GPL-3.0',cat:'CRYPTO',last:96,added:'2021-04',rec:40,mom:45,iss:55,con:60,lic:100,risk:38},
+  {id:'simplekeyboard',name:'Simple Keyboard',pkg:'com.rkkrp.keyboard',v:'1.0',ln:'Apache-2.0',cat:'INPUT',last:140,added:'2020-09',rec:42,mom:40,iss:38,con:50,lic:100,risk:40},
+  {id:'twidere',name:'Twidere',pkg:'org.mariotaku.twidere',v:'5.1.0',ln:'GPL-3.0',cat:'SOCIAL',last:610,added:'2019-08',rec:10,mom:12,iss:15,con:10,lic:100,risk:82}
+];
+const FRESH=[
+  {id:'materialfiles',name:'Material Files',pkg:'me.zhanghai.android.files',v:'1.7.0',ln:'GPL-3.0',cat:'FILES',last:3,addedDays:2,rec:96,mom:94,iss:90,con:88,lic:100,risk:6},
+  {id:'jellyfin',name:'Jellyfin',pkg:'org.jellyfin.mobile',v:'2.7.0',ln:'GPL-2.0',cat:'MEDIA',last:7,addedDays:5,rec:94,mom:90,iss:86,con:85,lic:100,risk:8},
+  {id:'briar',name:'Briar',pkg:'org.briarproject.briar.android',v:'1.5.0',ln:'GPL-3.0',cat:'MESSAGING',last:9,addedDays:6,rec:90,mom:86,iss:82,con:80,lic:100,risk:10},
+  {id:'kiwix',name:'Kiwix',pkg:'org.kiwix.kiwixmobile',v:'3.11.0',ln:'GPL-3.0',cat:'WIKI',last:11,addedDays:8,rec:88,mom:84,iss:80,con:78,lic:100,risk:12}
+];
+const ARCHIVE=[
+  {id:'twidere',name:'Twidere',pkg:'org.mariotaku.twidere',last:610,archived:'2023-09',risk:82,rec:10,mom:12,iss:15,con:10,lic:100},
+  {id:'frost',name:'Frost',pkg:'com.pitchedapps.frost',last:780,archived:'2022-11',risk:86,rec:12,mom:10,iss:14,con:8,lic:100},
+  {id:'andstatus',name:'AndStatus',pkg:'org.andstatus',last:1420,archived:'2021-05',risk:88,rec:8,mom:10,iss:12,con:10,lic:100}
+];
+const DEFAULT_TRACKED=APPS.map(a=>a.id);
+const WAVE_PATH='M0 60 H180 L245 18 L310 102 L375 36 L440 84 L505 52 L570 60 L635 30 L700 90 L765 48 L830 60 H1440';
+const WAVE_NODES=[[245,18],[310,102],[375,36],[440,84],[505,52],[570,60],[635,30],[700,90],[765,48]];
+const state={
+  filter:'all',
+  sort:'score',
+  query:'',
+  tracked:new Set()
+};
+let savedTracked=[];
+try{savedTracked=JSON.parse(localStorage.getItem('oss-signal-tracked')||'null')||DEFAULT_TRACKED}catch(e){savedTracked=DEFAULT_TRACKED}
+state.tracked=new Set(savedTracked);
+const dot=v=>v>=75?'ok':v>=40?'warn':'bad';
+const appScore=a=>Math.round(SIGNALS.reduce((s,o)=>{const val=o.k==='risk'?(100-a.risk):a[o.k];return s+val*o.w},0));
+const status=sc=>sc>=80?{l:'Active',t:'ok'}:sc>=50?{l:'Stalled',t:'warn'}:{l:'Abandoned',t:'bad'};
+const sigText=d=>d==='ok'?'healthy':d==='warn'?'warning':'at risk';
+const check=`<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6l2.5 2.5L10 3"></path></svg>`;
+const WAVE_ICONS={watchlist:false,fresh:true,archive:false,method:true};
+function heroGfx(flip){
+  const dots=WAVE_NODES.map(n=>`<i class="wd" style="left:${(n[0]/1440*100).toFixed(2)}%;top:${n[1]}px"></i>`).join('');
+  return `<div class="hero-gfx${flip?' flip':''}" aria-hidden="true"><svg viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="${WAVE_PATH}" vector-effect="non-scaling-stroke" fill="none" stroke="currentColor" stroke-width="1.5"></path></svg>${dots}</div>`;
+}
+function signalDots(a){
+  return SIGNALS.map(o=>{const v=o.k==='risk'?(100-a.risk):a[o.k];const d=dot(v);return `<span class="sdot ${d}" data-tip="${o.l} — ${sigText(d)}" title="${o.l}: ${sigText(d)}"></span>`}).join('');
+}
+function signalLabelRow(){
+  return `<div class="sdot-labels" aria-hidden="true">${SIGNALS.map(o=>`<span>${o.l[0].toUpperCase()}</span>`).join('')}</div>`;
+}
+function cardHTML(a,i,mode){
+  const sc=appScore(a);
+  const st=status(sc);
+  const sub=`${a.pkg} · v${a.v} · ${a.ln}`;
+  const aria=`${a.name}, score ${sc}, ${st.l}. `+SIGNALS.map(o=>{const v=o.k==='risk'?(100-a.risk):a[o.k];return o.l+': '+sigText(dot(v))}).join(', ');
+  const when=mode==='watch'?`LAST COMMIT · ${a.last}D AGO`:`ADDED ${a.addedDays}D AGO`;
+  const action=mode==='watch'
+    ? `<button class="untrack" data-od-id="cta-untrack-${a.id}" aria-label="Untrack ${a.name}">UNTRACK</button>`
+    : (state.tracked.has(a.id)
+        ? `<button class="btn btn-tracked" data-od-id="cta-add-${a.id}" disabled aria-label="${a.name} tracked">${check}TRACKED</button>`
+        : `<button class="btn btn-add" data-od-id="cta-add-${a.id}" aria-label="Add ${a.name} to watchlist">ADD TO WATCHLIST</button>`);
+  return `<article class="app-card" data-od-id="card-${a.id}" style="--i:${i}" aria-label="${aria}">
+    <div class="card-top">
+      <div class="tile ${st.t}">${a.name[0]}</div>
+      <div class="app-id">
+        <h3 class="app-name">${a.name}</h3>
+        <p class="app-sub">${sub}</p>
+      </div>
+      <div class="score"><span class="score-num ${st.t}">${sc}</span><span class="score-lbl">SCORE</span></div>
+    </div>
+    <div class="sigrow" role="img" aria-label="Six signals">${signalDots(a)}</div>
+    ${signalLabelRow()}
+    <div class="card-meta">
+      <span class="when">${when}</span>
+      <span class="tag ${st.t}"><i></i>${mode==='fresh'?'FRESH':st.l.toUpperCase()}</span>
+    </div>
+    <div class="actions">${action}</div>
+  </article>`;
+}
+function renderWatch(){
+  const apps=APPS.filter(a=>state.tracked.has(a.id));
+  const list=apps.filter(a=>{
+    if(state.filter!=='all'&&status(appScore(a)).t!==({nominal:'ok',warning:'warn',abandoned:'bad'}[state.filter]))return false;
+    if(state.query&&!(a.name.toLowerCase().includes(state.query)||a.pkg.toLowerCase().includes(state.query)))return false;
+    return true;
+  });
+  const sorted=[...list].sort((x,y)=>{
+    if(state.sort==='name')return x.name.localeCompare(y.name);
+    if(state.sort==='activity')return x.last-y.last;
+    return appScore(y)-appScore(x);
+  });
+  const grid=$('#watch-grid');
+  if(!sorted.length){
+    grid.innerHTML=state.tracked.size
+      ? `<div class="empty">NO MATCH — ADJUST FILTERS OR SEARCH</div>`
+      : `<div class="empty">WATCHLIST EMPTY — ADD APPS FROM FRESH FINDS</div>`;
+  }else{
+    grid.innerHTML=sorted.map((a,i)=>cardHTML(a,i,'watch')).join('');
+  }
+  const n=state.tracked.size;
+  const all=APPS.filter(a=>state.tracked.has(a.id));
+  const nom=all.filter(a=>status(appScore(a)).t==='ok').length;
+  const warn=all.filter(a=>status(appScore(a)).t==='warn').length;
+  const abn=all.filter(a=>status(appScore(a)).t==='bad').length;
+  $('#watch-stats').innerHTML=`<span><span class="num">${n}</span> TRACKED</span><span><span class="num">${nom}</span> NOMINAL</span><span><span class="num">${warn}</span> WARNING</span><span><span class="num">${abn}</span> ABANDONED</span>`;
+}
+function renderFresh(){
+  const list=FRESH.filter(a=>!state.query||a.name.toLowerCase().includes(state.query)||a.pkg.toLowerCase().includes(state.query));
+  const grid=$('#fresh-grid');
+  grid.innerHTML=list.length
+    ? list.map((a,i)=>cardHTML(a,i,'fresh')).join('')
+    : `<div class="empty">NO MATCH — TRY A DIFFERENT QUERY</div>`;
+}
+function renderArchive(){
+  $('#archive-rows').innerHTML=ARCHIVE.map(a=>{
+    const mini=['rec','mom','iss','con','lic','risk'].map(k=>{const v=k==='risk'?(100-a.risk):a[k];return `<i class="${dot(v)}"></i>`}).join('');
+    return `<div class="row" data-od-id="archive-row-${a.id}">
+      <span class="cell"><span class="appnm">${a.name}</span><span class="pkg">${a.pkg}</span></span>
+      <span class="cell" data-label="LAST ACTIVITY">${a.last}D AGO</span>
+      <span class="cell" data-label="ARCHIVED">${a.archived}</span>
+      <span class="cell mini-dots" data-label="SIGNALS">${mini}</span>
+      <span class="cell" data-label="RISK"><span class="risk-txt" style="color:var(--dot-bad)">${a.risk}%</span><span class="riskbar"><i style="width:${a.risk}%"></i></span></span>
+    </div>`;
+  }).join('');
+}
+function persistTracked(){localStorage.setItem('oss-signal-tracked',JSON.stringify([...state.tracked]))}
+function renderAll(){renderWatch();renderFresh();renderArchive()}
+$$('.view').forEach(v=>{v.insertAdjacentHTML('afterbegin',heroGfx(WAVE_ICONS[v.id.replace('view-','')]))});
+$$('.rail-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const id=b.dataset.view;
+    $$('.view').forEach(v=>v.classList.toggle('hidden',v.id!=='view-'+id));
+    $$('.rail-btn').forEach(x=>x.classList.toggle('active',x===b));
+    localStorage.setItem('oss-signal-section',id);
+  });
+});
+const savedSection=localStorage.getItem('oss-signal-section');
+if(savedSection){const b=$(`.rail-btn[data-view="${savedSection}"]`);if(b)b.click()}
+$$('.chip[data-f]').forEach(c=>c.addEventListener('click',()=>{
+  state.filter=c.dataset.f;
+  $$('.chip[data-f]').forEach(x=>x.classList.toggle('active',x===c));
+  renderWatch();
+}));
+$$('.sort button').forEach(b=>b.addEventListener('click',()=>{
+  state.sort=b.dataset.s;
+  $$('.sort button').forEach(x=>x.classList.toggle('active',x===b));
+  renderWatch();
+}));
+const q=$('#search-input');
+q.addEventListener('input',()=>{state.query=q.value.trim().toLowerCase();renderWatch();renderFresh()});
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus()}
+});
+$('#watch-grid').addEventListener('click',e=>{
+  const b=e.target.closest('.untrack');
+  if(!b)return;
+  state.tracked.delete(b.dataset.odId.replace('cta-untrack-',''));
+  persistTracked();
+  renderAll();
+});
+$('#fresh-grid').addEventListener('click',e=>{
+  const b=e.target.closest('.btn-add');
+  if(!b||b.disabled)return;
+  state.tracked.add(b.dataset.odId.replace('cta-add-',''));
+  persistTracked();
+  renderAll();
+});
+const themeBtn=$('#theme-toggle');
+const iconMoon=$('#icon-moon');
+const iconSun=$('#icon-sun');
+const applyTheme=t=>{
+  document.documentElement.dataset.theme=t;
+  iconMoon.classList.toggle('hidden',t==='light');
+  iconSun.classList.toggle('hidden',t==='dark');
+  localStorage.setItem('oss-signal-theme',t);
+};
+themeBtn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+applyTheme(localStorage.getItem('oss-signal-theme')||'dark');
+const bdSelect=$('#bd-app');
+const allApps=[...APPS,...FRESH];
+bdSelect.innerHTML=allApps.map(a=>`<option value="${a.id}">${a.name} · ${a.pkg}</option>`).join('');
+function renderBreakdown(){
+  const a=allApps.find(x=>x.id===bdSelect.value);
+  const sc=appScore(a);
+  const st=status(sc);
+  $('#bd-score').innerHTML=`<span class="n">${sc}</span><span class="l">SCORE</span><span class="s ${st.t}">${st.l.toUpperCase()}</span>`;
+  $('#bd-rows').innerHTML=SIGNALS.map(o=>{
+    const isRisk=o.k==='risk';
+    const v=isRisk?a.risk:a[o.k];
+    const d=isRisk?'bad':dot(v);
+    const bar=v;
+    const vl=isRisk?`<b>${v}%</b> ${v>=60?'HIGH':v>=40?'MED':'LOW'}`:`<b>${v}</b> ${v>=75?'HEALTHY':v>=40?'WARNING':'AT RISK'}`;
+    return `<div class="sigrow-bd">
+      <span class="nm"><b>${o.l}</b>×${o.w}</span>
+      <span class="bar"><i style="width:${Math.max(4,bar)}%;background:${d==='ok'?'var(--dot-ok)':d==='warn'?'var(--dot-warn)':'var(--dot-bad)'}"></i></span>
+      <span class="vl">${vl}</span>
+    </div>`;
+  }).join('');
+  $('#bd-formula').innerHTML=`SCORE = <b>0.20</b>·RECENCY + <b>0.20</b>·MOMENTUM + <b>0.15</b>·ISSUE HEALTH + <b>0.15</b>·CONTRIBUTORS + <b>0.15</b>·LICENSE + <b>0.15</b>·(100 − ABANDONMENT RISK)`;
+}
+bdSelect.addEventListener('change',renderBreakdown);
+renderBreakdown();
+renderAll();
+</script>
+</body>
+</html>

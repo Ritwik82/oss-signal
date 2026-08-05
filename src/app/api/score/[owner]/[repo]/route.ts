@@ -18,5 +18,7 @@ export async function GET(
   if (!project) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
-  return NextResponse.json(project);
+  return NextResponse.json(project, {
+    headers: { "Cache-Control": "public, max-age=3600" },
+  });
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useScoreModal } from "./score-modal";
 import { ThemeToggle } from "./theme-toggle";
+import { CatalogSearch } from "./catalog-search";
 import type { Project } from "@/lib/data";
 
 const sections = [
@@ -17,23 +18,6 @@ export function NavBar({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const { openScoreModal } = useScoreModal();
-  const [query, setQuery] = useState("");
-  const [focused, setFocused] = useState(false);
-  const boxRef = useRef<HTMLDivElement | null>(null);
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return projects
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.owner.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
-      )
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8);
-  }, [query, projects]);
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -63,24 +47,13 @@ export function NavBar({ projects }: { projects: Project[] }) {
   }, []);
 
   useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
-        setFocused(false);
-      }
-    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setFocused(false);
-        setQuery("");
         setMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, []);
 
   return (
@@ -126,7 +99,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
         >
           <span className="sys-dot" aria-hidden="true" />
           <span
-            className="font-mono text-[8px] tracking-[0.2em]"
+            className="font-mono text-[10px] tracking-[0.2em]"
             style={{ color: "var(--color-text-dim)" }}
           >
             SYSTEM ACTIVE
@@ -160,85 +133,9 @@ export function NavBar({ projects }: { projects: Project[] }) {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-2">
-          {/* Global search */}
-          <div ref={boxRef} className="relative mr-1 hidden sm:block">
-            <div className="relative">
-              <svg
-                aria-hidden="true"
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ color: "var(--color-text-dim)" }}
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => setFocused(true)}
-                placeholder="Search whole catalog…"
-                aria-label="Search the whole catalog"
-                aria-expanded={focused && results.length > 0}
-                role="combobox"
-                autoComplete="off"
-                className="w-44 border py-1.5 pl-8 pr-3 font-mono text-[10px] tracking-wider outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-                style={{
-                  borderColor: "var(--color-border)",
-                  backgroundColor: "var(--color-bg)",
-                  color: "var(--color-text)",
-                }}
-              />
-            </div>
-            {focused && query.trim() && (
-              <div
-                role="listbox"
-                className="absolute right-0 top-full mt-1 w-80 max-h-96 overflow-y-auto border z-[70] glass"
-                style={{ boxShadow: "0 12px 32px rgba(0, 0, 0, 0.4)" }}
-              >
-                {results.length === 0 ? (
-                  <p
-                    className="px-4 py-3 font-mono text-[10px]"
-                    style={{ color: "var(--color-text-dim)" }}
-                  >
-                    No matches for “{query}”
-                  </p>
-                ) : (
-                  results.map((p) => (
-                    <a
-                      key={p.id}
-                      href={`/project/${encodeURIComponent(p.id)}`}
-                      role="option"
-                      aria-selected={false}
-                      className="flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-                      style={{ color: "var(--color-text)", borderBottom: "1px solid var(--color-ruled)" }}
-                    >
-                      <span className="min-w-0">
-                        <span className="block font-mono text-[11px] font-bold truncate">
-                          {p.name}
-                        </span>
-                        <span className="block font-mono text-[9px] truncate" style={{ color: "var(--color-text-dim)" }}>
-                          {p.owner} · {p.genre_label}
-                        </span>
-                      </span>
-                      <span
-                        className="font-mono text-xs font-bold shrink-0"
-                        style={{ color: "var(--color-accent)" }}
-                      >
-                        {(p.score * 10).toFixed(1)}
-                      </span>
-                    </a>
-                  ))
-                )}
-              </div>
-            )}
+          {/* Global search — desktop */}
+          <div className="hidden sm:block w-44 mr-1">
+            <CatalogSearch projects={projects} />
           </div>
 
           <button
@@ -305,6 +202,9 @@ export function NavBar({ projects }: { projects: Project[] }) {
             style={{ borderColor: "var(--color-border)" }}
           >
             <div className="px-4 py-3 flex flex-col gap-1">
+              <div className="pb-2 mb-1 border-b" style={{ borderColor: "var(--color-border)" }}>
+                <CatalogSearch projects={projects} onNavigate={() => setMenuOpen(false)} />
+              </div>
               {sections.map((s) => (
                 <a
                   key={s.id}

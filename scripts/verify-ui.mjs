@@ -15,7 +15,6 @@ page.on("pageerror", (e) => errors.push(String(e)));
 await page.goto(url, { waitUntil: "networkidle" });
 
 const zones = await page.evaluate(() => {
-  const text = (el) => (el ? el.textContent.trim().slice(0, 60) : null);
   return {
     h2s: [...document.querySelectorAll("h2")].map((h) => h.textContent.trim()),
     projectCards: document.querySelectorAll("#fresh-finds a, #specimens a").length,
