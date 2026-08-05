@@ -22,7 +22,7 @@ Dark is the default theme; a `.dark` class toggles a near-white variant of the s
 | muted | `#a0a0a0` | `oklch(0.7058 0 0)` | `--color-text-muted` | secondary text |
 | border | `#232323` | `oklch(0.2562 0 0)` | `--color-border` | hairlines / dividers |
 | accent | `#00f5d4` | `oklch(0.8681 0.1595 178.2)` | `--color-accent` | waveform, live dot, active tags |
-| accent-secondary | `#ff2d95` | `oklch(0.6655 0.2492 357.34)` | `--color-accent-magenta` | alerts, warnings, abandonment-risk indicators |
+| accent-secondary | `#ff9f43` | `oklch(0.7851 0.1540 60.7)` | `--color-signal-amber` | alerts, warnings, abandonment-risk indicators |
 
 ### Derived dark tokens (also measured)
 
@@ -31,15 +31,15 @@ Dark is the default theme; a `.dark` class toggles a near-white variant of the s
 - `--color-accent-dim: #00f5d414` — accent chip fill; `--color-accent-border: #00f5d447` — accent chip border
 - `--color-paper: #101010`, `--color-ink: #d0d0d0`, `--color-ruled: #1e1e1e`, `--color-margin: #2e2e2e`
 - Glass: `--glass-bg: #ffffff0a` (white 4%), `--glass-border: #ffffff14` (white 8%), `--color-hero-scrim: #0a0a0a9e`
-- Signal status dots: green `#00e0b8` (fresh), red/magenta `#ff2d95` (abandoned), blue `#7dd3fc` (info), purple `#c084fc`, orange `#fb923c` (warning), pink `#f472b6`
+- Signal status dots: green `#00e0b8` (fresh), amber `#ff9f43` (warning, abandoned), orange `#fb923c` (stale), blue `#7dd3fc` (info), purple `#c084fc`, pink `#f472b6` (license)
 
 ### Light mode (`:root:not(.dark)`)
 
-bg `#fafafa`, surface `#fff`, border `#e3e3e3`, text `#1a1a1a`, muted `#555`, dim `#6f6f6f`; accent `#00796b`, accent-magenta `#c2185b`, accent-dim `#00796b14`, accent-border `#00796b40`; signals green `#0e8a62`, blue `#2563eb`, red `#c2185b`.
+bg `#fafafa`, surface `#fff`, border `#e3e3e3`, text `#1a1a1a`, muted `#555`, dim `#6f6f6f`; accent `#00796b`, signal-amber `#b45309`, accent-dim `#00796b14`, accent-border `#00796b40`; signals green `#0e8a62`, blue `#2563eb`, amber `#b45309`, red `#d64545`.
 
 **Rules of use**
 - The accent is a high-signal color — use it sparingly (waveform, live dot, one active tag per card), never as a large wash.
-- **Magenta (`accent-secondary`) is reserved for alerts and abandonment-risk indicators** — dark `#ff2d95`, light `#c2185b`. It never appears on neutral chrome or healthy-state UI.
+- **Warm amber (`accent-secondary`) is reserved for alerts and abandonment-risk indicators** — dark `#ff9f43`, light `#b45309`. It never appears on neutral chrome or healthy-state UI.
 - Status is encoded by the 6px signal dots plus a mono uppercase label; never rely on color alone (accompany with text).
 
 ---

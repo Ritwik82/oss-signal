@@ -9,7 +9,7 @@ colors:
   muted: "#a0a0a0"
   border: "#232323"
   accent: "#00f5d4"
-  accent-secondary: "#ff2d95"
+  accent-secondary: "#ff9f43"
 ---
 
 # OSS Signal — FOSS Android app health dashboard
@@ -32,7 +32,7 @@ Prioritize actively maintained FOSS Android apps. Track the ones you rely on and
 | muted | Muted | `#a0a0a0` | secondary text — measured --color-text-muted |
 | border | Border | `#232323` | hairlines / dividers — measured --color-border |
 | accent | Accent | `#00f5d4` | primary brand color — waveform, live status dot, active tags (measured --color-accent) |
-| accent-secondary | Accent secondary | `#ff2d95` | alerts, warnings, and abandonment-risk indicators — measured --color-accent-magenta (dark #ff2d95, light #c2185b) |
+| accent-secondary | Accent secondary | `#ff9f43` | alerts, warnings, and abandonment-risk indicators — measured --color-signal-amber (dark #ff9f43, light #b45309) |
 
 ## Typography
 - **Display:** Playfair Display — weights 400, 700 — fallbacks: Georgia, Times New Roman, serif
@@ -72,9 +72,9 @@ Prioritize actively maintained FOSS Android apps. Track the ones you rely on and
 - max-w-7xl (80rem) content column with 1rem page padding
 - Cards: glass fill (white 4%), 1px white-alpha border, 0 8px 24px black 25% shadow, 8px radius, 1rem padding, 2px accent L-corners on the top-left and bottom-right (corner-mark motif)
 - Uppercase JetBrains Mono micro-labels at 8–10px with tracking-widest for tags, statuses, and versions (monospace system labels)
-- Status communicated by 6px rounded signal dots: green (fresh), red/magenta (abandoned), orange (warning), blue (info), purple, pink
+- Status communicated by 6px rounded signal dots: green (fresh), amber (warning, abandoned), orange (stale), blue (info), purple, pink (license)
 - Circuit-board hero: a low-density schematic trace — the accent waveform line with node dots — spans the hero region on the near-black canvas, echoing the nav pulse line
-- Magenta is reserved for alerts and abandonment-risk indicators; it never appears on neutral chrome or healthy-state UI
+- Warm amber is reserved for alerts and abandonment-risk indicators; it never appears on neutral chrome or healthy-state UI
 - Hover raises card border to accent-border; focus-visible shows a 2px accent outline with 2px offset
 - Fade/rise entrance: cards start at 8px translate with blur-on-opacity view transitions
 - Dark is the default theme; a .dark class toggle switches to a near-white variant with the same roles

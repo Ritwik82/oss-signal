@@ -6,7 +6,7 @@ A measured, source-backed design system extracted from **https://oss-signal.verc
 
 ## Product Overview / Context
 
-OSS Signal is a health dashboard for open-source Android apps. It scores every project 1–10 from six transparent, weighted signals — Recency (0.24), Momentum (0.20), Abandonment Risk ↓ (0.20, inverted), Issue Health (0.16), Contributors (0.12), License (0.08) — and organizes apps into a Watchlist, Fresh Finds (last 9 months, no abandoned projects), a full Archive, and a Method explainer. Visually it is a **near-black glass UI**: serif Playfair Display headlines, Space Grotesk body, JetBrains Mono system labels, an accent teal oscilloscope waveform, a circuit-board hero, magenta abandonment indicators, and corner-mark glass cards — with an operations-console voice (technical, mechanical, calm).
+OSS Signal is a health dashboard for open-source Android apps. It scores every project 1–10 from six transparent, weighted signals — Recency (0.24), Momentum (0.20), Abandonment Risk ↓ (0.20, inverted), Issue Health (0.16), Contributors (0.12), License (0.08) — and organizes apps into a Watchlist, Fresh Finds (last 9 months, no abandoned projects), a full Archive, and a Method explainer. Visually it is a **near-black glass UI**: serif Playfair Display headlines, Space Grotesk body, JetBrains Mono system labels, an accent teal oscilloscope waveform, a circuit-board hero, warm amber abandonment indicators, and corner-mark glass cards — with an operations-console voice (technical, mechanical, calm).
 
 Source: [https://oss-signal.vercel.app/](https://oss-signal.vercel.app/) · Registered design system id: `user:oss-signal-vercel-app` · Brand extraction id: `oss-signal-f3cef3`
 
