@@ -1,9 +1,0 @@
-Art Assets — OSS Signal "Modern Calibration"
-
-No image assets ship with the project. The hero uses an inline SVG circuit-board
-graphic (defined in src/components/hero-section.tsx) drawn with CSS palette tokens
-(--color-accent / --color-text-muted) so it follows light/dark theme.
-
-Historical: the previous "Renaissance Edition" used hero-sky.webp, a Public Domain
-reproduction of Turner's "The Fighting Temeraire" (1839, National Gallery NG524).
-Deleted 2026-08-04 as part of the Modern Calibration reskin (decisions.md #57-66).
