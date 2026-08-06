@@ -284,7 +284,7 @@ async function main() {
       const summary = meta?.summary?.["en-US"] ?? (Array.isArray(meta?.summary) ? meta.summary[0] : null) ?? "";
       const license = meta?.license ?? null;
       const source = meta?.sourceCode ?? null; // string URL, not an object
-      return { pkgName, name, summary, license, sourceCode: source, addedAt: new Date(added).toISOString() };
+      return { pkgName, name, summary, license, sourceCode: source, addedAt: new Date(meta?.added ?? 0).toISOString() };
     });
 
   const freshProjects = [];
