@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { WatchlistApp, Project } from "@/lib/data";
+import { useLocalWatchlist, toWatchlistApp } from "@/lib/local-watchlist";
 import { RelativeTime } from "./relative-time";
 
 const DAY_KEY = "oss-signal-briefing-day";
@@ -35,6 +36,14 @@ export function DailyBriefing({
     localStorage.setItem(VISIT_KEY, String(Date.now()));
   }, []);
 
+  const local = useLocalWatchlist();
+  const allApps = useMemo(() => {
+    const byKey = new Map<string, WatchlistApp>();
+    for (const a of apps) byKey.set(a.repo ?? a.id, a);
+    for (const l of local) if (!byKey.has(l.repo ?? l.id)) byKey.set(l.repo ?? l.id, toWatchlistApp(l));
+    return [...byKey.values()];
+  }, [apps, local]);
+
   const newSinceVisit = useMemo(
     () =>
       projects.filter((p) => {
@@ -52,11 +61,11 @@ export function DailyBriefing({
 
   if (!mounted) return null;
 
-  const attention = apps.filter(
+  const attention = allApps.filter(
     (a) => a.staleness === "stale" || a.staleness === "abandoned" || a.staleness === "warning"
   ).length;
-  const updates = apps.filter((a) => a.update_available).length;
-  const refreshedThisWeek = apps.filter(
+  const updates = allApps.filter((a) => a.update_available).length;
+  const refreshedThisWeek = allApps.filter(
     (a) => a.days_since_push != null && a.days_since_push <= 7
   ).length;
 
@@ -81,7 +90,12 @@ export function DailyBriefing({
     facts.push(`${refreshedThisWeek} app${refreshedThisWeek !== 1 ? "s" : ""} updated upstream this week.`);
   if (newSinceVisit > 0)
     facts.push(`${newSinceVisit} new fresh ${newSinceVisit !== 1 ? "finds" : "find"} since your last visit.`);
-  if (facts.length === 0) facts.push("Everything is up to date. Nothing needs you today.");
+  if (facts.length === 0)
+    facts.push(
+      allApps.length === 0
+        ? "Your watchlist is empty — track apps from Fresh Finds to get health signals."
+        : "Everything is up to date. Nothing needs you today."
+    );
 
   if (hidden && !pinned) return null;
 

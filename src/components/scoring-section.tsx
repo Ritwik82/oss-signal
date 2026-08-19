@@ -35,7 +35,7 @@ export const signals = [
     description:
       "Open-issue load as a maintenance proxy. Zero open issues is ideal; a large backlog drags the signal down.",
     formula: "issue_health = steps(open_issues): 0 → 1.0 · <10 → 0.8 · <50 → 0.6 · <100 → 0.4 · else 0.2",
-    source: "GitHub Issues API (last 90 days)",
+    source: "GitHub `open_issues_count`",
     why: "Repos with <5 recent issues default to 0.5 to avoid punishing new or quiet repos.",
   },
   {
@@ -53,7 +53,7 @@ export const signals = [
     id: "S-05",
     name: "License",
     weight: "0.08",
-    dotClass: "signal-dot-pink",
+    dotClass: "signal-dot-purple",
     description:
       "Whether the project declares an open-source license. Legal clarity matters for actually using the code.",
     formula: "license = 1 if SPDX present, else 0",

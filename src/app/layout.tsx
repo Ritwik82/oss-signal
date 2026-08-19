@@ -24,6 +24,7 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
   title: {
     default: "OSS Signal — FOSS Android app health dashboard",
     template: "%s | OSS Signal",

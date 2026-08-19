@@ -1,0 +1,17 @@
+{
+  "name": "OSS Signal — FOSS Android app health dashboard",
+  "short_name": "OSS Signal",
+  "description": "Track and discover actively maintained FOSS Android apps. Six transparent health signals, one honest score.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1714",
+  "theme_color": "#14deb5",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

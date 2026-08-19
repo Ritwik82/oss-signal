@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import type { WatchlistApp, Project } from "@/lib/data";
+import { useLocalWatchlist, toWatchlistApp } from "@/lib/local-watchlist";
 
 function csvEscape(v: unknown): string {
   const s = v == null ? "" : String(v);
@@ -71,13 +73,21 @@ export function ExportButtons({
   watchlist: WatchlistApp[];
   projects: Project[];
 }) {
+  const local = useLocalWatchlist();
+  const all = useMemo(() => {
+    const byKey = new Map<string, WatchlistApp>();
+    for (const a of watchlist) byKey.set(a.repo ?? a.id, a);
+    for (const l of local) if (!byKey.has(l.repo ?? l.id)) byKey.set(l.repo ?? l.id, toWatchlistApp(l));
+    return [...byKey.values()];
+  }, [watchlist, local]);
+
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       <button
         onClick={() =>
           download(
             `watchlist-${stamp()}.json`,
-            JSON.stringify(watchlist, null, 2),
+            JSON.stringify(all, null, 2),
             "application/json"
           )
         }
@@ -94,7 +104,7 @@ export function ExportButtons({
         onClick={() =>
           download(
             `watchlist-${stamp()}.csv`,
-            watchlistCsv(watchlist),
+            watchlistCsv(all),
             "text/csv"
           )
         }

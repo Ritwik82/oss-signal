@@ -13,7 +13,7 @@ The design prefix `Section XX /` naming reflects this:
 - `Section 02 / Fresh Finds`
 - `Section 03 / Full Archive`
 
-Old handoff doc `HANDOFF.md`(filename preserved) pre-dates the pivot. New decisions are tracked in `decisions.md` (always update this file when making architectural choices).
+New decisions are tracked in `decisions.md` (always update this file when making architectural choices).
 
 ---
 
@@ -139,15 +139,8 @@ Prefer these skills; ignore the rest of the catalog to reduce noise:
 `pre-mortem` / `grill-me` (to red-team your own claims). Reach outside this set only when
 the task genuinely calls for it.
 
-## Open Audit (2026-08-05)
+## Brand Notes
 
-Full code quality + security + UI/UX audit with file:line references lives in
-`AUDIT-2026-08-05.md`. Its Task Tracker section lists 15 pending fixes (tick boxes).
-Rules for sessions working from it:
-- Do NOT re-run the whole audit; findings and evidence are already captured there.
-- Work items from the tracker in priority order; tick a box ONLY after the fix is
-  verified per Definition of Done (artifact, not self-inspection).
-- After completing items, re-run `npm run lint` (must be clean), `npm run build`,
-  and `npm audit` (0 high severity).
-- Known pending brand decision: user dislikes pink/magenta — warning/abandoned/alert
-  states should use warm amber (#ff9f43 family), teal stays the primary accent.
+- User dislikes pink/magenta. Warning/abandoned/alert states use warm amber
+  (`--color-signal-amber`, #ff9f43 family). Teal (`--color-accent`) stays the primary accent.
+- Non-amber signal dots (e.g. License) should avoid pink — use purple or another token.

@@ -2,15 +2,22 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getProjects } from "@/lib/data";
+import { TrackButton } from "@/components/track-button";
 
 const signalMeta: Record<string, { label: string; dotClass: string }> = {
   recency: { label: "Recency", dotClass: "signal-dot-green" },
   momentum: { label: "Momentum", dotClass: "signal-dot-blue" },
   issue_health: { label: "Issue Health", dotClass: "signal-dot-purple" },
   contributors: { label: "Contributors", dotClass: "signal-dot-orange" },
-  license: { label: "License", dotClass: "signal-dot-pink" },
+  license: { label: "License", dotClass: "signal-dot-purple" },
   abandonment_risk: { label: "Abandonment Risk ↓", dotClass: "signal-dot-red" },
 };
+
+function barColor(value: number): string {
+  if (value >= 0.7) return "var(--color-signal-green)";
+  if (value >= 0.4) return "var(--color-signal-amber)";
+  return "var(--color-signal-red)";
+}
 
 function BreakdownBar({ label, value }: { label: string; value: number }) {
   const meta = signalMeta[label] || { label: label, dotClass: "" };
@@ -33,7 +40,7 @@ function BreakdownBar({ label, value }: { label: string; value: number }) {
       >
         <div
           className="h-full transition-[width] duration-500 breakdown-bar-fill"
-          style={{ width: `${value * 100}%` }}
+          style={{ width: `${value * 100}%`, backgroundColor: barColor(value) }}
         />
       </div>
     </div>
@@ -147,6 +154,7 @@ export default async function ProjectPage({
           >
             GitHub ↗
           </a>
+          <TrackButton project={project} />
         </div>
       </header>
 

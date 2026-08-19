@@ -16,7 +16,7 @@ test("home page renders all three zones", async ({ page }) => {
   expect(body).toContain("Section 01 / Your Watchlist");
   expect(body).toContain("Section 02 / Fresh Finds");
   expect(body).toContain("Section 03 / Full Archive");
-  expect(body).toContain("Shizuku");
+  expect(body).toContain("Empty watchlist");
 
   const dark = await page.evaluate(() =>
     document.documentElement.classList.contains("dark")
@@ -67,4 +67,20 @@ test("mobile drawer search finds a project", async ({ page }) => {
   await page.getByRole("option").first().click();
   await page.waitForURL(/\/project\//);
   await expect(page).toHaveURL(new RegExp(`/project/${encodeURIComponent(p.id)}`));
+});
+
+test("track from Fresh Finds adds to watchlist, untrack removes it", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+
+  const trackBtn = page.getByRole("button", { name: /^Track / }).first();
+  const name = (await trackBtn.getAttribute("aria-label")).replace(/^Track /, "").trim();
+  await trackBtn.click();
+
+  const watchlist = page.locator("#watchlist");
+  await expect(watchlist).toContainText(name);
+  await expect(watchlist).toContainText("UNKNOWN");
+
+  await watchlist.getByRole("button", { name: `Stop tracking ${name}` }).click();
+  await expect(watchlist).toContainText("Empty watchlist");
 });

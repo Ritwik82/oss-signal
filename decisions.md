@@ -4,6 +4,16 @@ Every architectural choice and why. Updated when decisions are made. Newest at t
 
 ---
 
+## Public launch prep (2026-08-19)
+
+| # | Decision | Rationale |
+|---|----------|-------------|
+| 67 | Watchlist emptied for public launch; visitors track apps locally via localStorage (`oss-signal-watchlist` key) | No backend (decision #21). Track buttons on Fresh Finds cards and project pages write to the browser; the watchlist section merges server JSON + local entries, local ones rendered as "unknown" staleness (dashed amber) until enriched by the shared refresh workflow |
+| 68 | Cross-component sync via `useSyncExternalStore` + a custom window event, not a context provider | Same pattern daily-briefing already uses; no provider plumbing through server components |
+| 69 | Contributors grow the shared watchlist by PR: fork → replace `data/watchlist.json` with an ObtainX export → refresh workflow enriches it | Keeps #21 (no DB) while letting the shared dataset grow |
+
+---
+
 ## Modern Calibration reskin (2026-08-04)
 
 Complete visual overhaul — "Modern Calibration": dark-first minimal data instrument with
