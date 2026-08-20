@@ -89,21 +89,23 @@ function scoreRecency(pushedAt) {
   return clamp(1 - days / 90);
 }
 
+// Absolute reference curve, not run-relative: 10 stars/day sustained is full
+// marks. A 100-star 50-day repo scores log10(101)/log10(501) ≈ 0.77, a
+// 10-star 50-day repo log10(11)/log10(501) ≈ 0.40 — young repos discriminate.
 function scoreMomentum(stars, createdAt) {
   const age = Math.max(daysSince(createdAt), 1);
-  return Math.log10(1 + stars) / Math.log10(1 + age);
+  return clamp(Math.log10(1 + stars) / Math.log10(1 + 10 * age));
 }
 
-// Proxy: open_issues_count from the repo object itself — no extra API call.
-// Helm: 0 open issues => 1.0; many open issues relative to repo age => lower.
-// This avoids the expensive /search/issues calls entirely and is still a
-// reasonable maintenance signal.
-function scoreIssueHealth(repoData) {
-  const openIssues = repoData.open_issues_count ?? 0;
-  if (openIssues === 0) return 1.0;
-  if (openIssues < 10) return 0.8;
-  if (openIssues < 50) return 0.6;
-  if (openIssues < 100) return 0.4;
+// Proxy: open_issues_count includes open PRs, so subtract them — otherwise a
+// PR-active repo reads as issue-burdened (8 issues + 5 PRs = 13 → 0.6 instead
+// of 0.8). PR count comes from one search call (total_count), no pagination.
+function scoreIssueHealth(openIssues, openPRs) {
+  const issues = Math.max(0, openIssues - openPRs);
+  if (issues === 0) return 1.0;
+  if (issues < 10) return 0.8;
+  if (issues < 50) return 0.6;
+  if (issues < 100) return 0.4;
   return 0.2;
 }
 
@@ -287,7 +289,7 @@ async function main() {
       return { pkgName, name, summary, license, sourceCode: source, addedAt: new Date(meta?.added ?? 0).toISOString() };
     });
 
-  const freshProjects = [];
+  let freshProjects = [];
 
   async function scoreFreshApp(app) {
     // Must have a GitHub or GitLab source URL to score
@@ -310,7 +312,10 @@ async function main() {
     if (!repoData) return null;
     if (!isRelevantToAndroid(app.summary, name, repoData.topics ?? [], repoData.language)) return null;
 
-    const issueScore = scoreIssueHealth(repoData);
+    const openPRs = await fetchJSON(
+      `https://api.github.com/search/issues?q=repo:${owner}/${name}+type:pr+state:open&per_page=1`
+    ).then((r) => r?.total_count ?? 0).catch(() => 0);
+    const issueScore = scoreIssueHealth(repoData.open_issues_count ?? 0, openPRs);
     const abandonmentRisk = computeAbandonmentRisk(repoData.pushed_at);
     const last_release_at = await fetchJSON(`https://api.github.com/repos/${owner}/${name}/releases?per_page=1`)
       .then((rs) => rs?.[0]?.published_at ?? null)
@@ -322,7 +327,7 @@ async function main() {
       : { social_mentions: 0, links: [] };
 
     const recency = scoreRecency(repoData.pushed_at);
-    const momentumRaw = scoreMomentum(repoData.stargazers_count, repoData.created_at);
+    const momentum = scoreMomentum(repoData.stargazers_count, repoData.created_at);
     const license = repoData.license?.spdx_id ? 1 : 0;
 
     return {
@@ -337,8 +342,7 @@ async function main() {
       added_at: app.addedAt ?? null,
       license_name: repoData.license?.spdx_id ?? null,
       contributor_count: contribResult.raw,
-      _momentumRaw: momentumRaw,
-      score_breakdown: { recency, momentum: 0, issue_health: issueScore, license, contributors: contribResult.normalized, abandonment_risk: 1 - abandonmentRisk },
+      score_breakdown: { recency, momentum, issue_health: issueScore, license, contributors: contribResult.normalized, abandonment_risk: 1 - abandonmentRisk },
       discussion_links: social.links,
       genre: genreId,
       genre_label: genreLabel,
@@ -364,12 +368,6 @@ async function main() {
     await new Promise((r) => setTimeout(r, 300));
   }
 
-  const maxMomentum = Math.max(...freshProjects.map((p) => p._momentumRaw), 1);
-  for (const p of freshProjects) {
-    p.score_breakdown.momentum = clamp(p._momentumRaw / maxMomentum);
-    delete p._momentumRaw;
-  }
-
   for (const p of freshProjects) {
     const breakdown = p.score_breakdown;
     p.score = parseFloat(
@@ -392,11 +390,22 @@ async function main() {
   freshProjects.length = 0;
   freshProjects.push(...uniqueProjects);
 
+  // "Launched in the last 9 months" means both: added to F-Droid AND the GitHub
+  // repo created within the window. Old repos wearing a NEW badge was a live
+  // review offense; the archive still carries the full added-in-window catalog.
+  const beforeLaunchFilter = freshProjects.length;
+  const launchCutoffIso = new Date(cutoffMs).toISOString();
+  freshProjects = freshProjects.filter((p) => {
+    const created = new Date(p.created_at).getTime();
+    return created >= cutoffMs;
+  });
+  console.log(`  launch filter: ${beforeLaunchFilter} → ${freshProjects.length} (repos created within ${FRESH_FIND_MAX_AGE_DAYS}d)`);
+
   freshProjects.sort((a, b) => b.score - a.score);
 
   const dataDir = join(process.cwd(), "data");
   mkdirSync(dataDir, { recursive: true });
-  writeFileSync(join(dataDir, "projects.json"), JSON.stringify({ generated_at: new Date().toISOString(), projects: freshProjects }, null, 2));
+  writeFileSync(join(dataDir, "projects.json"), JSON.stringify({ generated_at: new Date().toISOString(), fresh_cutoff: launchCutoffIso, projects: freshProjects }, null, 2));
   console.log(`\nWrote ${freshProjects.length} fresh projects to data/projects.json`);
 }
 

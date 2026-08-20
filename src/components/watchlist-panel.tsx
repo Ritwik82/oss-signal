@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useMemo, startTransition } from "react";
+import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import type { WatchlistApp, GenreId, Genre } from "@/lib/data";
-import { useLocalWatchlist, toggleLocalWatchlist, toWatchlistApp } from "@/lib/local-watchlist";
+import {
+  useLocalWatchlist,
+  toggleLocalWatchlist,
+  toWatchlistApp,
+  importObtainiumExport,
+} from "@/lib/local-watchlist";
 
 function stalenessColor(staleness?: string) {
   switch (staleness) {
@@ -82,7 +87,6 @@ function StalenessChip({
   );
 }
 
-const LinkedCard = motion(Link);
 const PlainCard = motion.div;
 
 function AppCard({
@@ -98,16 +102,25 @@ function AppCard({
   const badge = app.update_available;
   const linked = Boolean(app.repo);
   const isUnknown = app.staleness === "unknown";
-  return linked ? (
-    <LinkedCard
-      href={`/project/${app.repo}`}
+  return (
+    <PlainCard
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] no-underline block"
-      style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)", border: isUnknown ? "1px dashed var(--color-signal-amber)" : undefined }}
+      className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      style={{ boxShadow: "var(--card-shadow)", border: isUnknown ? "1px dashed var(--color-signal-amber)" : undefined }}
       whileHover={{ y: -1 }}
     >
+      {/* Stretched link — whole card navigates when a repo exists;
+          interactive controls sit above it with z-10 (no nested anchors). */}
+      {linked && (
+        <Link
+          href={`/project/${app.repo}`}
+          aria-label={`Open ${app.name} on OSS Signal`}
+          className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        />
+      )}
+
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
           className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
@@ -137,9 +150,8 @@ function AppCard({
               href={`https://github.com/${app.repo}`}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
               aria-label={`Open ${app.repo} on GitHub`}
-              className="opacity-70 hover:opacity-100 transition-opacity"
+              className="relative z-10 opacity-70 hover:opacity-100 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
               style={{ color: "var(--color-accent)" }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -188,7 +200,7 @@ function AppCard({
             <button
               onClick={onUntrack}
               aria-label={`Stop tracking ${app.name}`}
-              className="font-mono text-[10px] tracking-wider px-2 py-0.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-0.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
               style={{
                 color: "var(--color-text-dim)",
                 borderColor: "var(--color-border)",
@@ -209,87 +221,6 @@ function AppCard({
         className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
         style={{ borderColor: "var(--color-accent)" }}
       />
-    </LinkedCard>
-  ) : (
-    <PlainCard
-      layout
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] no-underline"
-      style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)", border: isUnknown ? "1px dashed var(--color-signal-amber)" : undefined }}
-      whileHover={{ y: -1 }}
-    >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span
-          className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
-          style={{ backgroundColor: "var(--color-accent-dim)", color: "var(--color-accent)" }}
-        >
-          {genreLabel}
-        </span>
-        <div className="flex items-center gap-2">
-          <span
-            className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
-            style={{
-              color: app.installed ? "var(--color-text-muted)" : "var(--color-text-dim)",
-            }}
-          >
-            {app.installed ? "INSTALLED" : "WATCHING"}
-          </span>
-          {badge && (
-            <span
-              className="badge-pulse font-mono text-[11px] px-1.5 py-0.5 whitespace-nowrap"
-              style={{ backgroundColor: "var(--color-signal-green)", color: "var(--color-bg)" }}
-            >
-              UPDATE
-            </span>
-          )}
-        </div>
-      </div>
-
-      <h4
-        className="font-semibold text-sm tracking-tight line-clamp-1 mb-1"
-        style={{ color: "var(--color-text)" }}
-      >
-        {app.name}
-      </h4>
-      <p className="font-mono text-[10px] mb-3" style={{ color: "var(--color-text-dim)" }}>
-        {app.repo ?? app.source}
-      </p>
-
-      <div className="flex items-center justify-between mt-auto pt-2 border-t"
-        style={{ borderColor: "var(--color-ruled)" }}
-      >
-        <div className="flex items-center gap-1.5">
-          <span
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ backgroundColor: color }}
-          />
-          <span
-            className="font-mono text-[11px] tracking-wide"
-            style={{ color: "var(--color-text-dim)" }}
-          >
-            {stalenessLabel(app.staleness)}
-          </span>
-        </div>
-        {app.latestVersion && (
-          <span
-            className="font-mono text-[11px]"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            v{app.latestVersion}
-          </span>
-        )}
-      </div>
-
-      {/* Corner marks */}
-      <div
-        className="absolute top-0 left-0 w-2 h-2 border-t border-l"
-        style={{ borderColor: "var(--color-accent)" }}
-      />
-      <div
-        className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
-        style={{ borderColor: "var(--color-accent)" }}
-      />
     </PlainCard>
   );
 }
@@ -299,6 +230,33 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
   const [collapsed, setCollapsed] = useState(false);
   const [genreFilter, setGenreFilter] = useState<GenreId | "all">("all");
   const [stalenessFilter, setStalenessFilter] = useState("all");
+  const [importToast, setImportToast] = useState<string | null>(null);
+  const [importToastError, setImportToastError] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!importToast) return;
+    const t = setTimeout(() => {
+      setImportToast(null);
+      setImportToastError(false);
+    }, 2200);
+    return () => clearTimeout(t);
+  }, [importToast]);
+
+  async function onImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const count = await importObtainiumExport(file);
+      setImportToast(count > 0 ? `Imported ${count} app${count !== 1 ? "s" : ""}.` : "No new apps in that file.");
+      setImportToastError(false);
+    } catch (err) {
+      setImportToast(err instanceof Error ? err.message : "Couldn't import that file.");
+      setImportToastError(true);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   // Server watchlist (empty at launch) merged with each visitor's local tracking.
   const local = useLocalWatchlist();
@@ -353,10 +311,10 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
   );
 
   return (
-    <section id="watchlist" className="py-16 px-4">
+    <section id="watchlist" className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+        <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className="calibration-marks w-8" />
@@ -364,7 +322,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
                 className="font-mono text-[10px] tracking-[0.2em] uppercase"
                 style={{ color: "var(--color-text-dim)" }}
               >
-                Section 01 / Your Watchlist
+                Your Watchlist
               </span>
             </div>
             <h2
@@ -401,7 +359,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
 
         {/* Filters */}
         {!collapsed && allApps.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2 items-center">
+          <div className="mb-4 flex flex-wrap gap-2 items-center">
             <span
               className="font-mono text-[10px] tracking-widest uppercase mr-1"
               style={{ color: "var(--color-text-dim)" }}
@@ -424,7 +382,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
           </div>
         )}
         {!collapsed && allApps.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2 items-center">
+          <div className="mb-4 flex flex-wrap gap-2 items-center">
             <span
               className="font-mono text-[10px] tracking-widest uppercase mr-1"
               style={{ color: "var(--color-text-dim)" }}
@@ -456,7 +414,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
                 <div
                   className="glass p-8 text-center"
                   style={{
-                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+                    boxShadow: "var(--card-shadow)",
                     border: "1px dashed var(--color-signal-amber)",
                   }}
                 >
@@ -470,11 +428,41 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
                     className="text-sm max-w-md mx-auto leading-relaxed"
                     style={{ color: "var(--color-text-muted)" }}
                   >
-                    Track apps with the TRACK button on any Fresh Finds card or project page —
-                    they appear here, stored in your browser. For the shared watchlist, fork the
-                    repo, add your ObtainX export, and open a PR — the refresh workflow enriches
-                    it with real signals.
+                    Track apps with the TRACK button on any Fresh Finds card or project
+                    page, or import your own app list from an Obtainium export — they
+                    appear here, stored in your browser. Only you see this list.
                   </p>
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json,application/json"
+                      className="hidden"
+                      onChange={onImportFile}
+                      aria-label="Import Obtainium export"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                      style={{
+                        color: "var(--color-accent)",
+                        borderColor: "var(--color-accent-border)",
+                        backgroundColor: "var(--color-accent-dim)",
+                      }}
+                    >
+                      Import Obtainium export
+                    </button>
+                    <a
+                      href="#fresh-finds"
+                      className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                      style={{
+                        color: "var(--color-text-dim)",
+                        borderColor: "var(--color-border)",
+                      }}
+                    >
+                      Browse Fresh Finds ↓
+                    </a>
+                  </div>
                 </div>
               )}
               {attention.length > 0 && (
@@ -485,7 +473,7 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
                   >
                     Needs attention ({attention.length})
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {attention.map(renderCard)}
                   </div>
                 </>
@@ -507,6 +495,22 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
           )}
         </AnimatePresence>
       </div>
+
+      {/* Import toast */}
+      {importToast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] glass px-4 py-2 font-mono text-[11px] tracking-wider"
+          style={{
+            color: importToastError ? "var(--color-signal-red)" : "var(--color-text)",
+            borderColor: importToastError ? "var(--color-signal-red)" : "var(--color-accent-border)",
+            boxShadow: "var(--card-shadow)",
+          }}
+        >
+          {importToast}
+        </div>
+      )}
     </section>
   );
 }

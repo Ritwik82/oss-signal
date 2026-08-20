@@ -27,8 +27,8 @@ Each project gets a composite score from **6 mechanical signals**:
 | Signal | Weight | Source |
 |--------|--------|--------|
 | Recency (days since last push) | 24% | GitHub `pushed_at` |
-| Momentum (stars ÷ repo age) | 20% | GitHub Search API |
-| Issue health (closed ratio, last 90d) | 16% | GitHub Issues API |
+| Momentum (stars ÷ repo age, absolute curve) | 20% | GitHub `stargazers_count` + `created_at` |
+| Issue health (open issues minus open PRs) | 16% | GitHub Issues + Search API |
 | License presence | 8% | GitHub `license` field |
 | Contributor count (capped at 20) | 12% | GitHub Contributors API |
 | Abandonment risk | 20% | Computed: days-since-push + open issue response |

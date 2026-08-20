@@ -22,10 +22,10 @@ export const signals = [
     weight: "0.20",
     dotClass: "signal-dot-blue",
     description:
-      "Star velocity relative to repo age — rewards sustained growth over flash-in-the-pan spikes. Normalized against the run's best performer.",
-    formula: "momentum = ln(1 + stars) / ln(1 + age_days), scaled to run max",
-    source: "GitHub Search API",
-    why: "A busy community keeps a project honest. Normalizing against the run's best repo keeps the scale relative, not arbitrary.",
+      "Star velocity relative to repo age — rewards sustained growth over flash-in-the-pan spikes. Absolute reference scale, not run-relative.",
+    formula: "momentum = ln(1 + stars) / ln(1 + 10 × age_days), clamped [0, 1] (10 stars/day = full marks)",
+    source: "GitHub repo `stargazers_count` + `created_at`",
+    why: "A busy community keeps a project honest. An absolute curve means a quiet week in the whole catalog can't inflate every repo's score.",
   },
   {
     id: "S-03",
@@ -33,10 +33,10 @@ export const signals = [
     weight: "0.16",
     dotClass: "signal-dot-purple",
     description:
-      "Open-issue load as a maintenance proxy. Zero open issues is ideal; a large backlog drags the signal down.",
-    formula: "issue_health = steps(open_issues): 0 → 1.0 · <10 → 0.8 · <50 → 0.6 · <100 → 0.4 · else 0.2",
-    source: "GitHub `open_issues_count`",
-    why: "Repos with <5 recent issues default to 0.5 to avoid punishing new or quiet repos.",
+      "Open-issue load as a maintenance proxy, with open pull requests excluded — GitHub counts PRs as issues, which would punish PR-active repos.",
+    formula: "issue_health = steps(open_issues − open_prs): 0 → 1.0 · <10 → 0.8 · <50 → 0.6 · <100 → 0.4 · else 0.2",
+    source: "GitHub `open_issues_count` − open-PR search count",
+    why: "Repos with <10 recent issues default to 0.8 to avoid punishing new or quiet repos; excluding PRs stops healthy review traffic from reading as a bug backlog.",
   },
   {
     id: "S-04",
@@ -94,7 +94,7 @@ export function ScoringSection() {
               className="font-mono text-[10px] tracking-[0.2em] uppercase"
               style={{ color: "var(--color-text-dim)" }}
             >
-              Section 04 / Methodology
+              Methodology
             </span>
           </motion.div>
           <motion.h2

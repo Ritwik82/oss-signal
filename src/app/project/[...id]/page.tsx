@@ -172,7 +172,7 @@ export default async function ProjectPage({
 
         <div
           className="glass relative p-6"
-          style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
+          style={{ boxShadow: "var(--card-shadow)" }}
         >
           {/* Corner marks */}
           <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2" style={{ borderColor: "var(--color-accent)" }} />

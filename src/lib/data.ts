@@ -44,6 +44,7 @@ export interface Project {
     issue_health: number;
     license: number;
     contributors: number;
+    abandonment_risk: number;
   };
   discussion_links: { source: string; url: string }[];
   // New pivot fields
@@ -58,6 +59,9 @@ export interface Project {
 
 export interface ProjectsData {
   generated_at: string;
+  // Written by refresh-data.mjs: cutoff for the "launched ≤9 months" promise.
+  // Fresh Finds renders projects where added_at AND created_at are ≥ this.
+  fresh_cutoff: string;
   projects: Project[];
 }
 

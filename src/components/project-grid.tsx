@@ -17,7 +17,7 @@ function scoreColor(score: number): string {
   return "var(--color-signal-red)";
 }
 
-function FilterChip({
+export function FilterChip({
   label,
   selected,
   onClick,
@@ -46,7 +46,7 @@ function FilterChip({
   );
 }
 
-function OptionChipGroup<T extends string>({
+export function OptionChipGroup<T extends string>({
   label,
   options,
   value,
@@ -301,17 +301,17 @@ export function ProjectGrid({
     sortDir !== "desc";
 
   return (
-    <section id="archive" className="py-24 md:py-32 px-4">
+    <section id="archive" className="py-12 md:py-16 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
-        <div className="mb-16">
+        <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="calibration-marks w-8" />
             <span
               className="font-mono text-[10px] tracking-[0.2em] uppercase"
               style={{ color: "var(--color-text-dim)" }}
             >
-              Section 03 / Full Archive
+              Full Archive
             </span>
           </div>
           <h2
@@ -328,12 +328,13 @@ export function ProjectGrid({
             mechanical health signals (recency, momentum, issue activity, contributors,
             license, abandonment risk).
           </p>
+          <p className="specimen-number mt-2">{projects.length} apps cataloged</p>
         </div>
 
         {/* Collapse toggle */}
         <div
           className="glass mb-8"
-          style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
+          style={{ boxShadow: "var(--card-shadow)" }}
         >
           <button
             onClick={() => setCollapsed((c) => !c)}

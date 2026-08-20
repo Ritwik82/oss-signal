@@ -50,6 +50,23 @@ export function NavBar({ projects }: { projects: Project[] }) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setMenuOpen(false);
+        const el = document.activeElement as HTMLElement | null;
+        if (el && el instanceof HTMLElement) el.blur();
+        return;
+      }
+      if (e.key === "/" && window.matchMedia("(min-width: 640px)").matches) {
+        const target = e.target as HTMLElement | null;
+        const typing =
+          target &&
+          (target.tagName === "INPUT" ||
+            target.tagName === "TEXTAREA" ||
+            target.tagName === "SELECT" ||
+            target.isContentEditable);
+        if (!typing) {
+          e.preventDefault();
+          const input = document.getElementById("desktop-catalog-search");
+          if (input && input instanceof HTMLInputElement) input.focus();
+        }
       }
     };
     document.addEventListener("keydown", onKey);
@@ -58,7 +75,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b relative overflow-hidden"
+      className="sticky top-0 z-50 border-b relative"
       style={{
         backgroundColor: "color-mix(in srgb, var(--color-bg) 82%, transparent)",
         backdropFilter: "blur(8px)",
@@ -67,7 +84,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
     >
       {/* Data pulse riding the nav bottom hairline */}
       <div className="nav-pulse" aria-hidden="true" />
-      <div className="max-w-7xl mx-auto px-4 flex items-center h-10">
+      <div className="px-4 flex items-center h-10">
         {/* Station identifier — Pulse wordmark */}
         <a href="#main-content" className="flex items-center gap-2 mr-3 no-underline">
           <svg
@@ -135,7 +152,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
         <div className="ml-auto flex items-center gap-2">
           {/* Global search — desktop */}
           <div className="hidden sm:block w-44 mr-1">
-            <CatalogSearch projects={projects} />
+            <CatalogSearch projects={projects} inputId="desktop-catalog-search" />
           </div>
 
           <button
@@ -149,13 +166,6 @@ export function NavBar({ projects }: { projects: Project[] }) {
           >
             How is a score made?
           </button>
-
-          <span
-            className="hidden md:inline font-mono text-[10px] tracking-wider"
-            style={{ color: "var(--color-text-dim)" }}
-          >
-            SYS/{new Date().getFullYear()}
-          </span>
 
           <ThemeToggle />
 

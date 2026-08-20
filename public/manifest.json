@@ -4,8 +4,8 @@
   "description": "Track and discover actively maintained FOSS Android apps. Six transparent health signals, one honest score.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1714",
-  "theme_color": "#14deb5",
+  "background_color": "#0a0e13",
+  "theme_color": "#0a0e13",
   "icons": [
     {
       "src": "/icon.svg",

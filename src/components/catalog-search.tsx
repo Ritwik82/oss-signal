@@ -7,9 +7,11 @@ import type { Project } from "@/lib/data";
 export function CatalogSearch({
   projects,
   onNavigate,
+  inputId,
 }: {
   projects: Project[];
   onNavigate?: () => void;
+  inputId?: string;
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -68,6 +70,7 @@ export function CatalogSearch({
           <path d="M21 21l-4.35-4.35" />
         </svg>
         <input
+          id={inputId}
           type="search"
           value={query}
           onChange={(e) => {
@@ -88,7 +91,7 @@ export function CatalogSearch({
               go(results[activeIndex].id);
             }
           }}
-          placeholder="Search whole catalog…"
+          placeholder="Search"
           aria-label="Search the whole catalog"
           aria-expanded={listboxOpen}
           aria-controls="catalog-search-listbox"
@@ -112,7 +115,7 @@ export function CatalogSearch({
           id="catalog-search-listbox"
           role="listbox"
           className="absolute right-0 top-full mt-1 w-full max-h-96 overflow-y-auto border z-[70] glass"
-          style={{ boxShadow: "0 12px 32px rgba(0, 0, 0, 0.4)" }}
+          style={{ boxShadow: "var(--card-shadow)" }}
         >
           {results.length === 0 ? (
             <p

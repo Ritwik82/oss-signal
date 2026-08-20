@@ -112,6 +112,10 @@ When a bug had a non-obvious root cause, append a one-line lesson to the
 - Absolutely-positioned children resolve against the nearest *positioned* ancestor. A
   container holding absolute corner-marks/overlays MUST have `relative`, or children escape
   to `<body>` and scatter to viewport corners.
+- Playwright's synthetic clicks pass on clipped elements — a dropdown clipped by an ancestor's
+  `overflow:hidden` still "clicks" and fires handlers, so a passing Playwright test does NOT
+  prove a menu is visible. Verify dropdown/menu visibility with `document.elementFromPoint()`
+  hit-testing at each item's center, never with `.click()`/`.isVisible()`.
 - Featured/hero sections and the archive list are SEPARATE render paths. Verifying one does
   not verify the other. Check both.
 - PDF export leaves the hero/featured region blank — use a Playwright screenshot for that

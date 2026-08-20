@@ -11,7 +11,6 @@ import { ProjectGrid } from "@/components/project-grid";
 import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
-import { DailyBriefing } from "@/components/daily-briefing";
 import { ScoreModalProvider } from "@/components/score-modal";
 import { ExportButtons } from "@/components/export-buttons";
 import { ScrollTracker } from "@/components/scroll-tracker";
@@ -20,6 +19,16 @@ export default function Home() {
   const data = getProjects();
   const watchlistData = getWatchlist();
   const genres = getGenres();
+
+  // Fresh Finds = the "launched ≤9 months" promise: repos added to F-Droid AND
+  // created within the window (data.fresh_cutoff written by refresh-data.mjs).
+  // The archive below keeps the full catalog.
+  const cutoff = new Date(data.fresh_cutoff ?? data.generated_at).getTime();
+  const freshProjects = data.projects.filter(
+    (p) =>
+      new Date(p.added_at ?? p.created_at).getTime() >= cutoff &&
+      new Date(p.created_at).getTime() >= cutoff
+  );
 
   return (
     <div
@@ -33,12 +42,6 @@ export default function Home() {
         <LeftRail />
         <NavBar projects={data.projects} />
 
-        <DailyBriefing
-          apps={watchlistData.apps}
-          projects={data.projects}
-          generatedAt={data.generated_at}
-        />
-
         <div className="section-divider" />
 
         {/* Zone 1 — Your Watchlist (most important, top) */}
@@ -47,7 +50,7 @@ export default function Home() {
         <div className="section-divider" />
 
         {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
-        <FreshFinds projects={data.projects} genres={genres.genres} />
+        <FreshFinds projects={freshProjects} genres={genres.genres} />
 
         <div className="section-divider" />
 
@@ -92,6 +95,16 @@ export default function Home() {
                 style={{ color: "var(--color-accent)" }}
               >
                 Ritwik
+              </a>
+              {" · "}
+              <a
+                href="https://github.com/Ritwik82/oss-signal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
+                style={{ color: "var(--color-accent)" }}
+              >
+                View on GitHub
               </a>
             </p>
             <p className="font-mono text-[10px]" style={{ color: "var(--color-text-dim)" }}>

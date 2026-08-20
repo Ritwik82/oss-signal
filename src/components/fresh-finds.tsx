@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, startTransition } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
 import type { Project, Genre, GenreId } from "@/lib/data";
 import { useLocalWatchlist, toggleLocalWatchlist } from "@/lib/local-watchlist";
+import { OptionChipGroup } from "./project-grid";
 
 function daysSince(iso: string | null): number | null {
   if (!iso) return null;
@@ -22,10 +25,28 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
   const genreMap = new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label]));
   const [page, setPage] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  const [sort, setSort] = useState<"score" | "newest" | "stars">("score");
   const PAGE_SIZE = 12;
   const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages - 1);
-  const visible = projects.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
+
+  const sorted = useMemo(() => {
+    const list = [...projects];
+    if (sort === "newest") {
+      list.sort(
+        (a, b) =>
+          new Date(b.added_at ?? b.created_at).getTime() -
+          new Date(a.added_at ?? a.created_at).getTime()
+      );
+    } else if (sort === "stars") {
+      list.sort((a, b) => b.stars - a.stars);
+    } else {
+      list.sort((a, b) => b.score - a.score);
+    }
+    return list;
+  }, [projects, sort]);
+
+  const visible = sorted.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
 
   useEffect(() => {
     if (!toast) return;
@@ -56,17 +77,17 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
   }, []);
 
   return (
-    <section id="fresh-finds" className="py-16 px-4">
+    <section id="fresh-finds" className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="calibration-marks w-8" />
             <span
               className="font-mono text-[10px] tracking-[0.2em] uppercase"
               style={{ color: "var(--color-text-dim)" }}
             >
-              Section 02 / Fresh Finds
+              Fresh Finds
             </span>
           </div>
           <h2
@@ -82,6 +103,18 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
             Open-source apps launched in the last 9 months, scored on activity,
             contributors, and freshness. No abandoned projects.
           </p>
+          <div className="mt-3">
+            <OptionChipGroup
+              label="sort"
+              options={[
+                { value: "score", label: "SCORE" },
+                { value: "newest", label: "NEWEST" },
+                { value: "stars", label: "STARS" },
+              ]}
+              value={sort}
+              onChange={(v) => startTransition(() => setSort(v))}
+            />
+          </div>
         </div>
 
         {/* Grid */}
@@ -154,7 +187,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
           style={{
             color: "var(--color-text)",
             borderColor: "var(--color-accent-border)",
-            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+            boxShadow: "var(--card-shadow)",
           }}
         >
           {toast}
@@ -181,10 +214,21 @@ function FreshCard({
   const isFresh = days !== null && days < 14;
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -1 }}
       className="glass group relative p-5 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)]"
-      style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)" }}
+      style={{ boxShadow: "var(--card-shadow)" }}
     >
+      {/* Stretched link — the whole card navigates; interactive controls
+          below sit above it with z-10 (valid HTML, no nested anchors). */}
+      <Link
+        href={`/project/${encodeURIComponent(project.id)}`}
+        aria-label={`Open ${project.name} on OSS Signal`}
+        className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      />
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <span
@@ -240,11 +284,8 @@ function FreshCard({
         </span>
       </div>
 
-      {/* Name + owner — internal link */}
-      <a
-        href={`/project/${encodeURIComponent(project.id)}`}
-        className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-      >
+      {/* Name + owner — whole card links to the project page */}
+      <div className="block">
         <h4
           className="font-semibold text-sm tracking-tight line-clamp-1 mb-0.5 transition-colors group-hover:text-[var(--color-accent)]"
           style={{ color: "var(--color-text)" }}
@@ -257,7 +298,7 @@ function FreshCard({
         >
           {project.owner}/{project.name}
         </p>
-      </a>
+      </div>
 
       {/* Description */}
       <p
@@ -269,10 +310,10 @@ function FreshCard({
 
       {/* Footer */}
       <div
-        className="flex items-center justify-between gap-2 pt-3 border-t"
+        className="flex items-center justify-between gap-2 pt-3 border-t flex-wrap"
         style={{ borderColor: "var(--color-ruled)" }}
       >
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-wrap">
           <span
             className="font-medium text-xs truncate"
             style={{ color: "var(--color-text)" }}
@@ -295,7 +336,7 @@ function FreshCard({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
           {isFresh && (
             <span
               className="badge-pulse font-mono text-[11px] px-1.5 py-0.5"
@@ -309,7 +350,7 @@ function FreshCard({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Open ${project.name} on GitHub`}
-            className="flex items-center border px-2 py-1 transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="relative z-10 flex items-center border px-2 py-1 transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               color: "var(--color-accent)",
               borderColor: "var(--color-accent-border)",
@@ -324,7 +365,7 @@ function FreshCard({
             onClick={onToggleTrack}
             aria-pressed={tracked}
             aria-label={tracked ? `Stop tracking ${project.name}` : `Track ${project.name}`}
-            className="font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               color: tracked ? "var(--color-signal-green)" : "var(--color-accent)",
               borderColor: tracked ? "var(--color-signal-green)" : "var(--color-accent-border)",
@@ -336,7 +377,7 @@ function FreshCard({
           <button
             onClick={() => onCopy(project.url)}
             aria-label={`Copy GitHub link for ${project.name}`}
-            className="font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               color: "var(--color-accent)",
               borderColor: "var(--color-accent-border)",
@@ -357,6 +398,6 @@ function FreshCard({
         className="absolute bottom-0 right-0 w-2 h-2 border-b border-r"
         style={{ borderColor: "var(--color-accent)" }}
       />
-    </div>
+    </motion.div>
   );
 }

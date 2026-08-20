@@ -14,6 +14,22 @@ Every architectural choice and why. Updated when decisions are made. Newest at t
 
 ---
 
+## Harsh-judge pass (2026-08-20)
+
+External review of the live site found the flagship watchlist empty, an unauthenticated
+write endpoint, and a lying score_breakdown type. Fixes:
+
+| # | Decision | Rationale |
+|---|----------|-------------|
+| 70 | Watchlist re-seeded with the pre-launch 35-app list (restored from git history) and re-enriched by the refresh workflow | The flagship zone rendered as a permanent empty dashed box; a populated watchlist is the product's premise. #67's "empty for launch" experiment ended |
+| 71 | `PUT /api/tracked` requires `Authorization: Bearer $ADMIN_TOKEN`; without the env var configured it rejects ALL writes (403) | The only write endpoint on a live site was unauthenticated by design — one curl wipes the sole persistent state. The public site never PUTs (localStorage only), so fail-closed costs nothing |
+| 72 | View Transitions dropped: dead `::view-transition-*` CSS and `--duration-*` tokens deleted; framer-motion covers all motion | Documented as shipped in #61 but nothing called `document.startViewTransition`; a shipped-looking dead block is worse than none |
+| 73 | `score_breakdown` type gains the 6th key `abandonment_risk` it was already writing and reading | The type claimed 5 keys while the pipeline wrote 6 and the project page rendered 6 — an unchecked cast turned the type layer off |
+| 74 | Fresh Finds = added to F-Droid AND repo created within 9 months (`fresh_cutoff` written to `projects.json` by refresh-data) | "Launched in the last 9 months" read as old-repo apps wearing NEW badges; the archive still carries the full added-in-window catalog |
+| 75 | Issue Health subtracts open PRs; Momentum uses an absolute reference curve (10 stars/day = full marks) instead of run-max normalization | `open_issues_count` counts PRs as issues (systematic under-score for PR-active repos); run-relative momentum compressed young repos into a noise band |
+
+---
+
 ## Modern Calibration reskin (2026-08-04)
 
 Complete visual overhaul — "Modern Calibration": dark-first minimal data instrument with

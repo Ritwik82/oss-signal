@@ -13,17 +13,62 @@ test("home page renders all three zones", async ({ page }) => {
   await page.waitForTimeout(1500);
 
   const body = await page.textContent("body");
-  expect(body).toContain("Section 01 / Your Watchlist");
-  expect(body).toContain("Section 02 / Fresh Finds");
-  expect(body).toContain("Section 03 / Full Archive");
-  expect(body).toContain("Empty watchlist");
+  expect(body).toContain("Your Watchlist");
+  expect(body).toContain("Fresh Finds");
+  expect(body).toContain("Full Archive");
+  expect(body).not.toContain("Section 0");
 
-  const dark = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark")
+  const watchlistData = JSON.parse(
+    readFileSync(join(process.cwd(), "data", "watchlist.json"), "utf-8")
   );
-  expect(dark).toBe(true);
+  expect(watchlistData.apps.length).toBeGreaterThanOrEqual(3);
+  expect(body).toContain(watchlistData.apps[0].name);
+
+  const theme = await page.evaluate(() => document.documentElement.dataset.theme);
+  expect(theme).toBe("terminal");
 
   expect(errors).toEqual([]);
+});
+
+test("theme picker switches theme and persists across reload", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+
+  const trigger = page.getByRole("button", { name: "Change theme" });
+  await trigger.click();
+  await page.getByRole("button", { name: "LIGHT", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: /Cream/ }).click();
+
+  const theme = await page.evaluate(() => ({
+    theme: document.documentElement.dataset.theme,
+    meta: document.querySelector('meta[name="theme-color"]')?.getAttribute("content"),
+  }));
+  expect(theme.theme).toBe("cream");
+  expect(theme.meta).toBe("#f6eddd");
+
+  await page.reload({ waitUntil: "networkidle" });
+  const persisted = await page.evaluate(() => document.documentElement.dataset.theme);
+  expect(persisted).toBe("cream");
+});
+
+test("fresh card body navigates, TRACK button does not", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+
+  const card = page.locator("#fresh-finds .glass.group").first();
+  await card.click();
+  await page.waitForURL(/\/project\//);
+  expect(page.url()).toMatch(/\/project\//);
+
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.waitForTimeout(1500);
+
+  const trackBtn = page.getByRole("button", { name: /^Track / }).first();
+  const name = (await trackBtn.getAttribute("aria-label")).replace(/^Track /, "").trim();
+  await trackBtn.click();
+  await page.waitForTimeout(300);
+  expect(page.url()).not.toMatch(/\/project\//);
+  await expect(page.locator("#watchlist")).toContainText(name);
 });
 
 test("project page renders a real project", async ({ page }) => {
@@ -73,14 +118,23 @@ test("track from Fresh Finds adds to watchlist, untrack removes it", async ({ pa
   await page.goto("/", { waitUntil: "networkidle" });
   await page.waitForTimeout(1500);
 
-  const trackBtn = page.getByRole("button", { name: /^Track / }).first();
-  const name = (await trackBtn.getAttribute("aria-label")).replace(/^Track /, "").trim();
-  await trackBtn.click();
-
+  const projects = JSON.parse(
+    readFileSync(join(process.cwd(), "data", "projects.json"), "utf-8")
+  ).projects;
+  const watchlistIds = new Set(
+    JSON.parse(readFileSync(join(process.cwd(), "data", "watchlist.json"), "utf-8")).apps.map((a) => a.repo ?? a.id)
+  );
+  // Seeded apps are "shared" (no untrack button) — track one that isn't seeded.
+  const target = [...projects].sort((a, b) => b.score - a.score).find((p) => !watchlistIds.has(p.id));
+  const encoded = encodeURIComponent(target.id);
+  const card = page.locator(`#fresh-finds a[href="/project/${encoded}"]`).locator("..");
   const watchlist = page.locator("#watchlist");
-  await expect(watchlist).toContainText(name);
-  await expect(watchlist).toContainText("UNKNOWN");
+  const stopBtn = watchlist.getByRole("button", { name: `Stop tracking ${target.name}` });
+  await expect(stopBtn).toHaveCount(0);
 
-  await watchlist.getByRole("button", { name: `Stop tracking ${name}` }).click();
-  await expect(watchlist).toContainText("Empty watchlist");
+  await card.getByRole("button", { name: `Track ${target.name}` }).click();
+  await expect(stopBtn).toHaveCount(1);
+
+  await stopBtn.click();
+  await expect(stopBtn).toHaveCount(0);
 });

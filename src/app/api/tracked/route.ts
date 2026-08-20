@@ -48,6 +48,12 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const token = process.env.ADMIN_TOKEN;
+  if (!token || request.headers.get("authorization") !== `Bearer ${token}`) {
+    // Fail closed: no token configured means no one can write. The public site
+    // never PUTs — the watchlist is per-visitor localStorage.
+    return NextResponse.json({ error: "unauthorized" }, { status: 403 });
+  }
   const body = (await request.json().catch(() => null)) as { ids?: unknown } | null;
   if (!body || !Array.isArray(body.ids)) {
     return NextResponse.json({ error: "ids must be an array" }, { status: 400 });
