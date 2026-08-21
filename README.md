@@ -58,49 +58,30 @@ Three flags: 🏷️ **Genre**, 🔌 **Shizuku**, 🧩 **Generic** (common ideas
 
 ---
 
-## 🚀 Getting started
-
-```bash
-npm install
-npm run dev
-```
-Open http://localhost:3000
-
----
-
-## 🔄 Data refresh
-
-```bash
-GITHUB_TOKEN=your_token node scripts/refresh-data.mjs
-```
-Fetches fresh finds, re-checks watchlist, writes `data/projects.json` + `data/watchlist.json`.  
-GitHub Action runs this every 6 hours ⏰
-
----
-
 ## 👤 Watchlist source
 
 Empty by default — you build it in the browser with Track buttons or an Obtainium import. Nothing personal ships in the repo.
 
----
-
-## ☁️ Deploy
+<details>
+<summary>🧑‍💻 For contributors — run locally</summary>
 
 ```bash
-vercel deploy
+npm install
+npm run dev
+# → http://localhost:3000
 ```
-Or push to GitHub — Vercel deploys automatically ✨
 
----
+Data refresh (every 6h via GitHub Action):
 
-## 🧰 Tech stack
+```bash
+GITHUB_TOKEN=your_token node scripts/refresh-data.mjs
+```
 
-- ⚛️ Next.js (App Router) + React
-- 🎨 Tailwind CSS
-- 🎬 Framer Motion
-- ☁️ Vercel Hobby (free)
-- 🐙 GitHub REST API
-- 🔍 HN Algolia + Reddit
+Deploy: `vercel deploy` or push to GitHub — Vercel auto-deploys.
+
+Tech: Next.js (App Router) + Tailwind + Framer Motion + Vercel Hobby + GitHub REST API
+
+</details>
 
 ---
 
