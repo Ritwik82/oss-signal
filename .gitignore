@@ -61,3 +61,12 @@ run.err
 dev.log
 pipeline.log
 server.log
+
+# meta (not site)
+
+
+# local meta (not site)
+AGENTS.md
+HANDOFF.md
+decisions.md
+
