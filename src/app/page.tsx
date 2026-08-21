@@ -40,22 +40,14 @@ export default function Home() {
         <LeftRail />
         <NavBar projects={data.projects} />
 
-        <div className="section-divider" />
-
         {/* Zone 1 — Your Watchlist (most important, top) */}
         <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} />
-
-        <div className="section-divider" />
 
         {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
         <FreshFinds projects={freshProjects} genres={genres.genres} />
 
-        <div className="section-divider" />
-
         {/* Zone 3 — The rest of the archive with pagination */}
         <ProjectGrid projects={data.projects} genres={genres.genres} />
-
-        <div className="section-divider" />
 
         {/* Scoring methodology — at the bottom, after the data */}
         <ScoringSection />
