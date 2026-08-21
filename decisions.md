@@ -27,6 +27,7 @@ write endpoint, and a lying score_breakdown type. Fixes:
 | 73 | `score_breakdown` type gains the 6th key `abandonment_risk` it was already writing and reading | The type claimed 5 keys while the pipeline wrote 6 and the project page rendered 6 — an unchecked cast turned the type layer off |
 | 74 | Fresh Finds = added to F-Droid AND repo created within 9 months (`fresh_cutoff` written to `projects.json` by refresh-data) | "Launched in the last 9 months" read as old-repo apps wearing NEW badges; the archive still carries the full added-in-window catalog |
 | 75 | Issue Health subtracts open PRs; Momentum uses an absolute reference curve (10 stars/day = full marks) instead of run-max normalization | `open_issues_count` counts PRs as issues (systematic under-score for PR-active repos); run-relative momentum compressed young repos into a noise band |
+| 76 | Watchlist re-emptied (reverses #70): the seed was the owner's personal Obtainium export (installed versions, app sources like apkpure/playstore) — personal data doesn't ship in a public repo. Visitors populate the section locally via Track buttons/import; the GitHub repo is the only version of the site | Owner product call, outweighs reviewer preference. Judge flip-condition #1 ("seeded watchlist") reopens by design; the empty state carries import/browse CTAs |
 
 ---
 

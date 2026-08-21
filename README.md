@@ -59,7 +59,7 @@ The GitHub Actions workflow (`.github/workflows/refresh-data.yml`) runs this eve
 
 ## Watchlist source
 
-Seeded from an ObtainX (Obtainium fork) export. Re-import by re-exporting from your phone and replacing `data/watchlist.json`.
+Empty by default — every visitor builds their own list in the browser (Track buttons or an Obtainium import); no personal app data ships in the repo. Contributors can grow the shared starter list by PR: replace `data/watchlist.json` with your export and the refresh workflow fills in staleness/versions.
 
 ## Deploy
 

@@ -21,8 +21,8 @@ test("home page renders all three zones", async ({ page }) => {
   const watchlistData = JSON.parse(
     readFileSync(join(process.cwd(), "data", "watchlist.json"), "utf-8")
   );
-  expect(watchlistData.apps.length).toBeGreaterThanOrEqual(3);
-  expect(body).toContain(watchlistData.apps[0].name);
+  expect(watchlistData.apps.length).toBe(0);
+  expect(body).toContain("Empty watchlist");
 
   const theme = await page.evaluate(() => document.documentElement.dataset.theme);
   expect(theme).toBe("terminal");
