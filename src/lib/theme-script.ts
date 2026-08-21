@@ -38,7 +38,7 @@ export const themeScript = `
   var THEMES = ["espresso", "caramel", "terminal", "midnight", "latte", "cream", "blush", "azure"];
   var META = { espresso: "#1a1410", caramel: "#3a2a1a", terminal: "#0a0e13", midnight: "#12161d", latte: "#e6d9bf", cream: "#f6eddd", blush: "#f2dfda", azure: "#d9e6f2" };
   var t = localStorage.getItem('oss-signal-theme');
-  if (THEMES.indexOf(t) === -1) t = "terminal";
+  if (THEMES.indexOf(t) === -1) t = "midnight";
   document.documentElement.dataset.theme = t;
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', META[t]);
