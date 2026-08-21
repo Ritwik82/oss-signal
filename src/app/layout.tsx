@@ -69,8 +69,6 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col isolate">
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        {/* Ambient aurora — sits behind all content so glass surfaces have something to blur */}
-        <div className="aurora" aria-hidden="true" />
         {/* Fixed graph-paper grid — telemetry texture behind everything */}
         <div className="grid-overlay" aria-hidden="true" />
         {children}

@@ -305,15 +305,6 @@ export function ProjectGrid({
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="calibration-marks w-8" />
-            <span
-              className="font-mono text-[10px] tracking-[0.2em] uppercase"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              Full Archive
-            </span>
-          </div>
           <h2
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4 serif-display"
             style={{ color: "var(--color-text)" }}

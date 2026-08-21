@@ -316,15 +316,6 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
         {/* Header */}
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="calibration-marks w-8" />
-              <span
-                className="font-mono text-[10px] tracking-[0.2em] uppercase"
-                style={{ color: "var(--color-text-dim)" }}
-              >
-                Your Watchlist
-              </span>
-            </div>
             <h2
               className="text-3xl md:text-4xl font-bold tracking-tight serif-display"
               style={{ color: "var(--color-text)" }}

@@ -81,15 +81,6 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="calibration-marks w-8" />
-            <span
-              className="font-mono text-[10px] tracking-[0.2em] uppercase"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              Fresh Finds
-            </span>
-          </div>
           <h2
             className="text-3xl md:text-4xl font-bold tracking-tight serif-display"
             style={{ color: "var(--color-text)" }}

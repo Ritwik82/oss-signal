@@ -13,9 +13,9 @@ test("home page renders all three zones", async ({ page }) => {
   await page.waitForTimeout(1500);
 
   const body = await page.textContent("body");
-  expect(body).toContain("Your Watchlist");
-  expect(body).toContain("Fresh Finds");
-  expect(body).toContain("Full Archive");
+  expect(body).toContain("Apps you rely on");
+  expect(body).toContain("New & actively maintained");
+  expect(body).toContain("Everything we're tracking");
   expect(body).not.toContain("Section 0");
 
   const watchlistData = JSON.parse(

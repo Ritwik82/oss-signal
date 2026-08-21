@@ -51,9 +51,6 @@
   --glow-strong: 0 0 10px 1px rgba(217, 160, 91, 0.3);
   --glow-faint: 0 0 2px 0 rgba(217, 160, 91, 0.2);
   --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --aurora-1: rgba(217, 160, 91, 0.14);
-  --aurora-2: rgba(232, 163, 61, 0.1);
-  --aurora-3: rgba(165, 100, 31, 0.08);
 }
 
 /* Terminal — dark cyan (non-brown) */
@@ -94,9 +91,6 @@
   --glow-strong: 0 0 10px 1px rgba(44, 201, 238, 0.3);
   --glow-faint: 0 0 2px 0 rgba(44, 201, 238, 0.2);
   --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --aurora-1: rgba(44, 201, 238, 0.14);
-  --aurora-2: rgba(60, 130, 240, 0.1);
-  --aurora-3: rgba(90, 60, 200, 0.08);
 }
 
 /* Midnight — dark blue-gray (non-brown) */
@@ -137,9 +131,6 @@
   --glow-strong: 0 0 10px 1px rgba(134, 174, 232, 0.3);
   --glow-faint: 0 0 2px 0 rgba(134, 174, 232, 0.2);
   --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --aurora-1: rgba(134, 174, 232, 0.14);
-  --aurora-2: rgba(96, 130, 220, 0.1);
-  --aurora-3: rgba(70, 90, 190, 0.08);
 }
 
 /* Caramel — mid-dark */
@@ -180,9 +171,6 @@
   --glow-strong: 0 0 10px 1px rgba(232, 163, 61, 0.3);
   --glow-faint: 0 0 2px 0 rgba(232, 163, 61, 0.2);
   --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --aurora-1: rgba(232, 163, 61, 0.13);
-  --aurora-2: rgba(208, 140, 63, 0.1);
-  --aurora-3: rgba(165, 100, 31, 0.08);
 }
 
 /* Latte — light warm tan */
@@ -223,9 +211,6 @@
   --glow-strong: 0 0 10px 1px rgba(139, 77, 21, 0.18);
   --glow-faint: 0 0 2px 0 rgba(139, 77, 21, 0.12);
   --card-shadow: 0 1px 3px rgba(80, 55, 25, 0.12), 0 6px 18px -6px rgba(80, 55, 25, 0.22);
-  --aurora-1: rgba(139, 77, 21, 0.1);
-  --aurora-2: rgba(217, 160, 91, 0.14);
-  --aurora-3: rgba(160, 110, 40, 0.08);
 }
 
 /* Cream — light clean cream, brightest */
@@ -266,9 +251,6 @@
   --glow-strong: 0 0 10px 1px rgba(143, 80, 31, 0.16);
   --glow-faint: 0 0 2px 0 rgba(143, 80, 31, 0.12);
   --card-shadow: 0 1px 2px rgba(60, 45, 25, 0.08), 0 4px 14px -4px rgba(60, 45, 25, 0.15);
-  --aurora-1: rgba(143, 80, 31, 0.07);
-  --aurora-2: rgba(217, 160, 91, 0.1);
-  --aurora-3: rgba(165, 100, 31, 0.05);
 }
 
 /* Blush — light rosy (non-brown) */
@@ -309,9 +291,6 @@
   --glow-strong: 0 0 10px 1px rgba(166, 83, 79, 0.18);
   --glow-faint: 0 0 2px 0 rgba(166, 83, 79, 0.12);
   --card-shadow: 0 1px 3px rgba(90, 50, 45, 0.1), 0 6px 18px -6px rgba(90, 50, 45, 0.2);
-  --aurora-1: rgba(166, 83, 79, 0.09);
-  --aurora-2: rgba(200, 120, 110, 0.13);
-  --aurora-3: rgba(140, 90, 130, 0.07);
 }
 
 /* Azure — light blue (non-brown) */
@@ -352,9 +331,6 @@
   --glow-strong: 0 0 10px 1px rgba(42, 95, 158, 0.18);
   --glow-faint: 0 0 2px 0 rgba(42, 95, 158, 0.12);
   --card-shadow: 0 1px 3px rgba(35, 55, 85, 0.1), 0 6px 18px -6px rgba(35, 55, 85, 0.2);
-  --aurora-1: rgba(42, 95, 158, 0.09);
-  --aurora-2: rgba(90, 140, 200, 0.13);
-  --aurora-3: rgba(60, 110, 180, 0.07);
 }
 
 body {
@@ -362,18 +338,6 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* ── Ambient aurora (what glass blurs) ── */
-.aurora {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(720px 460px at 12% 8%, var(--aurora-1), transparent 62%),
-    radial-gradient(780px 540px at 88% 24%, var(--aurora-2), transparent 62%),
-    radial-gradient(560px 440px at 50% 92%, var(--aurora-3), transparent 60%);
 }
 
 /* ── Glass surface ── */
@@ -810,7 +774,6 @@ button, a, [role="button"] {
 
 /* ── Print: hide telemetry chrome, force content visible ── */
 @media print {
-  .aurora,
   .grid-overlay,
   .calibration-scan,
   .scroll-tracker,
