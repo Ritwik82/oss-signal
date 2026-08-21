@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="public/icon.svg" width="72" height="72" alt="OSS Signal logo" />
+  <a href="https://oss-signal.vercel.app">
+    <img src="public/icon.svg" width="72" height="72" alt="OSS Signal — wave logo from top-left header" />
+  </a>
 </p>
 
 <h1 align="center">OSS Signal</h1>
@@ -23,66 +25,85 @@
 
 ---
 
-## What it is
+## ✨ What it is
 
-**Your Watchlist** — the apps you actually use, checked for:
-- Staleness — how long since the last push or release
-- Updates — is there a newer release than your installed version
-- Abandonment risk — will this likely go stale soon, not just “is it stale today”
+### 📋 Your Watchlist
+The apps **you** actually use, checked for:
+- 🕒 Staleness — how long since the last push or release
+- 🔄 Updates — is there a newer release than your installed version
+- ⚠️ Abandonment risk — will this likely go stale soon
 
-**Fresh Finds** — open-source Android projects launched in the last 9 months:
-- Shizuku customization and utility apps
-- Everyday FOSS tools (Termux, media, system utilities)
-- Filterable by genre, access, and risk
+### 🌱 Fresh Finds — <em>New & actively maintained</em>
+Open-source Android projects launched in the last 9 months:
+- ✨ Shizuku customization and utility apps
+- 🛠️ Everyday FOSS tools (Termux, media, system utilities)
+- 🎛️ Filterable by genre, access, and risk
 
-## How scoring works
+---
 
-Six plain signals, no black box:
+## 📊 Scoring — transparent, not a black box
+
+Each project gets a composite score from **6 mechanical signals**:
 
 | Signal | Weight | Source |
 |--------|--------|--------|
-| Recency (days since last push) | 24% | GitHub `pushed_at` |
-| Momentum (stars ÷ repo age) | 20% | `stargazers_count` + `created_at` |
-| Issue health (open issues minus open PRs) | 16% | GitHub Issues + Search API |
-| License presence | 8% | `license` field |
-| Contributor count (capped at 20) | 12% | Contributors API |
-| Abandonment risk | 20% | Days since push + issue response |
+| ⏱️ Recency (days since last push) | 24% | GitHub `pushed_at` |
+| 📈 Momentum (stars ÷ repo age) | 20% | `stargazers_count` + `created_at` |
+| 💬 Issue health (open issues minus open PRs) | 16% | GitHub Issues + Search API |
+| 📄 License presence | 8% | `license` field |
+| 👥 Contributor count (capped at 20) | 12% | Contributors API |
+| 🚨 Abandonment risk | 20% | Days since push + issue response |
 
-Three flags: **Genre** (customization / media / store / etc), **Shizuku** (needs Shizuku), **Generic** (common ideas like notes apps need extra proof to surface).
+Three flags: 🏷️ **Genre**, 🔌 **Shizuku**, 🧩 **Generic** (common ideas need extra proof to surface).
 
-## Getting started
+---
+
+## 🚀 Getting started
 
 ```bash
 npm install
 npm run dev
 ```
-Open http://localhost:3000
+Open http://localhost:3000 🎉
 
-## Data refresh
+---
+
+## 🔄 Data refresh
 
 ```bash
 GITHUB_TOKEN=your_token node scripts/refresh-data.mjs
 ```
 Fetches fresh finds, re-checks watchlist, writes `data/projects.json` + `data/watchlist.json`.  
-GitHub Action runs this every 6 hours (`.github/workflows/refresh-data.yml`).
+GitHub Action runs this every 6 hours ⏰
 
-## Watchlist source
+---
+
+## 👤 Watchlist source
 
 Empty by default — you build it in the browser with Track buttons or an Obtainium import. Nothing personal ships in the repo.
 
-## Deploy
+---
+
+## ☁️ Deploy
 
 ```bash
 vercel deploy
 ```
-Or push to GitHub — Vercel deploys automatically.
+Or push to GitHub — Vercel deploys automatically ✨
 
-## Tech stack
+---
 
-Next.js (App Router) + React, Tailwind CSS, Framer Motion, Vercel Hobby (free), GitHub REST API
+## 🧰 Tech stack
+
+- ⚛️ Next.js (App Router) + React
+- 🎨 Tailwind CSS
+- 🎬 Framer Motion
+- ☁️ Vercel Hobby (free)
+- 🐙 GitHub REST API
+- 🔍 HN Algolia + Reddit
 
 ---
 
 <p align="center">
-  <sub>Built by <a href="https://github.com/Ritwik82">Ritwik</a> • Scores are automated health signals, not endorsements</sub>
+  <sub>Built by <a href="https://github.com/Ritwik82">Ritwik</a> • <a href="https://github.com/Ritwik82/oss-signal">View on GitHub</a> • Scores are automated health signals, not endorsements</sub>
 </p>

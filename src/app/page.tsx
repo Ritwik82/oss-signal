@@ -6,7 +6,6 @@ import {
 import { RelativeTime } from "@/components/relative-time";
 import { NavBar } from "@/components/nav-bar";
 import { LeftRail } from "@/components/left-rail";
-import { CalibrationScan } from "@/components/calibration-scan";
 import { ProjectGrid } from "@/components/project-grid";
 import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
@@ -37,7 +36,6 @@ export default function Home() {
       style={{ color: "var(--color-text)" }}
     >
       <ScrollTracker />
-      <CalibrationScan />
       <ScoreModalProvider>
         <LeftRail />
         <NavBar projects={data.projects} />
