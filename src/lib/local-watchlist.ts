@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { WatchlistApp } from "./data";
+import type { WatchlistApp, Project } from "./data";
 
 const KEY = "oss-signal-watchlist";
 const EVENT = "oss-signal-watchlist-change";
@@ -30,6 +30,60 @@ export function toWatchlistAppFallback(l: LocalEntry): WatchlistApp {
     staleness: "not_yet_catalogued",
     notYetCatalogued: true,
   };
+}
+
+// Derive staleness from abandonment_risk (precomputed from pushed_at using
+// the same 14/30/90-day thresholds as refresh-data.mjs computeAbandonmentRisk).
+// Note: computeAbandonmentRisk has a discontinuity at day 30 (risk jumps from
+// 1.0 down to ~0.21), so a risk value in (0,1) could come from either the
+// 14-30d "warning" branch or the 30-90d "stale" branch of the original
+// day-based logic — they can't be told apart after the fact from risk alone.
+// Treat that whole open range as "warning" (documented here, don't silently
+// guess "stale").
+export function stalenessFromAbandonmentRisk(risk: number): "fresh" | "warning" | "stale" | "abandoned" {
+  if (risk <= 0) return "fresh";
+  if (risk >= 1) return "abandoned";
+  return "warning";
+}
+
+// Build a WatchlistApp from a Project for locally tracked apps that exist in the catalog.
+export function watchlistAppFromProject(p: Project): WatchlistApp {
+  const staleness = stalenessFromAbandonmentRisk(p.abandonment_risk);
+  return {
+    id: p.id,
+    name: p.name,
+    genre: p.genre,
+    source: "local",
+    repo: p.id,
+    installedVersion: null,
+    latestVersion: null,
+    installed: false,
+    trackOnly: true,
+    fdroid: false,
+    last_release_at: p.last_release_at,
+    staleness,
+    update_available: false,
+    notYetCatalogued: false,
+  };
+}
+
+// Merge server watchlist with local tracking, enriching local entries from
+// the project catalog when available.
+export function mergeWatchlist(
+  apps: WatchlistApp[],
+  local: LocalEntry[],
+  projects: Project[]
+): WatchlistApp[] {
+  const projectById = new Map(projects.map((p) => [p.id, p]));
+  const byKey = new Map<string, WatchlistApp>();
+  for (const a of apps) byKey.set(a.repo ?? a.id, a);
+  for (const l of local) {
+    const key = l.repo ?? l.id;
+    if (byKey.has(key)) continue;
+    const project = projectById.get(key);
+    byKey.set(key, project ? watchlistAppFromProject(project) : toWatchlistAppFallback(l));
+  }
+  return [...byKey.values()];
 }
 
 // getSnapshot must return a stable reference between renders unless the

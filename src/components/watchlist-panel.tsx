@@ -1,25 +1,15 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, startTransition, useRef } from "react";
+import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
   useLocalWatchlist,
   toggleLocalWatchlist,
-  toWatchlistAppFallback,
   importObtainiumExport,
+  mergeWatchlist,
 } from "@/lib/local-watchlist";
-
-// Hook to get current time that updates periodically without triggering lint errors
-function useCurrentTime(intervalMs = 60_000): number {
-  const [time, setTime] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setTime(Date.now()), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs]);
-  return time;
-}
 
 function stalenessColor(staleness?: string) {
   switch (staleness) {
@@ -28,6 +18,7 @@ function stalenessColor(staleness?: string) {
     case "stale": return "var(--color-signal-orange)";
     case "abandoned": return "var(--color-signal-amber)";
     case "unknown": return "var(--color-signal-amber)";
+    case "not_yet_catalogued": return "var(--color-signal-blue)";
     default: return "var(--color-text-dim)";
   }
 }
@@ -250,60 +241,12 @@ function AppCard({
 
 export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[]; genres: Genre[]; projects: Project[] }) {
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
-  const projectById = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
-  const now = useCurrentTime();
   const [collapsed, setCollapsed] = useState(false);
   const [genreFilter, setGenreFilter] = useState<GenreId | "all">("all");
   const [stalenessFilter, setStalenessFilter] = useState("all");
   const [importToast, setImportToast] = useState<string | null>(null);
   const [importToastError, setImportToastError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Derive staleness from a Project using the same thresholds as refresh-data.mjs
-  // (14/30/90 days since last_release_at). Fall back to abandonment_risk heuristic
-  // if last_release_at is unavailable.
-  const deriveStalenessFromProject = useCallback(
-    (p: Project, now: number): "fresh" | "warning" | "stale" | "abandoned" | "unknown" => {
-      if (p.last_release_at) {
-        const days = (now - new Date(p.last_release_at).getTime()) / 86_400_000;
-        if (days < 14) return "fresh";
-        if (days < 30) return "warning";
-        if (days < 90) return "stale";
-        return "abandoned";
-      }
-      // Fallback: approximate from abandonment_risk (0-1, computed from pushed_at at build time)
-      const risk = p.abandonment_risk;
-      if (risk === 0) return "fresh";
-      if (risk === 1) return "abandoned";
-      // risk in (0,1) spans warning (14-30d) and stale (30-90d) — treat conservatively as warning
-      return "warning";
-    },
-    []
-  );
-
-  // Build a WatchlistApp from a Project for locally tracked apps that exist in the catalog.
-  const watchlistAppFromProject = useCallback(
-    (p: Project, now: number): WatchlistApp => {
-      const staleness = deriveStalenessFromProject(p, now);
-      return {
-        id: p.id,
-        name: p.name,
-        genre: p.genre,
-        source: "local",
-        repo: p.id,
-        installedVersion: null,
-        latestVersion: null,
-        installed: false,
-        trackOnly: true,
-        fdroid: false,
-        last_release_at: p.last_release_at,
-        staleness,
-        update_available: false,
-        notYetCatalogued: false,
-      };
-    },
-    [deriveStalenessFromProject]
-  );
 
   useEffect(() => {
     if (!importToast) return;
@@ -331,21 +274,7 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
 
   // Server watchlist (empty at launch) merged with each visitor's local tracking.
   const local = useLocalWatchlist();
-  const allApps = useMemo(() => {
-    const byKey = new Map<string, WatchlistApp>();
-    for (const a of apps) byKey.set(a.repo ?? a.id, a);
-    for (const l of local) {
-      const key = l.repo ?? l.id;
-      if (byKey.has(key)) continue;
-      const project = projectById.get(key);
-      if (project) {
-        byKey.set(key, watchlistAppFromProject(project, now));
-      } else {
-        byKey.set(key, toWatchlistAppFallback(l));
-      }
-    }
-    return [...byKey.values()];
-  }, [apps, local, projectById, now, watchlistAppFromProject]);
+  const allApps = useMemo(() => mergeWatchlist(apps, local, projects), [apps, local, projects]);
 
   const filtered = useMemo(() => {
     let list = allApps;
