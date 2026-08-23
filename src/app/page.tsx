@@ -5,7 +5,6 @@ import {
 } from "@/lib/data";
 import { RelativeTime } from "@/components/relative-time";
 import { NavBar } from "@/components/nav-bar";
-import { LeftRail } from "@/components/left-rail";
 import { ProjectGrid } from "@/components/project-grid";
 import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
@@ -37,7 +36,6 @@ export default function Home() {
     >
       <ScrollTracker />
       <ScoreModalProvider>
-        <LeftRail />
         <NavBar projects={data.projects} />
 
         {/* Zone 1 — Your Watchlist (most important, top) */}
