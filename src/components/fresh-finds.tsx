@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback, useMemo, startTransition } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Project, Genre, GenreId } from "@/lib/data";
 import { useLocalWatchlist, toggleLocalWatchlist } from "@/lib/local-watchlist";
-import { OptionChipGroup } from "./project-grid";
+import { FilterChipGroup } from "./filter-chip";
 
 function daysSince(iso: string | null): number | null {
   if (!iso) return null;
@@ -22,6 +22,7 @@ function scoreColor(score: number): string {
 }
 
 export function FreshFinds({ projects, genres }: { projects: Project[]; genres: Genre[] }) {
+  const router = useRouter();
   const genreMap = new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label]));
   const [page, setPage] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -95,7 +96,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
             contributors, and freshness. No abandoned projects.
           </p>
           <div className="mt-3">
-            <OptionChipGroup
+            <FilterChipGroup
               label="sort"
               options={[
                 { value: "score", label: "SCORE" },
@@ -103,38 +104,42 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
                 { value: "stars", label: "STARS" },
               ]}
               value={sort}
-              onChange={(v) => startTransition(() => setSort(v))}
+              onChange={(v) => startTransition(() => setSort(v as "score" | "newest" | "stars"))}
+              useStartTransition
             />
           </div>
         </div>
 
         {/* Grid */}
         {projects.length === 0 ? (
-          <div
-            className="glass p-12 text-center"
-          >
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              No fresh finds today. Run{" "}
-              <code
-                className="font-mono text-xs px-1 py-0.5"
-                style={{ backgroundColor: "var(--color-bg)", color: "var(--color-accent)" }}
-              >
-                node scripts/refresh-data.mjs
-              </code>{" "}
-              to update.
+          <div className="glass p-12 text-center">
+            <p className="font-mono text-[10px] tracking-widest uppercase mb-2" style={{ color: "var(--color-text-dim)" }}>
+              No fresh finds yet
             </p>
+            <p className="text-sm max-w-md mx-auto leading-relaxed mb-4" style={{ color: "var(--color-text-muted)" }}>
+              Fresh Finds shows open-source apps launched in the last 9 months that
+              score well on activity and freshness. The catalog is updated periodically.
+            </p>
+            <p className="text-sm max-w-md mx-auto leading-relaxed mb-4" style={{ color: "var(--color-text-muted)" }}>
+              If you&apos;re seeing this, the data may need refreshing. Run the update script
+              to pull the latest from F-Droid and GitHub.
+            </p>
+            <code className="font-mono text-xs px-2 py-1 rounded" style={{ backgroundColor: "var(--color-bg)", color: "var(--color-accent)", border: "1px solid var(--color-border)" }}>
+              node scripts/refresh-data.mjs
+            </code>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visible.map((p) => (
-                                <FreshCard
+{visible.map((p) => (
+                <FreshCard
                   key={p.id}
                   project={p}
                   genreLabel={genreMap.get(p.genre) ?? p.genre_label}
                   onCopy={copyLink}
                   tracked={trackedIds.has(p.id)}
                   onToggleTrack={() => toggleTrack(p)}
+                  router={router}
                 />
               ))}
             </div>
@@ -194,15 +199,36 @@ function FreshCard({
   onCopy,
   tracked,
   onToggleTrack,
+  router,
 }: {
   project: Project;
   genreLabel: string;
   onCopy: (url: string) => void;
   tracked: boolean;
   onToggleTrack: () => void;
+  router: ReturnType<typeof useRouter>;
 }) {
   const days = daysSince(project.last_release_at);
   const isFresh = days !== null && days < 14;
+
+  function handleCardClick(e: React.MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("a[href^='https://github.com']") ||
+      target.closest("button") ||
+      target.closest('[role="checkbox"]')
+    ) {
+      return;
+    }
+    router.push(`/project/${encodeURIComponent(project.id)}`);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      router.push(`/project/${encodeURIComponent(project.id)}`);
+    }
+  }
 
   return (
     <motion.div
@@ -212,14 +238,12 @@ function FreshCard({
       whileHover={{ y: -1 }}
       className="glass group relative p-5 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)]"
       style={{ boxShadow: "var(--card-shadow)" }}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`Open ${project.name} on OSS Signal`}
     >
-      {/* Stretched link — the whole card navigates; interactive controls
-          below sit above it with z-10 (valid HTML, no nested anchors). */}
-      <Link
-        href={`/project/${encodeURIComponent(project.id)}`}
-        aria-label={`Open ${project.name} on OSS Signal`}
-        className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-      />
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <span

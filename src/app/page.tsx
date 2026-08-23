@@ -12,6 +12,7 @@ import { FreshFinds } from "@/components/fresh-finds";
 import { ScoreModalProvider } from "@/components/score-modal";
 import { ExportButtons } from "@/components/export-buttons";
 import { ScrollTracker } from "@/components/scroll-tracker";
+import { ViewTransition } from "react";
 
 export default function Home() {
   const data = getProjects();
@@ -37,76 +38,81 @@ export default function Home() {
       <ScrollTracker />
       <ScoreModalProvider>
         <NavBar projects={data.projects} />
-
-        {/* Zone 1 — Your Watchlist (most important, top) */}
-        <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} projects={data.projects} />
-
-        {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
-        <FreshFinds projects={freshProjects} genres={genres.genres} />
-
-        {/* Zone 3 — The rest of the archive with pagination */}
-        <ProjectGrid projects={data.projects} genres={genres.genres} />
-
-        {/* Scoring methodology — at the bottom, after the data */}
-        <ScoringSection />
-
-        <div className="py-8 px-4">
-          <div className="max-w-4xl mx-auto">
-            <ExportButtons
-              watchlist={watchlistData.apps}
-              projects={data.projects}
-            />
-          </div>
-        </div>
-
-        <footer
-          className="border-t py-12 px-4"
-          style={{ borderColor: "var(--color-border)" }}
+        <ViewTransition
+          enter={{ "nav-forward": "slide-from-right", "nav-back": "slide-from-left", default: "none" }}
+          exit={{ "nav-forward": "slide-to-left", "nav-back": "slide-to-right", default: "none" }}
+          default="none"
         >
-          <div className="max-w-6xl mx-auto flex flex-col items-center gap-3 text-center">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="status-dot" />
-              <span
-                className="font-mono text-[10px] tracking-[0.2em] uppercase"
-                style={{ color: "var(--color-accent)" }}
-              >
-                OSS Signal
-              </span>
+          {/* Zone 1 — Your Watchlist (most important, top) */}
+          <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} projects={data.projects} />
+
+          {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
+          <FreshFinds projects={freshProjects} genres={genres.genres} />
+
+          {/* Zone 3 — The rest of the archive with pagination */}
+          <ProjectGrid projects={data.projects} genres={genres.genres} />
+
+          {/* Scoring methodology — at the bottom, after the data */}
+          <ScoringSection />
+
+          <div className="py-8 px-4">
+            <div className="max-w-4xl mx-auto">
+              <ExportButtons
+                watchlist={watchlistData.apps}
+                projects={data.projects}
+              />
             </div>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              Built by{" "}
-              <a
-                href="https://github.com/Ritwik82"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
-                style={{ color: "var(--color-accent)" }}
-              >
-                Ritwik
-              </a>
-              {" · "}
-              <a
-                href="https://github.com/Ritwik82/oss-signal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
-                style={{ color: "var(--color-accent)" }}
-              >
-                View on GitHub
-              </a>
-            </p>
-            <p className="font-mono text-[10px]" style={{ color: "var(--color-text-dim)" }}>
-              Last calibration: <RelativeTime iso={data.generated_at} />
-            </p>
-            <p
-              className="text-[10px] max-w-md leading-relaxed mt-2"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              Scores are automated health signals, not endorsements or safety
-              reviews. Use your own judgment.
-            </p>
           </div>
-        </footer>
+
+          <footer
+            className="border-t py-12 px-4"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <div className="max-w-6xl mx-auto flex flex-col items-center gap-3 text-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="status-dot" />
+                <span
+                  className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                  style={{ color: "var(--color-accent)" }}
+                >
+                  OSS Signal
+                </span>
+              </div>
+              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                Built by{" "}
+                <a
+                  href="https://github.com/Ritwik82"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
+                  style={{ color: "var(--color-accent)" }}
+                >
+                  Ritwik
+                </a>
+                {" · "}
+                <a
+                  href="https://github.com/Ritwik82/oss-signal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"
+                  style={{ color: "var(--color-accent)" }}
+                >
+                  View on GitHub
+                </a>
+              </p>
+              <p className="font-mono text-[10px]" style={{ color: "var(--color-text-dim)" }}>
+                Last calibration: <RelativeTime iso={data.generated_at} />
+              </p>
+              <p
+                className="text-[10px] max-w-md leading-relaxed mt-2"
+                style={{ color: "var(--color-text-dim)" }}
+              >
+                Scores are automated health signals, not endorsements or safety
+                reviews. Use your own judgment.
+              </p>
+            </div>
+          </footer>
+        </ViewTransition>
       </ScoreModalProvider>
     </div>
   );

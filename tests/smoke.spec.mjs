@@ -126,13 +126,13 @@ test("track from Fresh Finds adds to watchlist, untrack removes it", async ({ pa
   );
   // Seeded apps are "shared" (no untrack button) — track one that isn't seeded.
   const target = [...projects].sort((a, b) => b.score - a.score).find((p) => !watchlistIds.has(p.id));
-  const encoded = encodeURIComponent(target.id);
-  const card = page.locator(`#fresh-finds a[href="/project/${encoded}"]`).locator("..");
   const watchlist = page.locator("#watchlist");
   const stopBtn = watchlist.getByRole("button", { name: `Stop tracking ${target.name}` });
   await expect(stopBtn).toHaveCount(0);
 
-  await card.getByRole("button", { name: `Track ${target.name}` }).click();
+  // Find the card by its track button
+  const trackBtn = page.locator("#fresh-finds").getByRole("button", { name: `Track ${target.name}` });
+  await trackBtn.click();
   await expect(stopBtn).toHaveCount(1);
 
   await stopBtn.click();

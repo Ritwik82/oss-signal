@@ -2,7 +2,9 @@
 
 import { useState, useMemo, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import type { Project, Genre, GenreId } from "@/lib/data";
+import { FilterChipGroup } from "./filter-chip";
 
 const GitHubIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -15,69 +17,6 @@ function scoreColor(score: number): string {
   if (s >= 7) return "var(--color-signal-green)";
   if (s >= 4) return "var(--color-signal-amber)";
   return "var(--color-signal-red)";
-}
-
-export function FilterChip({
-  label,
-  selected,
-  onClick,
-  ariaLabel,
-}: {
-  label: string;
-  selected: boolean;
-  onClick: () => void;
-  ariaLabel?: string;
-}) {
-  return (
-    <button
-      role="checkbox"
-      aria-checked={selected}
-      aria-label={ariaLabel}
-      onClick={onClick}
-      className="font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-      style={{
-        backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
-        color: selected ? "var(--color-accent)" : "var(--color-text-dim)",
-        borderColor: selected ? "var(--color-accent-border)" : "var(--color-border)",
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-export function OptionChipGroup<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span
-        className="font-mono text-[10px] tracking-widest uppercase shrink-0"
-        style={{ color: "var(--color-text-dim)" }}
-      >
-        {label}
-      </span>
-      <div className="flex flex-wrap gap-1">
-        {options.map((o) => (
-          <FilterChip
-            key={o.value}
-            label={o.label}
-            selected={value === o.value}
-            onClick={() => onChange(o.value)}
-            ariaLabel={`${label}: ${o.label}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
 }
 
 type SortField = "score" | "stars" | "newest" | "recency" | "abandonment";
@@ -93,22 +32,46 @@ function ArchiveRow({
   project,
   index,
   genreMap,
+  router,
 }: {
   project: Project;
   index: number;
   genreMap: Map<string, string>;
+  router: ReturnType<typeof useRouter>;
 }) {
   const specimenId = `SP-${String(index + 1).padStart(3, "0")}`;
   const days = daysSince(project.last_release_at);
 
+  function handleRowClick(e: React.MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("a[href^='https://github.com']") ||
+      target.closest("button")
+    ) {
+      return;
+    }
+    router.push(`/project/${encodeURIComponent(project.id)}`);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      router.push(`/project/${encodeURIComponent(project.id)}`);
+    }
+  }
+
   return (
-    <motion.a
-      href={`/project/${encodeURIComponent(project.id)}`}
+    <motion.div
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
       transition={{ duration: 0.35 }}
       className="glass group relative flex items-center gap-3 px-4 min-h-[44px] transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-accent)]"
+      onClick={handleRowClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={`Open ${project.name} on OSS Signal`}
     >
       {/* Corner tick */}
       <span
@@ -195,7 +158,7 @@ function ArchiveRow({
       >
         <GitHubIcon />
       </a>
-    </motion.a>
+    </motion.div>
   );
 }
 
@@ -206,6 +169,7 @@ export function ProjectGrid({
   projects: Project[];
   genres: Genre[];
 }) {
+  const router = useRouter();
   const genreMap = useMemo(
     () => new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label])),
     [genres]
@@ -231,6 +195,7 @@ export function ProjectGrid({
   const [sort, setSort] = useState<SortField>("score");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [showGeneric, setShowGeneric] = useState(true);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const languages = useMemo(() => {
     const langs = projects.map((p) => p.language).filter(Boolean) as string[];
@@ -436,13 +401,13 @@ export function ProjectGrid({
 
                 {/* Filters */}
                 <div className="flex flex-col gap-3">
-                  <OptionChipGroup
+                  <FilterChipGroup
                     label="Genre"
                     options={genreOptions}
                     value={genreFilter}
                     onChange={setGenreFilter}
                   />
-                  <OptionChipGroup
+                  <FilterChipGroup
                     label="Lang"
                     options={[
                       { value: "all", label: "ALL" },
@@ -451,70 +416,8 @@ export function ProjectGrid({
                     value={lang}
                     onChange={setLang}
                   />
-                  <div className="flex flex-wrap gap-4">
-                    <OptionChipGroup
-                      label="Score"
-                      options={[
-                        { value: "all", label: "ANY" },
-                        { value: "0.3", label: "3+" },
-                        { value: "0.5", label: "5+" },
-                        { value: "0.7", label: "7+" },
-                      ]}
-                      value={minScore}
-                      onChange={setMinScore}
-                    />
-                    <OptionChipGroup
-                      label="Stars"
-                      options={[
-                        { value: "all", label: "ANY" },
-                        { value: "80", label: "80+" },
-                        { value: "500", label: "500+" },
-                        { value: "1000", label: "1k+" },
-                        { value: "5000", label: "5k+" },
-                      ]}
-                      value={minStars}
-                      onChange={setMinStars}
-                    />
-                    <OptionChipGroup
-                      label="Active"
-                      options={[
-                        { value: "all", label: "ANY" },
-                        { value: "7", label: "7d" },
-                        { value: "14", label: "14d" },
-                        { value: "30", label: "30d" },
-                      ]}
-                      value={activeDays}
-                      onChange={setActiveDays}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    <OptionChipGroup
-                      label="Access"
-                      options={[
-                        { value: "all", label: "ALL" },
-                        { value: "shizuku", label: "SHIZUKU" },
-                        { value: "non-shizuku", label: "STANDARD" },
-                      ]}
-                      value={shizukuFilter}
-                      onChange={setShizukuFilter}
-                    />
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="font-mono text-[10px] tracking-widest uppercase shrink-0"
-                        style={{ color: "var(--color-text-dim)" }}
-                      >
-                        Generic
-                      </span>
-                      <FilterChip
-                        label={showGeneric ? "Showing" : "Hidden"}
-                        selected={showGeneric}
-                        onClick={() => startTransition(() => setShowGeneric((p) => !p))}
-                        ariaLabel={showGeneric ? "Generic apps visible" : "Generic apps hidden"}
-                      />
-                    </div>
-                  </div>
                   <div className="flex flex-wrap gap-4 items-center">
-                    <OptionChipGroup
+                    <FilterChipGroup
                       label="Sort"
                       options={[
                         { value: "score", label: "SCORE" },
@@ -526,21 +429,101 @@ export function ProjectGrid({
                       value={sort}
                       onChange={setSort}
                     />
-                    <div className="flex items-center gap-1">
-                      <FilterChip
-                        label="↓ High→Low"
-                        selected={sortDir === "desc"}
-                        onClick={() => startTransition(() => setSortDir("desc"))}
-                        ariaLabel="Sort descending"
-                      />
-                      <FilterChip
-                        label="↑ Low→High"
-                        selected={sortDir === "asc"}
-                        onClick={() => startTransition(() => setSortDir("asc"))}
-                        ariaLabel="Sort ascending"
-                      />
-                    </div>
+                    <FilterChipGroup
+                      label="Order"
+                      options={[
+                        { value: "desc", label: "↓ HIGH→LOW" },
+                        { value: "asc", label: "↑ LOW→HIGH" },
+                      ]}
+                      value={sortDir}
+                      onChange={setSortDir}
+                    />
                   </div>
+                  {/* Advanced filters toggle */}
+                  <button
+                    onClick={() => setAdvancedOpen((o) => !o)}
+                    aria-expanded={advancedOpen}
+                    aria-controls="advanced-filters"
+                    className="font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                    style={{
+                      borderColor: "var(--color-border)",
+                      color: "var(--color-text-dim)",
+                      backgroundColor: "var(--color-surface)",
+                    }}
+                  >
+                    {advancedOpen ? "HIDE ADVANCED" : "SHOW ADVANCED"}
+                  </button>
+                  <AnimatePresence>
+                    {advancedOpen && (
+                      <motion.div
+                        id="advanced-filters"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex flex-col gap-3 overflow-hidden border-t pt-3"
+                        style={{ borderColor: "var(--color-border)" }}
+                      >
+                        <div className="flex flex-wrap gap-4">
+                          <FilterChipGroup
+                            label="Score"
+                            options={[
+                              { value: "all", label: "ANY" },
+                              { value: "0.3", label: "3+" },
+                              { value: "0.5", label: "5+" },
+                              { value: "0.7", label: "7+" },
+                            ]}
+                            value={minScore}
+                            onChange={setMinScore}
+                          />
+                          <FilterChipGroup
+                            label="Stars"
+                            options={[
+                              { value: "all", label: "ANY" },
+                              { value: "80", label: "80+" },
+                              { value: "500", label: "500+" },
+                              { value: "1000", label: "1k+" },
+                              { value: "5000", label: "5k+" },
+                            ]}
+                            value={minStars}
+                            onChange={setMinStars}
+                          />
+                          <FilterChipGroup
+                            label="Active"
+                            options={[
+                              { value: "all", label: "ANY" },
+                              { value: "7", label: "7d" },
+                              { value: "14", label: "14d" },
+                              { value: "30", label: "30d" },
+                            ]}
+                            value={activeDays}
+                            onChange={setActiveDays}
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-4">
+                          <FilterChipGroup
+                            label="Access"
+                            options={[
+                              { value: "all", label: "ALL" },
+                              { value: "shizuku", label: "SHIZUKU" },
+                              { value: "non-shizuku", label: "STANDARD" },
+                            ]}
+                            value={shizukuFilter}
+                            onChange={setShizukuFilter}
+                          />
+                          <FilterChipGroup
+                            label="Generic"
+                            options={[
+                              { value: "true", label: "SHOWING" },
+                              { value: "false", label: "HIDDEN" },
+                            ]}
+                            value={showGeneric ? "true" : "false"}
+                            onChange={(v) => startTransition(() => setShowGeneric(v === "true"))}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -558,9 +541,7 @@ export function ProjectGrid({
 
               {/* Rows */}
               {filtered.length === 0 ? (
-                <div
-                  className="flex flex-col items-center gap-4 py-20 text-center glass"
-                >
+                <div className="flex flex-col items-center gap-4 py-20 text-center glass">
                   <svg
                     aria-hidden="true"
                     width="40"
@@ -577,12 +558,35 @@ export function ProjectGrid({
                     <path d="M21 21l-4.35-4.35" />
                     <path d="M8 11h6" />
                   </svg>
-                  <p
-                    className="text-sm font-medium"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    No specimens match your criteria
+                  <p className="font-mono text-[10px] tracking-widest uppercase mb-2" style={{ color: "var(--color-text-dim)" }}>
+                    No matches
                   </p>
+                  <p className="text-sm max-w-md mx-auto leading-relaxed mb-4" style={{ color: "var(--color-text-muted)" }}>
+                    Your filters are too restrictive — no projects match all criteria.
+                  </p>
+                  <p className="text-sm max-w-md mx-auto leading-relaxed mb-4" style={{ color: "var(--color-text-muted)" }}>
+                    Try broadening your search, resetting filters, or checking a different genre.
+                  </p>
+                  <button
+                    onClick={() => {
+                      startTransition(() => {
+                        setSearch("");
+                        setLang("all");
+                        setMinScore("all");
+                        setMinStars("all");
+                        setGenreFilter("all");
+                        setShizukuFilter("all");
+                        setActiveDays("all");
+                        setSort("score");
+                        setSortDir("desc");
+                        setShowGeneric(true);
+                      });
+                    }}
+                    className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                    style={{ borderColor: "var(--color-accent-border)", color: "var(--color-accent)", backgroundColor: "var(--color-accent-dim)" }}
+                  >
+                    Reset all filters
+                  </button>
                 </div>
               ) : (() => {
                 const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -597,6 +601,7 @@ export function ProjectGrid({
                           project={p}
                           index={clampedPage * PAGE_SIZE + i}
                           genreMap={genreMap}
+                          router={router}
                         />
                       ))}
                     </div>

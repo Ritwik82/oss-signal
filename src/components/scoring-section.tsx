@@ -90,9 +90,9 @@ export function ScoringSection() {
             className="text-4xl md:text-5xl font-bold tracking-tight mb-4 serif-display"
             style={{ color: "var(--color-text)" }}
           >
-            Six signals.
+            How the score works.
             <br />
-            <span style={{ color: "var(--color-text-muted)" }}>One honest score.</span>
+            <span style={{ color: "var(--color-text-muted)" }}>Six signals. One honest number.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -102,12 +102,39 @@ export function ScoringSection() {
             className="text-base max-w-xl leading-relaxed"
             style={{ color: "var(--color-text-muted)" }}
           >
-            No black boxes. Each project is scored on six weighted health
-            signals, combined into a single 1–10 score you can actually reason
-            about. Weight #6 inverts abandonment risk — stale repos score lower,
-            not hidden.
+            Every project gets a 1–10 health score from six transparent signals.
+            No black boxes — each signal has a clear formula and public data source.
+            The final score is a weighted sum, normalized to 0–10.
           </motion.p>
         </div>
+
+        {/* Signal overview bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-12 flex flex-wrap gap-2"
+          style={{ fontSize: "11px" }}
+        >
+          {signals.map((signal) => (
+            <span
+              key={signal.id}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded border"
+              style={{
+                borderColor: "var(--color-accent-border)",
+                backgroundColor: "var(--color-accent-dim)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <span className={`w-2 h-2 rounded-full ${signal.dotClass}`} aria-hidden="true" />
+              <span className="font-mono tracking-wider">{signal.name}</span>
+              <span className="font-mono font-bold ml-1" style={{ color: "var(--color-text)" }}>
+                {Math.round(parseFloat(signal.weight) * 100)}%
+              </span>
+            </span>
+          ))}
+        </motion.div>
 
         {/* Notebook entries */}
         <StaggerGroup className="space-y-0">
@@ -127,7 +154,7 @@ export function ScoringSection() {
                   {/* Entry header */}
                   <div className="flex items-center gap-4 mb-3">
                     {/* Signal dot */}
-                    <div className={`w-2.5 h-2.5 rounded-full ${signal.dotClass}`} />
+                    <div className={`w-2.5 h-2.5 rounded-full ${signal.dotClass}`} aria-hidden="true" />
 
                     {/* ID + Name */}
                     <span
@@ -152,16 +179,24 @@ export function ScoringSection() {
                         backgroundColor: "var(--color-accent-dim)",
                       }}
                     >
-                      w={signal.weight}
+                      {Math.round(parseFloat(signal.weight) * 100)}%
                     </span>
                   </div>
 
-                  {/* Description */}
+                  {/* What it measures */}
                   <p
                     className="text-sm leading-relaxed mb-2"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     {signal.description}
+                  </p>
+
+                  {/* Why it matters */}
+                  <p
+                    className="text-sm leading-relaxed mb-2"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    <strong style={{ color: "var(--color-text)" }}>Why it matters:</strong> {signal.why}
                   </p>
 
                   {/* Formula */}
@@ -170,6 +205,14 @@ export function ScoringSection() {
                     style={{ color: "var(--color-text-dim)" }}
                   >
                     {signal.formula}
+                  </p>
+
+                  {/* Source */}
+                  <p
+                    className="font-mono text-[10px] tracking-wide mt-1"
+                    style={{ color: "var(--color-text-dim)" }}
+                  >
+                    Source: {signal.source}
                   </p>
                 </div>
               </div>
@@ -198,21 +241,21 @@ export function ScoringSection() {
               Final Calculation
             </span>
           </div>
-          <p
-            className="font-mono text-sm"
-            style={{ color: "var(--color-text)" }}
-          >
+          <p className="font-mono text-sm mb-2" style={{ color: "var(--color-text)" }}>
             score = Σ(signal_i × weight_i) × 10 → normalized to [0, 10]
+          </p>
+          <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
+            Higher is healthier. A score of 7+ means actively maintained; below 4 signals risk.
           </p>
           <button
             onClick={openScoreModal}
-            className="mt-4 font-mono text-xs border px-3 py-1.5 transition-colors hover:opacity-80"
+            className="mt-2 font-mono text-xs border px-3 py-1.5 transition-colors hover:opacity-80"
             style={{
               color: "var(--color-accent)",
               borderColor: "var(--color-accent-border)",
             }}
           >
-            Why these weights and thresholds?
+            Deep dive: weights, thresholds & methodology
           </button>
         </motion.div>
       </div>

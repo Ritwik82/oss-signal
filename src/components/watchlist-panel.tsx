@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
   useLocalWatchlist,
@@ -10,6 +10,7 @@ import {
   importObtainiumExport,
   mergeWatchlist,
 } from "@/lib/local-watchlist";
+import { FilterChipGroup } from "./filter-chip";
 
 function stalenessColor(staleness?: string) {
   switch (staleness) {
@@ -37,73 +38,75 @@ const STALENESS_OPTIONS: { value: string; label: string }[] = [
   { value: "not_yet_catalogued", label: "Not Catalogued" },
 ];
 
-const chipStyle = (selected: boolean): React.CSSProperties => ({
-  backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
-  color: selected ? "var(--color-accent)" : "var(--color-text-dim)",
-  borderColor: selected ? "var(--color-accent-border)" : "var(--color-border)",
-});
-
-const chipClass =
-  "font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]";
-
-function GenreChip({
-  label,
-  selected,
-  onSelect,
-}: {
-  label: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      role="checkbox"
-      aria-checked={selected}
-      onClick={onSelect}
-      className={chipClass}
-      style={chipStyle(selected)}
-    >
-      {label.toUpperCase()}
-    </button>
-  );
-}
-
-function StalenessChip({
-  label,
-  selected,
-  onSelect,
-}: {
-  label: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      role="checkbox"
-      aria-checked={selected}
-      onClick={onSelect}
-      className={chipClass}
-      style={chipStyle(selected)}
-    >
-      {label.toUpperCase()}
-    </button>
-  );
-}
-
 const PlainCard = motion.div;
 
+function StalenessIcon({ staleness, notYetCatalogued }: { staleness?: string; notYetCatalogued?: boolean }) {
+  if (notYetCatalogued) {
+    return (
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-signal-blue)" }}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4M12 8h.01" />
+      </svg>
+    );
+  }
+  switch (staleness) {
+    case "fresh":
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-signal-green)" }}>
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+      );
+    case "warning":
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-signal-amber)" }}>
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      );
+    case "stale":
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-signal-orange)" }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    case "abandoned":
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-signal-red)" }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="15" y1="9" x2="9" y2="15" />
+          <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+      );
+    case "unknown":
+      return (
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: "var(--color-text-dim)" }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+ 
 function AppCard({
   app,
   genreLabel,
   onUntrack,
+  router,
 }: {
   app: WatchlistApp;
   genreLabel: string;
   onUntrack?: () => void;
+  router: ReturnType<typeof useRouter>;
 }) {
   const color = stalenessColor(app.staleness);
   const badge = app.update_available;
-  const linked = Boolean(app.repo);
+  const hasRepo = Boolean(app.repo);
   const isUnknown = app.staleness === "unknown";
   const notYetCatalogued = app.notYetCatalogued === true;
   const borderStyle = notYetCatalogued
@@ -111,6 +114,29 @@ function AppCard({
     : isUnknown
     ? "1px dashed var(--color-signal-amber)"
     : undefined;
+
+  function handleCardClick(e: React.MouseEvent) {
+    // Don't navigate if clicking interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("a[href^='https://github.com']") ||
+      target.closest("button") ||
+      target.closest('[role="checkbox"]')
+    ) {
+      return;
+    }
+    if (hasRepo) {
+      router.push(`/project/${app.repo}`);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if ((e.key === "Enter" || e.key === " ") && hasRepo) {
+      e.preventDefault();
+      router.push(`/project/${app.repo}`);
+    }
+  }
+
   return (
     <PlainCard
       layout
@@ -119,17 +145,12 @@ function AppCard({
       className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
       style={{ boxShadow: "var(--card-shadow)", border: borderStyle }}
       whileHover={{ y: -1 }}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={hasRepo ? 0 : undefined}
+      role={hasRepo ? "button" : undefined}
+      aria-label={hasRepo ? `Open ${app.name} on OSS Signal` : undefined}
     >
-      {/* Stretched link — whole card navigates when a repo exists;
-          interactive controls sit above it with z-10 (no nested anchors). */}
-      {linked && (
-        <Link
-          href={`/project/${app.repo}`}
-          aria-label={`Open ${app.name} on OSS Signal`}
-          className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-        />
-      )}
-
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
           className="font-mono text-[10px] tracking-widest uppercase px-1.5 py-0.5"
@@ -191,8 +212,9 @@ function AppCard({
       >
         <div className="flex items-center gap-1.5">
           <span
-            className="w-1.5 h-1.5 rounded-full"
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: color }}
+            aria-hidden="true"
           />
           <span
             className="font-mono text-[11px] tracking-wide"
@@ -200,6 +222,7 @@ function AppCard({
           >
             {stalenessLabel(app.staleness, notYetCatalogued)}
           </span>
+          <StalenessIcon staleness={app.staleness} notYetCatalogued={notYetCatalogued} />
         </div>
         <div className="flex items-center gap-2">
           {app.latestVersion && (
@@ -240,6 +263,7 @@ function AppCard({
 }
 
 export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[]; genres: Genre[]; projects: Project[] }) {
+  const router = useRouter();
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
   const [collapsed, setCollapsed] = useState(false);
   const [genreFilter, setGenreFilter] = useState<GenreId | "all">("all");
@@ -304,6 +328,7 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
       key={app.id}
       app={app}
       genreLabel={genreMap.get(app.genre) ?? app.genre}
+      router={router}
       onUntrack={
         localKeys.has(app.repo ?? app.id)
           ? () =>
@@ -359,45 +384,28 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
 
         {/* Filters */}
         {!collapsed && allApps.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2 items-center">
-            <span
-              className="font-mono text-[10px] tracking-widest uppercase mr-1"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              genre
-            </span>
-            <GenreChip
-              label="All"
-              selected={genreFilter === "all"}
-              onSelect={() => startTransition(() => setGenreFilter("all"))}
-            />
-            {(["customization", "shizuku", "media", "utility", "productivity", "security", "store", "education", "dev-tools", "other"] as GenreId[]).map((g) => (
-              <GenreChip
-                key={g}
-                label={genreMap.get(g) ?? g}
-                selected={genreFilter === g}
-                onSelect={() => startTransition(() => setGenreFilter(g))}
-              />
-            ))}
-          </div>
+          <FilterChipGroup
+            label="genre"
+            options={[
+              { value: "all", label: "All" },
+              ...(["customization", "shizuku", "media", "utility", "productivity", "security", "store", "education", "dev-tools", "other"] as GenreId[]).map((g) => ({
+                value: g as GenreId,
+                label: genreMap.get(g) ?? g,
+              })),
+            ]}
+            value={genreFilter}
+            onChange={(v) => startTransition(() => setGenreFilter(v as GenreId))}
+            useStartTransition
+          />
         )}
         {!collapsed && allApps.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2 items-center">
-            <span
-              className="font-mono text-[10px] tracking-widest uppercase mr-1"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              staleness
-            </span>
-            {STALENESS_OPTIONS.map((o) => (
-              <StalenessChip
-                key={o.value}
-                label={o.label}
-                selected={stalenessFilter === o.value}
-                onSelect={() => startTransition(() => setStalenessFilter(o.value))}
-              />
-            ))}
-          </div>
+          <FilterChipGroup
+            label="staleness"
+            options={STALENESS_OPTIONS}
+            value={stalenessFilter}
+            onChange={(v) => startTransition(() => setStalenessFilter(v))}
+            useStartTransition
+          />
         )}
 
         {/* Grid */}
@@ -425,12 +433,19 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                     Empty watchlist
                   </p>
                   <p
-                    className="text-sm max-w-md mx-auto leading-relaxed"
+                    className="text-sm max-w-md mx-auto leading-relaxed mb-4"
                     style={{ color: "var(--color-text-muted)" }}
                   >
-                    Track apps with the TRACK button on any Fresh Finds card or project
-                    page, or import your own app list from an Obtainium export — they
-                    appear here, stored in your browser. Only you see this list.
+                    Your watchlist is where apps you care about live. When an app you
+                    track needs attention — a new release, stalled development, or
+                    security issue — it appears here first.
+                  </p>
+                  <p
+                    className="text-sm max-w-md mx-auto leading-relaxed mb-6"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Add apps by clicking <strong>TRACK</strong> on any Fresh Finds card
+                    or project page, or import an existing list.
                   </p>
                   <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
                     <input
@@ -460,7 +475,7 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                         borderColor: "var(--color-border)",
                       }}
                     >
-                      Browse Fresh Finds ↓
+                      Browse Fresh Finds
                     </a>
                   </div>
                 </div>
