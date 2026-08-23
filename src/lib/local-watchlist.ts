@@ -12,7 +12,10 @@ export type LocalEntry = Pick<WatchlistApp, "id" | "name" | "repo" | "genre"> & 
 
 // Local entries lack the enriched fields; merge them as full WatchlistApp
 // shapes so all consumers (panel, exports) can share one merge.
-export function toWatchlistApp(l: LocalEntry): WatchlistApp {
+// FALLBACK ONLY: used when a locally tracked app is not yet in the project catalog.
+// Do not use this for apps that exist in the catalog — they should get real
+// staleness/last_release_at from the Project data.
+export function toWatchlistAppFallback(l: LocalEntry): WatchlistApp {
   return {
     id: l.id,
     name: l.name,
@@ -24,7 +27,8 @@ export function toWatchlistApp(l: LocalEntry): WatchlistApp {
     installed: false,
     trackOnly: true,
     fdroid: false,
-    staleness: "unknown",
+    staleness: "not_yet_catalogued",
+    notYetCatalogued: true,
   };
 }
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { WatchlistApp, Project } from "@/lib/data";
-import { useLocalWatchlist, toWatchlistApp } from "@/lib/local-watchlist";
+import { useLocalWatchlist, toWatchlistAppFallback } from "@/lib/local-watchlist";
 
 function csvEscape(v: unknown): string {
   const s = v == null ? "" : String(v);
@@ -77,7 +77,7 @@ export function ExportButtons({
   const all = useMemo(() => {
     const byKey = new Map<string, WatchlistApp>();
     for (const a of watchlist) byKey.set(a.repo ?? a.id, a);
-    for (const l of local) if (!byKey.has(l.repo ?? l.id)) byKey.set(l.repo ?? l.id, toWatchlistApp(l));
+    for (const l of local) if (!byKey.has(l.repo ?? l.id)) byKey.set(l.repo ?? l.id, toWatchlistAppFallback(l));
     return [...byKey.values()];
   }, [watchlist, local]);
 

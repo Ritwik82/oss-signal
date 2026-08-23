@@ -41,7 +41,7 @@ export default function Home() {
         <NavBar projects={data.projects} />
 
         {/* Zone 1 — Your Watchlist (most important, top) */}
-        <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} />
+        <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} projects={data.projects} />
 
         {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
         <FreshFinds projects={freshProjects} genres={genres.genres} />

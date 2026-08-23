@@ -1,15 +1,25 @@
 "use client";
 
-import { useState, useMemo, useEffect, startTransition, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import type { WatchlistApp, GenreId, Genre } from "@/lib/data";
+import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
   useLocalWatchlist,
   toggleLocalWatchlist,
-  toWatchlistApp,
+  toWatchlistAppFallback,
   importObtainiumExport,
 } from "@/lib/local-watchlist";
+
+// Hook to get current time that updates periodically without triggering lint errors
+function useCurrentTime(intervalMs = 60_000): number {
+  const [time, setTime] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setTime(Date.now()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return time;
+}
 
 function stalenessColor(staleness?: string) {
   switch (staleness) {
@@ -22,7 +32,8 @@ function stalenessColor(staleness?: string) {
   }
 }
 
-function stalenessLabel(s?: string) {
+function stalenessLabel(s?: string, notYetCatalogued?: boolean) {
+  if (notYetCatalogued) return "NOT YET CATALOGUED";
   return s ? s.toUpperCase() : "UNKNOWN";
 }
 
@@ -32,6 +43,7 @@ const STALENESS_OPTIONS: { value: string; label: string }[] = [
   { value: "warning", label: "Warning" },
   { value: "stale", label: "Stale" },
   { value: "abandoned", label: "Abandoned" },
+  { value: "not_yet_catalogued", label: "Not Catalogued" },
 ];
 
 const chipStyle = (selected: boolean): React.CSSProperties => ({
@@ -102,13 +114,19 @@ function AppCard({
   const badge = app.update_available;
   const linked = Boolean(app.repo);
   const isUnknown = app.staleness === "unknown";
+  const notYetCatalogued = app.notYetCatalogued === true;
+  const borderStyle = notYetCatalogued
+    ? "1px dashed var(--color-signal-blue)"
+    : isUnknown
+    ? "1px dashed var(--color-signal-amber)"
+    : undefined;
   return (
     <PlainCard
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-      style={{ boxShadow: "var(--card-shadow)", border: isUnknown ? "1px dashed var(--color-signal-amber)" : undefined }}
+      style={{ boxShadow: "var(--card-shadow)", border: borderStyle }}
       whileHover={{ y: -1 }}
     >
       {/* Stretched link — whole card navigates when a repo exists;
@@ -171,6 +189,11 @@ function AppCard({
       <p className="font-mono text-[10px] mb-3" style={{ color: "var(--color-accent)" }}>
         {app.repo ?? app.source}
       </p>
+      {notYetCatalogued && (
+        <p className="font-mono text-[10px] mb-2" style={{ color: "var(--color-signal-blue)" }}>
+          Not yet scanned — picked up in the next catalog refresh
+        </p>
+      )}
 
       <div className="flex items-center justify-between mt-auto pt-2 border-t"
         style={{ borderColor: "var(--color-ruled)" }}
@@ -184,7 +207,7 @@ function AppCard({
             className="font-mono text-[11px] tracking-wide"
             style={{ color: "var(--color-text-dim)" }}
           >
-            {stalenessLabel(app.staleness)}
+            {stalenessLabel(app.staleness, notYetCatalogued)}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -225,14 +248,62 @@ function AppCard({
   );
 }
 
-export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres: Genre[] }) {
+export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[]; genres: Genre[]; projects: Project[] }) {
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
+  const projectById = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
+  const now = useCurrentTime();
   const [collapsed, setCollapsed] = useState(false);
   const [genreFilter, setGenreFilter] = useState<GenreId | "all">("all");
   const [stalenessFilter, setStalenessFilter] = useState("all");
   const [importToast, setImportToast] = useState<string | null>(null);
   const [importToastError, setImportToastError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Derive staleness from a Project using the same thresholds as refresh-data.mjs
+  // (14/30/90 days since last_release_at). Fall back to abandonment_risk heuristic
+  // if last_release_at is unavailable.
+  const deriveStalenessFromProject = useCallback(
+    (p: Project, now: number): "fresh" | "warning" | "stale" | "abandoned" | "unknown" => {
+      if (p.last_release_at) {
+        const days = (now - new Date(p.last_release_at).getTime()) / 86_400_000;
+        if (days < 14) return "fresh";
+        if (days < 30) return "warning";
+        if (days < 90) return "stale";
+        return "abandoned";
+      }
+      // Fallback: approximate from abandonment_risk (0-1, computed from pushed_at at build time)
+      const risk = p.abandonment_risk;
+      if (risk === 0) return "fresh";
+      if (risk === 1) return "abandoned";
+      // risk in (0,1) spans warning (14-30d) and stale (30-90d) — treat conservatively as warning
+      return "warning";
+    },
+    []
+  );
+
+  // Build a WatchlistApp from a Project for locally tracked apps that exist in the catalog.
+  const watchlistAppFromProject = useCallback(
+    (p: Project, now: number): WatchlistApp => {
+      const staleness = deriveStalenessFromProject(p, now);
+      return {
+        id: p.id,
+        name: p.name,
+        genre: p.genre,
+        source: "local",
+        repo: p.id,
+        installedVersion: null,
+        latestVersion: null,
+        installed: false,
+        trackOnly: true,
+        fdroid: false,
+        last_release_at: p.last_release_at,
+        staleness,
+        update_available: false,
+        notYetCatalogued: false,
+      };
+    },
+    [deriveStalenessFromProject]
+  );
 
   useEffect(() => {
     if (!importToast) return;
@@ -263,9 +334,18 @@ export function WatchlistPanel({ apps, genres }: { apps: WatchlistApp[]; genres:
   const allApps = useMemo(() => {
     const byKey = new Map<string, WatchlistApp>();
     for (const a of apps) byKey.set(a.repo ?? a.id, a);
-    for (const l of local) if (!byKey.has(l.repo ?? l.id)) byKey.set(l.repo ?? l.id, toWatchlistApp(l));
+    for (const l of local) {
+      const key = l.repo ?? l.id;
+      if (byKey.has(key)) continue;
+      const project = projectById.get(key);
+      if (project) {
+        byKey.set(key, watchlistAppFromProject(project, now));
+      } else {
+        byKey.set(key, toWatchlistAppFallback(l));
+      }
+    }
     return [...byKey.values()];
-  }, [apps, local]);
+  }, [apps, local, projectById, now, watchlistAppFromProject]);
 
   const filtered = useMemo(() => {
     let list = allApps;

@@ -80,8 +80,9 @@ export interface WatchlistApp {
   pushed_at?: string | null;
   last_release_at?: string | null;
   days_since_push?: number | null;
-  staleness?: "fresh" | "warning" | "stale" | "abandoned" | "unknown";
+  staleness?: "fresh" | "warning" | "stale" | "abandoned" | "unknown" | "not_yet_catalogued";
   update_available?: boolean;
+  notYetCatalogued?: boolean;
 }
 
 export interface WatchlistData {
