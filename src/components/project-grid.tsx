@@ -323,6 +323,7 @@ export function ProjectGrid({
                   </span>
                   <button
                     onClick={() => startTransition(() => setAtRiskOnly((v) => !v))}
+                    aria-pressed={atRiskOnly}
                     className="font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                     style={{
                       borderColor: atRiskOnly ? "var(--terracotta)" : "var(--color-border)",

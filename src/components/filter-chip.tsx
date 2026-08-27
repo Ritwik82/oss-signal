@@ -20,13 +20,13 @@ export function FilterChip<T extends string = string>({
 }: FilterChipProps<T>) {
   return (
     <button
-      role="checkbox"
+      role="radio"
       aria-checked={selected}
       aria-disabled={disabled}
       aria-label={ariaLabel}
       onClick={onSelect}
       disabled={disabled}
-      className="filter-chip font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      className="filter-chip font-mono text-[10px] tracking-wider px-2.5 py-1.5 min-h-[32px] border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
       style={{
         backgroundColor: selected ? "var(--color-accent-dim)" : "transparent",
         color: selected ? "var(--color-accent)" : disabled ? "var(--color-text-dim)" : "var(--color-text-dim)",
@@ -57,7 +57,7 @@ export function FilterChipGroup<T extends string = string>({
   useStartTransition = false,
 }: FilterChipGroupProps<T>) {
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-2 flex-wrap">
+    <div role="radiogroup" aria-label={label} className="flex items-center gap-2 flex-wrap">
       <span
         aria-hidden="true"
         className="filter-chip-label font-mono text-[10px] tracking-widest uppercase shrink-0"

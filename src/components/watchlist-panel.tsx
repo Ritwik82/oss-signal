@@ -308,7 +308,7 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
 
   const inboundStack = useMemo(() => {
     if (!stackParam) return [];
-    const repos = stackParam.split(",").map((s) => s.trim()).filter(Boolean);
+    const repos = stackParam.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 50);
     const matched: LocalEntry[] = [];
     for (const r of repos) {
       const proj = projects.find(

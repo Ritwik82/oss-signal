@@ -118,14 +118,26 @@ export function useLocalWatchlist(): LocalEntry[] {
   return useSyncExternalStore(subscribe, read, () => []);
 }
 
+function safeSave(next: LocalEntry[]): boolean {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event(EVENT));
+    return true;
+  } catch (err) {
+    console.error("Storage write failed:", err);
+    return false;
+  }
+}
+
 // Returns true when the app was added, false when it was removed.
 export function toggleLocalWatchlist(entry: LocalEntry): boolean {
   const list = read();
   const exists = list.some((a) => a.id === entry.id);
   const next = exists ? list.filter((a) => a.id !== entry.id) : [...list, entry];
-  localStorage.setItem(KEY, JSON.stringify(next));
-  window.dispatchEvent(new Event(EVENT));
-  return !exists;
+  if (safeSave(next)) {
+    return !exists;
+  }
+  return false;
 }
 
 export function addStarterPack(entries: LocalEntry[]): number {
@@ -134,9 +146,10 @@ export function addStarterPack(entries: LocalEntry[]): number {
   const toAdd = entries.filter((e) => !existing.has(e.id));
   if (toAdd.length === 0) return 0;
   const next = [...list, ...toAdd];
-  localStorage.setItem(KEY, JSON.stringify(next));
-  window.dispatchEvent(new Event(EVENT));
-  return toAdd.length;
+  if (safeSave(next)) {
+    return toAdd.length;
+  }
+  return 0;
 }
 
 export function isLocalTracked(id: string): boolean {
@@ -171,6 +184,9 @@ export async function importObtainiumExport(file: File): Promise<number> {
     raw = asRecord.appList as unknown[];
   }
 
+  if (raw.length > 500) {
+    throw new Error("That file contains too many apps (maximum 500 allowed).");
+  }
   const existing = new Set(read().map((l) => l.id));
   const added: LocalEntry[] = [];
   for (const entry of raw) {
@@ -188,7 +204,8 @@ export async function importObtainiumExport(file: File): Promise<number> {
   }
 
   if (added.length === 0) return 0;
-  localStorage.setItem(KEY, JSON.stringify([...read(), ...added]));
-  window.dispatchEvent(new Event(EVENT));
-  return added.length;
+  if (safeSave([...read(), ...added])) {
+    return added.length;
+  }
+  return 0;
 }

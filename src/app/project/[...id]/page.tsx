@@ -35,6 +35,12 @@ function BreakdownBar({ label, value }: { label: string; value: number }) {
         </span>
       </div>
       <div
+        role="progressbar"
+        aria-label={meta.label}
+        aria-valuenow={Math.round(value * 100)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuetext={`${(value * 10).toFixed(1)} out of 10`}
         className="w-full h-1.5 overflow-hidden"
         style={{ backgroundColor: "var(--color-ruled)" }}
       >

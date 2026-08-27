@@ -30,7 +30,7 @@ export async function GET(
   { params }: { params: Promise<{ owner: string; repo: string }> }
 ) {
   const id = reqId(request);
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (isRateLimited(ip)) {
     return err(429, "rate limited", "RATE_LIMITED", id, { "Retry-After": "60" });
   }
