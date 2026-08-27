@@ -94,6 +94,14 @@ export default async function ProjectPage({
 
   return (
     <div id="main-content" className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 scroll-mt-24">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-4 font-mono text-[10px] tracking-widest uppercase flex items-center gap-2" style={{ color: "var(--color-text-dim)" }}>
+        <Link href="/" className="hover:text-[var(--color-accent)] transition-colors">Home</Link>
+        <span aria-hidden="true">/</span>
+        <Link href="/#archive" className="hover:text-[var(--color-accent)] transition-colors">Archive</Link>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page" style={{ color: "var(--color-text)" }}>{project.name}</span>
+      </nav>
       {/* Back link */}
       <Link
         href="/"
@@ -137,7 +145,15 @@ export default async function ProjectPage({
           className="text-base leading-relaxed"
           style={{ color: "var(--color-text-muted)" }}
         >
-          {project.description || "No description provided."}
+          {project.description || (
+            <>
+              No upstream description — see{" "}
+              <a href={project.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2" style={{ color: "var(--color-accent)" }}>
+                GitHub README
+              </a>
+              .
+            </>
+          )}
         </p>
 
         {/* Meta row */}

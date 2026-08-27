@@ -107,8 +107,11 @@ export default function Home() {
                 className="text-[10px] max-w-md leading-relaxed mt-2"
                 style={{ color: "var(--color-text-dim)" }}
               >
-                Scores are automated health signals, not endorsements or safety
-                reviews. Use your own judgment.
+                Scores are automated health signals —{" "}
+                <a href="#methodology" className="underline underline-offset-2" style={{ color: "var(--color-accent)" }}>
+                  see formulas
+                </a>{" "}
+                — not endorsements or safety reviews. Use your own judgment.
               </p>
             </div>
           </footer>

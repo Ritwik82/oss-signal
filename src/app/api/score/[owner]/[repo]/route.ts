@@ -50,7 +50,10 @@ export async function GET(
   if (ifNone === etag) {
     return new NextResponse(null, { status: 304, headers: { ETag: etag, "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400", "x-request-id": id } });
   }
-  return NextResponse.json(project, {
+  const url = new URL(request.url);
+  const wantEnvelope = url.searchParams.get("envelope") === "1";
+  const body = wantEnvelope ? { data: project, meta: { etag, requestId: id, cachedUntil: new Date(Date.now() + 3600_000).toISOString() } } : project;
+  return NextResponse.json(body, {
     headers: { "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400", ETag: etag, "X-Content-Type-Options": "nosniff", "x-request-id": id },
   });
 }

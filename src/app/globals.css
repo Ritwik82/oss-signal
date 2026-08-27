@@ -342,10 +342,15 @@ body {
 
 /* ── Glass surface ── */
 .glass {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background: var(--color-surface);
   border: 1px solid var(--glass-border);
+}
+@supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
 }
 
 /* ── Focus ring (both themes) ── */
@@ -534,6 +539,15 @@ button, a, [role="button"] {
 .serif-display {
   font-family: var(--font-serif), "Playfair Display", Georgia, "Times New Roman", serif;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+@media (prefers-color-scheme: light) {
+  .serif-display { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18); }
+}
+:root[data-theme="cream"] .serif-display,
+:root[data-theme="latte"] .serif-display,
+:root[data-theme="blush"] .serif-display,
+:root[data-theme="azure"] .serif-display {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 
 .serif-display-swash {

@@ -135,6 +135,7 @@ test("track from Fresh Finds adds to watchlist, untrack removes it", async ({ pa
   await trackBtn.click();
   await expect(stopBtn).toHaveCount(1);
 
+  page.once("dialog", (d) => d.accept());
   await stopBtn.click();
   await expect(stopBtn).toHaveCount(0);
 });

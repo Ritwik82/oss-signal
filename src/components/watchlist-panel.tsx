@@ -313,14 +313,16 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
       genreLabel={genreMap.get(app.genre) ?? app.genre}
       onUntrack={
         localKeys.has(app.repo ?? app.id)
-          ? () =>
+          ? () => {
+              if (!window.confirm(`Stop tracking ${app.name}?`)) return;
               toggleLocalWatchlist({
                 id: app.repo ?? app.id,
                 name: app.name,
                 repo: app.repo,
                 genre: app.genre,
                 source: "local",
-              })
+              });
+            }
           : undefined
       }
     />

@@ -46,7 +46,7 @@ function ArchiveRow({
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.18 }}
       className="glass group relative flex items-center gap-3 px-4 min-h-[44px] transition-colors hover:border-[var(--color-accent-border)]"
     >
       {/* Corner tick */}

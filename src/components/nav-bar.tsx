@@ -5,14 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useScoreModal } from "./score-modal";
 import { ThemeToggle } from "./theme-toggle";
 import { CatalogSearch } from "./catalog-search";
+import { sections } from "@/lib/nav";
 import type { Project } from "@/lib/data";
-
-const sections = [
-  { id: "watchlist", label: "WATCHLIST" },
-  { id: "fresh-finds", label: "FRESH FINDS" },
-  { id: "archive", label: "ARCHIVE" },
-  { id: "methodology", label: "METHODOLOGY" },
-];
 
 export function NavBar({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState("");

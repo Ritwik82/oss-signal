@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { sections as navSections } from "@/lib/nav";
 
 const sections = [
-  { id: "watchlist", numeral: "I", label: "Watchlist", icon: "eye" },
-  { id: "fresh-finds", numeral: "II", label: "Fresh Finds", icon: "sparkle" },
-  { id: "archive", numeral: "III", label: "Archive", icon: "archive" },
-  { id: "methodology", numeral: "IV", label: "Method", icon: "ruler" },
+  { id: navSections[0].id, numeral: "I", label: "Watchlist", icon: "eye" },
+  { id: navSections[1].id, numeral: "II", label: "Fresh Finds", icon: "sparkle" },
+  { id: navSections[2].id, numeral: "III", label: "Archive", icon: "archive" },
+  { id: navSections[3].id, numeral: "IV", label: "Method", icon: "ruler" },
 ] as const;
 
 const icons: Record<string, React.ReactNode> = {

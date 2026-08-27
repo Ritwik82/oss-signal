@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useDeferredValue } from "react";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/data";
 
@@ -15,12 +15,13 @@ export function CatalogSearch({
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [focused, setFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     if (!q) return [];
     return projects
       .filter(
@@ -31,7 +32,7 @@ export function CatalogSearch({
       )
       .sort((a, b) => b.score - a.score)
       .slice(0, 8);
-  }, [query, projects]);
+  }, [deferredQuery, projects]);
 
   const listboxOpen = focused && query.trim().length > 0;
 
