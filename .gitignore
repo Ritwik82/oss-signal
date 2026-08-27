@@ -69,4 +69,8 @@ server.log
 AGENTS.md
 HANDOFF.md
 decisions.md
+.agents/
+artifacts/
+skills-lock.json
+
 

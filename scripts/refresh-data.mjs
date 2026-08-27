@@ -10,7 +10,7 @@ if (!GITHUB_TOKEN) {
 const ONLY_FRESH = process.argv.includes("--fresh-only");
 const ONLY_WATCHLIST = process.argv.includes("--watchlist-only");
 
-const UA = "oss-signal/1.1";
+const UA = "pulsaross/1.1";
 const FRESH_FIND_MAX_AGE_DAYS = 274; // ~9 months
 
 // Existing 5 signals scaled to 0.80, abandonment_risk = new 0.20 weight.
@@ -193,7 +193,7 @@ function detectShizuku(desc) {
 
 async function main() {
   const now = new Date().toISOString();
-  console.log(`[${now}] Starting OSS Signal refresh`);
+  console.log(`[${now}] Starting PulsarOss refresh`);
 
   // ─── Watchlist ────────────────────────────────────────────────────────────────
   if (ONLY_FRESH) {

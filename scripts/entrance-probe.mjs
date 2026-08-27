@@ -6,7 +6,7 @@ import { join } from "node:path";
 // Captures #main-content entrance from FIRST PAINT: an in-page rAF
 // sampler logs (t, opacity, transform, animationName) from the moment
 // the element exists, plus screenshots at 80ms intervals.
-const url = process.argv[2] ?? "https://oss-signal.vercel.app";
+const url = process.argv[2] ?? "https://pulsaross.vercel.app";
 const outDir = process.argv[3] ?? "probe-out";
 const reduced = process.argv.includes("--reduced");
 mkdirSync(outDir, { recursive: true });

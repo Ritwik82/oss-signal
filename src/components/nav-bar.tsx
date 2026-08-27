@@ -105,7 +105,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
             className="wordmark-text font-mono text-xs font-bold tracking-widest"
             style={{ color: "var(--color-text)" }}
           >
-            OSS SIGNAL
+            PULSAROSS
           </span>
         </a>
 

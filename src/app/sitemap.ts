@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getProjects } from "@/lib/data";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://oss-signal.vercel.app";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pulsaross.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const projects = getProjects().projects;

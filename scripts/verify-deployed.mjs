@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const url = process.env.URL ?? "https://oss-signal.vercel.app";
+const url = process.env.URL ?? "https://pulsaross.vercel.app";
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 2400 } });
 await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });

@@ -242,7 +242,7 @@ function FreshCard({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
-      aria-label={`Open ${project.name} on OSS Signal`}
+      aria-label={`Open ${project.name} on PulsarOss`}
     >
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">

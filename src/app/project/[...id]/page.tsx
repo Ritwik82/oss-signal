@@ -60,7 +60,7 @@ export function generateMetadata({
       title: `${project.name} — score ${(project.score * 10).toFixed(1)}/10`,
       description: project.description,
       openGraph: {
-        title: `${project.name} — OSS Signal`,
+        title: `${project.name} — PulsarOss`,
         description: project.description,
         type: "website",
       },

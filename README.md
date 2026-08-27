@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="https://oss-signal.vercel.app">
-    <img src="public/icon.svg" width="72" height="72" alt="OSS Signal — wave logo from top-left header" />
+  <a href="https://pulsaross.vercel.app">
+    <img src="public/icon.svg" width="72" height="72" alt="PulsarOss — wave logo from top-left header" />
   </a>
 </p>
 
-<h1 align="center">OSS Signal</h1>
+<h1 align="center">PulsarOss</h1>
 
 <p align="center">
   Tired of installing a great FOSS app only to find it was abandoned a year ago?<br/>
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://oss-signal.vercel.app"><img src="https://img.shields.io/badge/Live-oss--signal.vercel.app-14deb5?style=flat-square" alt="Live" /></a>
+  <a href="https://pulsaross.vercel.app"><img src="https://img.shields.io/badge/Live-pulsaross.vercel.app-14deb5?style=flat-square" alt="Live" /></a>
   <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square" alt="Next.js" />
   <img src="https://img.shields.io/badge/Tailwind-38bdf8?style=flat-square" alt="Tailwind" />
   <img src="https://img.shields.io/badge/Vercel-Hobby-000?style=flat-square" alt="Vercel" />
@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://oss-signal.vercel.app"><strong>oss-signal.vercel.app →</strong></a>
+  <a href="https://pulsaross.vercel.app"><strong>pulsaross.vercel.app →</strong></a>
 </p>
 
 ---
@@ -86,5 +86,5 @@ Tech: Next.js (App Router) + Tailwind + Framer Motion + Vercel Hobby + GitHub RE
 ---
 
 <p align="center">
-  <sub>Built by <a href="https://github.com/Ritwik82">Ritwik</a> • <a href="https://github.com/Ritwik82/oss-signal">View on GitHub</a> • Scores are automated health signals, not endorsements</sub>
+  <sub>Built by <a href="https://github.com/Ritwik82">Ritwik</a> • <a href="https://github.com/Ritwik82/pulsaross">View on GitHub</a> • Scores are automated health signals, not endorsements</sub>
 </p>

@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name         OSS Signal — GitHub Health Badge
-// @namespace    https://oss-signal.vercel.app/
+// @name         PulsarOss — GitHub Health Badge
+// @namespace    https://pulsaross.vercel.app/
 // @version      1.1.0
-// @description  Shows OSS Signal health scores on GitHub repository pages
+// @description  Shows PulsarOss health scores on GitHub repository pages
 // @author       Ritwik
 // @match        https://github.com/*/*
 // @grant        GM_xmlhttpRequest
-// @connect      oss-signal.vercel.app
+// @connect      pulsaross.vercel.app
 // @run-at       document-idle
 // @license      MIT
 // @compatible   chrome Tampermonkey, Violentmonkey
@@ -17,7 +17,7 @@
 (function () {
   "use strict";
 
-  const API_BASE = "https://oss-signal.vercel.app/api/score";
+  const API_BASE = "https://pulsaross.vercel.app/api/score";
 
   function getOwnerRepo() {
     const parts = location.pathname.split("/").filter(Boolean);
@@ -54,13 +54,13 @@
   function injectBadge(project) {
     const heading = document.querySelector("h1");
     if (!heading) return;
-    if (document.querySelector('[data-testid="oss-signal-badge"]')) return;
+    if (document.querySelector('[data-testid="pulsaross-badge"]')) return;
 
     const score = project.score;
     const colors = scoreColor(score);
 
     const badge = document.createElement("span");
-    badge.setAttribute("data-testid", "oss-signal-badge");
+    badge.setAttribute("data-testid", "pulsaross-badge");
     badge.style.cssText = `
       display: inline-flex;
       align-items: center;
@@ -78,7 +78,7 @@
       text-decoration: none;
       cursor: default;
     `;
-    badge.title = `OSS Signal health score: ${score.toFixed(2)}`;
+    badge.title = `PulsarOss health score: ${score.toFixed(2)}`;
 
     const dot = document.createElement("span");
     dot.style.cssText = `
@@ -101,10 +101,10 @@
   function injectNotTracked() {
     const heading = document.querySelector("h1");
     if (!heading) return;
-    if (document.querySelector('[data-testid="oss-signal-badge"]')) return;
+    if (document.querySelector('[data-testid="pulsaross-badge"]')) return;
 
     const badge = document.createElement("span");
-    badge.setAttribute("data-testid", "oss-signal-badge");
+    badge.setAttribute("data-testid", "pulsaross-badge");
     badge.style.cssText = `
       display: inline-flex;
       align-items: center;
@@ -120,7 +120,7 @@
       white-space: nowrap;
     `;
     badge.textContent = "OSS not tracked";
-    badge.title = "This repo is not tracked by OSS Signal yet";
+    badge.title = "This repo is not tracked by PulsarOss yet";
 
     heading.parentElement.insertBefore(badge, heading.nextSibling);
   }
@@ -128,7 +128,7 @@
   async function main() {
     const info = getOwnerRepo();
     if (!info) return;
-    if (document.querySelector('[data-testid="oss-signal-badge"]')) return;
+    if (document.querySelector('[data-testid="pulsaross-badge"]')) return;
 
     const project = await fetchScore(info.owner, info.repo);
     if (project) {

@@ -26,23 +26,23 @@ const playfairDisplay = Playfair_Display({
 export const metadata: Metadata = {
   manifest: "/manifest.json",
   title: {
-    default: "OSS Signal — FOSS Android app health dashboard",
-    template: "%s | OSS Signal",
+    default: "PulsarOss — FOSS Android app health dashboard",
+    template: "%s | PulsarOss",
   },
   description:
     "Prioritize actively maintained FOSS Android apps. Track the ones you rely on and discover the ones worth installing — every score is built from six transparent health signals.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://oss-signal.vercel.app"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://pulsaross.vercel.app"
   ),
   openGraph: {
-    title: "OSS Signal — FOSS Android app health dashboard",
+    title: "PulsarOss — FOSS Android app health dashboard",
     description:
       "Prioritize actively maintained FOSS Android apps. Track the ones you rely on and discover the ones worth installing.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "OSS Signal — FOSS Android app health dashboard",
+    title: "PulsarOss — FOSS Android app health dashboard",
     description:
       "Six transparent health signals. One honest score. Never install abandonware again.",
   },

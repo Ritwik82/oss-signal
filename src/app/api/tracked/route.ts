@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProjects } from "@/lib/data";
 
-const KEY = "oss-signal-tracked";
+const KEY = "pulsaross-tracked";
 const MAX_APPS = 300;
 
 const KV_URL = process.env.KV_REST_API_URL;

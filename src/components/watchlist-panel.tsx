@@ -149,7 +149,7 @@ function AppCard({
       onKeyDown={handleKeyDown}
       tabIndex={hasRepo ? 0 : undefined}
       role={hasRepo ? "button" : undefined}
-      aria-label={hasRepo ? `Open ${app.name} on OSS Signal` : undefined}
+      aria-label={hasRepo ? `Open ${app.name} on PulsarOss` : undefined}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span

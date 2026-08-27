@@ -56,7 +56,7 @@ function getServerSnapshot(): ThemeName {
 // captured DOM nodes inside component functions, so the DOM write lives here.
 function applyTheme(next: ThemeName) {
   document.documentElement.dataset.theme = next;
-  localStorage.setItem("oss-signal-theme", next);
+  localStorage.setItem("pulsaross-theme", next);
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute("content", THEME_META_COLORS[next]);

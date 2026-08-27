@@ -75,7 +75,7 @@ export default function Home() {
                   className="font-mono text-[10px] tracking-[0.2em] uppercase"
                   style={{ color: "var(--color-accent)" }}
                 >
-                  OSS Signal
+                  PulsarOss
                 </span>
               </div>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -91,7 +91,7 @@ export default function Home() {
                 </a>
                 {" · "}
                 <a
-                  href="https://github.com/Ritwik82/oss-signal"
+                  href="https://github.com/Ritwik82/pulsaross"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2 decoration-accent/50 transition-colors hover:opacity-80"

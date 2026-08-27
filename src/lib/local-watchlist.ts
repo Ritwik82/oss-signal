@@ -3,8 +3,8 @@
 import { useSyncExternalStore } from "react";
 import type { WatchlistApp, Project } from "./data";
 
-const KEY = "oss-signal-watchlist";
-const EVENT = "oss-signal-watchlist-change";
+const KEY = "pulsaross-watchlist";
+const EVENT = "pulsaross-watchlist-change";
 
 export type LocalEntry = Pick<WatchlistApp, "id" | "name" | "repo" | "genre"> & {
   source: "local";

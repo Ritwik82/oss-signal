@@ -12,7 +12,7 @@ const projectUrl = `${url}/project/${encodeURIComponent(firstProject.id)}`;
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
 if (light) {
-  await context.addInitScript(() => localStorage.setItem("oss-signal-theme", "cream"));
+  await context.addInitScript(() => localStorage.setItem("pulsaross-theme", "cream"));
 }
 const page = await context.newPage();
 
