@@ -57,8 +57,9 @@ export function FilterChipGroup<T extends string = string>({
   useStartTransition = false,
 }: FilterChipGroupProps<T>) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div role="group" aria-label={label} className="flex items-center gap-2 flex-wrap">
       <span
+        aria-hidden="true"
         className="filter-chip-label font-mono text-[10px] tracking-widest uppercase shrink-0"
         style={{ color: "var(--color-text-dim)" }}
       >

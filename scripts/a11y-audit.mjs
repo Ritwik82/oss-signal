@@ -19,7 +19,8 @@ const page = await context.newPage();
 let failed = false;
 
 async function auditPage(target, label) {
-  await page.goto(target, { waitUntil: "networkidle" });
+  await page.goto(target, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(1000);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag21a"])
     .analyze();
@@ -38,7 +39,8 @@ async function auditPage(target, label) {
 }
 
 async function keyboardCheck(label) {
-  await page.goto(url, { waitUntil: "networkidle" });
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(1000);
   console.log(`\n=== KEYBOARD: ${label} ===`);
 
   const firstTab = await page.evaluate(() => {

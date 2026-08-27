@@ -75,6 +75,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
 
   return (
     <nav
+      aria-label="Primary"
       className="sticky top-0 z-50 border-b relative"
       style={{
         backgroundColor: "color-mix(in srgb, var(--color-bg) 82%, transparent)",
@@ -135,7 +136,8 @@ export function NavBar({ projects }: { projects: Project[] }) {
             <a
               key={s.id}
               href={`#${s.id}`}
-              className="font-mono text-[10px] tracking-widest px-2.5 py-1 transition-colors"
+              aria-current={active === s.id ? "true" : undefined}
+              className="font-mono text-[10px] tracking-widest px-2.5 py-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
               style={{
                 color:
                   active === s.id
@@ -204,6 +206,9 @@ export function NavBar({ projects }: { projects: Project[] }) {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

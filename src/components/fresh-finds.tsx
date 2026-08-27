@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, startTransition } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Project, Genre, GenreId } from "@/lib/data";
 import { useLocalWatchlist, toggleLocalWatchlist } from "@/lib/local-watchlist";
@@ -211,25 +212,6 @@ function FreshCard({
   const days = daysSince(project.last_release_at);
   const isFresh = days !== null && days < 14;
 
-  function handleCardClick(e: React.MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (
-      target.closest("a[href^='https://github.com']") ||
-      target.closest("button") ||
-      target.closest('[role="checkbox"]')
-    ) {
-      return;
-    }
-    router.push(`/project/${encodeURIComponent(project.id)}`);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      router.push(`/project/${encodeURIComponent(project.id)}`);
-    }
-  }
-
   return (
     <motion.div
       layout
@@ -238,11 +220,6 @@ function FreshCard({
       whileHover={{ y: -1 }}
       className="glass group relative p-5 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)]"
       style={{ boxShadow: "var(--card-shadow)" }}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
-      aria-label={`Open ${project.name} on PulsarOss`}
     >
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -299,21 +276,22 @@ function FreshCard({
         </span>
       </div>
 
-      {/* Name + owner — whole card links to the project page */}
-      <div className="block">
+      {/* Name + owner link */}
+      <Link
+        href={`/project/${encodeURIComponent(project.id)}`}
+        className="block mb-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        aria-label={`Open ${project.name} on PulsarOss`}
+      >
         <h4
           className="font-semibold text-sm tracking-tight line-clamp-1 mb-0.5 transition-colors group-hover:text-[var(--color-accent)]"
           style={{ color: "var(--color-text)" }}
         >
           {project.name}
         </h4>
-        <p
-          className="font-mono text-[10px] mb-3"
-          style={{ color: "var(--color-text-dim)" }}
-        >
-          {project.owner}/{project.name}
+        <p className="font-mono text-[10px]" style={{ color: "var(--color-text-dim)" }}>
+          {project.owner}
         </p>
-      </div>
+      </Link>
 
       {/* Description */}
       <p

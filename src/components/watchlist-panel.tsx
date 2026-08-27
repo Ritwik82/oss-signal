@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
@@ -97,12 +98,10 @@ function AppCard({
   app,
   genreLabel,
   onUntrack,
-  router,
 }: {
   app: WatchlistApp;
   genreLabel: string;
   onUntrack?: () => void;
-  router: ReturnType<typeof useRouter>;
 }) {
   const color = stalenessColor(app.staleness);
   const badge = app.update_available;
@@ -115,41 +114,14 @@ function AppCard({
     ? "1px dashed var(--color-signal-amber)"
     : undefined;
 
-  function handleCardClick(e: React.MouseEvent) {
-    // Don't navigate if clicking interactive elements
-    const target = e.target as HTMLElement;
-    if (
-      target.closest("a[href^='https://github.com']") ||
-      target.closest("button") ||
-      target.closest('[role="checkbox"]')
-    ) {
-      return;
-    }
-    if (hasRepo) {
-      router.push(`/project/${app.repo}`);
-    }
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if ((e.key === "Enter" || e.key === " ") && hasRepo) {
-      e.preventDefault();
-      router.push(`/project/${app.repo}`);
-    }
-  }
-
   return (
     <PlainCard
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      className="glass group relative p-4 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)]"
       style={{ boxShadow: "var(--card-shadow)", border: borderStyle }}
       whileHover={{ y: -1 }}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={hasRepo ? 0 : undefined}
-      role={hasRepo ? "button" : undefined}
-      aria-label={hasRepo ? `Open ${app.name} on PulsarOss` : undefined}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
@@ -192,12 +164,23 @@ function AppCard({
         </div>
       </div>
 
-      <h4
-        className="font-semibold text-sm tracking-tight line-clamp-1 mb-1"
-        style={{ color: "var(--color-text)" }}
-      >
-        {app.name}
-      </h4>
+      {hasRepo ? (
+        <Link
+          href={`/project/${encodeURIComponent(app.repo!)}`}
+          className="font-semibold text-sm tracking-tight line-clamp-1 mb-1 transition-colors hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          style={{ color: "var(--color-text)" }}
+          aria-label={`Open ${app.name} on PulsarOss`}
+        >
+          {app.name}
+        </Link>
+      ) : (
+        <h4
+          className="font-semibold text-sm tracking-tight line-clamp-1 mb-1"
+          style={{ color: "var(--color-text)" }}
+        >
+          {app.name}
+        </h4>
+      )}
       <p className="font-mono text-[10px] mb-3" style={{ color: "var(--color-accent)" }}>
         {app.repo ?? app.source}
       </p>
@@ -328,7 +311,6 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
       key={app.id}
       app={app}
       genreLabel={genreMap.get(app.genre) ?? app.genre}
-      router={router}
       onUntrack={
         localKeys.has(app.repo ?? app.id)
           ? () =>

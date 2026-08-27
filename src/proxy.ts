@@ -9,6 +9,7 @@ export const config = {
 // reads x-nonce for our own inline themeScript.)
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const requestId = crypto.randomUUID();
   const isDev = process.env.NODE_ENV === "development";
 
   const cspHeader = [
@@ -27,9 +28,11 @@ export function proxy(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("x-request-id", requestId);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", cspHeader);
+  response.headers.set("x-request-id", requestId);
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");

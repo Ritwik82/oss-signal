@@ -47,6 +47,12 @@ function BreakdownBar({ label, value }: { label: string; value: number }) {
   );
 }
 
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return getProjects().projects.map((p) => ({ id: p.id.split("/") }));
+}
+
 export function generateMetadata({
   params,
 }: {

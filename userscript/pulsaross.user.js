@@ -56,7 +56,8 @@
     if (!heading) return;
     if (document.querySelector('[data-testid="pulsaross-badge"]')) return;
 
-    const score = project.score;
+    const score = typeof project.score === "number" && isFinite(project.score) ? Math.max(0, Math.min(1, project.score)) : null;
+    if (score === null) return;
     const colors = scoreColor(score);
 
     const badge = document.createElement("span");

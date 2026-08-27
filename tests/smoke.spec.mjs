@@ -25,7 +25,7 @@ test("home page renders all three zones", async ({ page }) => {
   expect(body).toContain("Empty watchlist");
 
   const theme = await page.evaluate(() => document.documentElement.dataset.theme);
-  expect(theme).toBe("terminal");
+  expect(theme).toBe("midnight");
 
   expect(errors).toEqual([]);
 });
@@ -55,8 +55,8 @@ test("fresh card body navigates, TRACK button does not", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   await page.waitForTimeout(1500);
 
-  const card = page.locator("#fresh-finds .glass.group").first();
-  await card.click();
+  const cardLink = page.locator("#fresh-finds .glass.group").first().getByRole("link", { name: /Open .* on PulsarOss/ });
+  await cardLink.click();
   await page.waitForURL(/\/project\//);
   expect(page.url()).toMatch(/\/project\//);
 

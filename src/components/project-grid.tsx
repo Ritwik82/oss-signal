@@ -2,6 +2,7 @@
 
 import { useState, useMemo, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Project, Genre, GenreId } from "@/lib/data";
 import { FilterChipGroup } from "./filter-chip";
@@ -32,33 +33,13 @@ function ArchiveRow({
   project,
   index,
   genreMap,
-  router,
 }: {
   project: Project;
   index: number;
   genreMap: Map<string, string>;
-  router: ReturnType<typeof useRouter>;
 }) {
   const specimenId = `SP-${String(index + 1).padStart(3, "0")}`;
   const days = daysSince(project.last_release_at);
-
-  function handleRowClick(e: React.MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (
-      target.closest("a[href^='https://github.com']") ||
-      target.closest("button")
-    ) {
-      return;
-    }
-    router.push(`/project/${encodeURIComponent(project.id)}`);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      router.push(`/project/${encodeURIComponent(project.id)}`);
-    }
-  }
 
   return (
     <motion.div
@@ -66,12 +47,7 @@ function ArchiveRow({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
       transition={{ duration: 0.35 }}
-      className="glass group relative flex items-center gap-3 px-4 min-h-[44px] transition-colors hover:border-[var(--color-accent-border)] focus-visible:outline-2 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-accent)]"
-      onClick={handleRowClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
-      aria-label={`Open ${project.name} on PulsarOss`}
+      className="glass group relative flex items-center gap-3 px-4 min-h-[44px] transition-colors hover:border-[var(--color-accent-border)]"
     >
       {/* Corner tick */}
       <span
@@ -87,8 +63,12 @@ function ArchiveRow({
         {specimenId}
       </span>
 
-      {/* Name + owner */}
-      <span className="min-w-0 flex-1 flex items-baseline gap-2">
+      {/* Name + owner link */}
+      <Link
+        href={`/project/${encodeURIComponent(project.id)}`}
+        className="min-w-0 flex-1 flex items-baseline gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        aria-label={`Open ${project.name} on PulsarOss`}
+      >
         <span
           className="text-sm font-semibold tracking-tight truncate transition-colors group-hover:text-[var(--color-accent)]"
           style={{ color: "var(--color-text)" }}
@@ -101,7 +81,7 @@ function ArchiveRow({
         >
           {project.owner}
         </span>
-      </span>
+      </Link>
 
       {/* Genre chip */}
       <span
@@ -151,9 +131,8 @@ function ArchiveRow({
         href={project.url}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
         aria-label={`Open ${project.name} on GitHub`}
-        className="ml-2 opacity-70 hover:opacity-100 focus-visible:opacity-100 transition-opacity shrink-0"
+        className="ml-2 opacity-70 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] transition-opacity shrink-0 z-10"
         style={{ color: "var(--color-accent)" }}
       >
         <GitHubIcon />
@@ -601,7 +580,6 @@ export function ProjectGrid({
                           project={p}
                           index={clampedPage * PAGE_SIZE + i}
                           genreMap={genreMap}
-                          router={router}
                         />
                       ))}
                     </div>
