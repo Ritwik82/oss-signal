@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getProjects } from "@/lib/data";
+import { getProjects, getHealthStatus } from "@/lib/data";
 import { TrackButton } from "@/components/track-button";
 
 const signalMeta: Record<string, { label: string; dotClass: string }> = {
@@ -92,6 +92,11 @@ export default async function ProjectPage({
         ? "Decent health signals with room to grow. Worth keeping in observation as the community matures."
         : "Early-stage or lower activity — could be a hidden gem or just getting started.";
 
+  const alternatives = data.projects
+    .filter((p) => p.id !== project.id && p.genre === project.genre && p.score >= 0.65)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
   return (
     <div id="main-content" className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 scroll-mt-24">
       {/* Breadcrumb */}
@@ -176,6 +181,18 @@ export default async function ProjectPage({
           >
             GitHub ↗
           </a>
+          <a
+            href={`obtainium://add/${project.url}`}
+            className="font-mono text-[11px] inline-flex items-center gap-1 px-2.5 py-1 border transition-colors hover:opacity-80"
+            style={{
+              color: "var(--color-accent)",
+              borderColor: "var(--color-accent-border)",
+              backgroundColor: "var(--color-accent-dim)",
+            }}
+            title="Open & track in Obtainium Android app"
+          >
+            Obtainium 📲
+          </a>
           <TrackButton project={project} />
         </div>
       </header>
@@ -216,16 +233,21 @@ export default async function ProjectPage({
               <p className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "var(--color-text-dim)" }}>
                 Status
               </p>
-              <span
-                className="font-mono text-xs font-bold px-2 py-0.5 border"
-                style={{
-                  color: "var(--color-accent)",
-                  borderColor: "var(--color-accent-border)",
-                  backgroundColor: "var(--color-accent-dim)",
-                }}
-              >
-                {project.score >= 0.7 ? "HEALTHY" : project.score >= 0.4 ? "MODERATE" : "EARLY"}
-              </span>
+              {(() => {
+                const health = getHealthStatus(project.score);
+                return (
+                  <span
+                    className="font-mono text-xs font-bold px-2 py-0.5 border"
+                    style={{
+                      color: health.color,
+                      borderColor: health.color,
+                      backgroundColor: "var(--color-accent-dim)",
+                    }}
+                  >
+                    {health.label}
+                  </span>
+                );
+              })()}
             </div>
           </div>
 
@@ -264,6 +286,45 @@ export default async function ProjectPage({
           </p>
         </div>
       </section>
+
+      {/* Active Alternatives */}
+      {alternatives.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="calibration-marks w-6" />
+            <h2
+              className="font-mono text-[10px] tracking-[0.2em] uppercase"
+              style={{ color: "var(--color-text-dim)" }}
+            >
+              Active Alternatives in {project.genre_label || project.genre}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {alternatives.map((alt) => {
+              const altHealth = getHealthStatus(alt.score);
+              return (
+                <Link
+                  key={alt.id}
+                  href={`/project/${encodeURIComponent(alt.id)}`}
+                  className="glass p-4 border block transition-colors hover:border-[var(--color-accent)]"
+                  style={{ borderColor: "var(--color-border)" }}
+                >
+                  <p className="font-mono text-xs font-semibold truncate" style={{ color: "var(--color-text)" }}>
+                    {alt.name}
+                  </p>
+                  <p className="font-mono text-[10px] truncate mb-2" style={{ color: "var(--color-text-dim)" }}>
+                    {alt.owner}
+                  </p>
+                  <div className="flex items-center justify-between font-mono text-[10px]">
+                    <span style={{ color: altHealth.color }}>{(alt.score * 10).toFixed(1)}</span>
+                    <span style={{ color: "var(--color-text-muted)" }}>★ {alt.stars}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Discussion links */}
       {project.discussion_links.length > 0 && (

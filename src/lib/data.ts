@@ -65,6 +65,23 @@ export interface ProjectsData {
   projects: Project[];
 }
 
+export interface HealthStatus {
+  label: string;
+  color: string;
+  badgeStyle: "fresh" | "warning" | "stale";
+}
+
+export function getHealthStatus(score: number, staleness?: string): HealthStatus {
+  const scaled = score <= 1 ? score * 10 : score;
+  if (staleness === "abandoned" || staleness === "stale" || scaled < 5.0) {
+    return { label: "Stalled / At Risk", color: "var(--terracotta)", badgeStyle: "stale" };
+  }
+  if (staleness === "warning" || scaled < 7.5) {
+    return { label: "Slow Release Rate", color: "var(--color-signal-amber)", badgeStyle: "warning" };
+  }
+  return { label: "Active & Maintained", color: "var(--color-signal-green)", badgeStyle: "fresh" };
+}
+
 export interface WatchlistApp {
   id: string;
   name: string;

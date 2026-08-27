@@ -128,6 +128,17 @@ export function toggleLocalWatchlist(entry: LocalEntry): boolean {
   return !exists;
 }
 
+export function addStarterPack(entries: LocalEntry[]): number {
+  const list = read();
+  const existing = new Set(list.map((a) => a.id));
+  const toAdd = entries.filter((e) => !existing.has(e.id));
+  if (toAdd.length === 0) return 0;
+  const next = [...list, ...toAdd];
+  localStorage.setItem(KEY, JSON.stringify(next));
+  window.dispatchEvent(new Event(EVENT));
+  return toAdd.length;
+}
+
 export function isLocalTracked(id: string): boolean {
   return read().some((a) => a.id === id);
 }

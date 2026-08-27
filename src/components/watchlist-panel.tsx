@@ -3,13 +3,15 @@
 import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
   useLocalWatchlist,
   toggleLocalWatchlist,
+  addStarterPack,
   importObtainiumExport,
   mergeWatchlist,
+  LocalEntry,
 } from "@/lib/local-watchlist";
 import { FilterChipGroup } from "./filter-chip";
 
@@ -37,6 +39,39 @@ const STALENESS_OPTIONS: { value: string; label: string }[] = [
   { value: "stale", label: "Stale" },
   { value: "abandoned", label: "Abandoned" },
   { value: "not_yet_catalogued", label: "Not Catalogued" },
+];
+
+const STARTER_PACKS: { name: string; icon: string; items: LocalEntry[] }[] = [
+  {
+    name: "Daily Essentials",
+    icon: "⚡",
+    items: [
+      { id: "bikram-agarwal/ObtainX", name: "ObtainX", repo: "bikram-agarwal/ObtainX", genre: "store", source: "local" },
+      { id: "chenxiaolong/BasicSync", name: "BasicSync", repo: "chenxiaolong/BasicSync", genre: "utility", source: "local" },
+      { id: "LeanBitLab/LeanType", name: "LeanType", repo: "LeanBitLab/LeanType", genre: "utility", source: "local" },
+      { id: "InlitX/streak", name: "streak", repo: "InlitX/streak", genre: "productivity", source: "local" },
+    ],
+  },
+  {
+    name: "Security & Privacy",
+    icon: "🛡️",
+    items: [
+      { id: "samyak2403/RepoStore", name: "RepoStore", repo: "samyak2403/RepoStore", genre: "security", source: "local" },
+      { id: "GlassOnTin/Haven", name: "Haven", repo: "GlassOnTin/Haven", genre: "security", source: "local" },
+      { id: "R0b0To/VaultExplorer", name: "VaultExplorer", repo: "R0b0To/VaultExplorer", genre: "security", source: "local" },
+      { id: "ELowry/DNSToggle", name: "DNSToggle", repo: "ELowry/DNSToggle", genre: "customization", source: "local" },
+    ],
+  },
+  {
+    name: "Media & Utilities",
+    icon: "🎵",
+    items: [
+      { id: "AppFuton/Futon", name: "Futon", repo: "AppFuton/Futon", genre: "media", source: "local" },
+      { id: "UsagiApp/Usagi", name: "Usagi", repo: "UsagiApp/Usagi", genre: "media", source: "local" },
+      { id: "s4nj1th/Slauncher", name: "Slauncher", repo: "s4nj1th/Slauncher", genre: "customization", source: "local" },
+      { id: "kitsumed/ShizuCallRecorder", name: "ShizuCallRecorder", repo: "kitsumed/ShizuCallRecorder", genre: "shizuku", source: "local" },
+    ],
+  },
 ];
 
 const PlainCard = motion.div;
@@ -216,6 +251,19 @@ function AppCard({
               v{app.latestVersion}
             </span>
           )}
+          <a
+            href={`obtainium://add/https://github.com/${app.repo}`}
+            aria-label={`Install ${app.name} via Obtainium`}
+            title="Install / Track in Obtainium"
+            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-0.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            style={{
+              color: "var(--color-accent)",
+              borderColor: "var(--color-accent-border)",
+              backgroundColor: "var(--color-accent-dim)",
+            }}
+          >
+            Obtainium 📲
+          </a>
           {onUntrack && (
             <button
               onClick={onUntrack}
@@ -247,6 +295,9 @@ function AppCard({
 
 export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[]; genres: Genre[]; projects: Project[] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const stackParam = searchParams.get("stack");
+
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
   const [collapsed, setCollapsed] = useState(false);
   const [genreFilter, setGenreFilter] = useState<GenreId | "all">("all");
@@ -254,6 +305,26 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
   const [importToast, setImportToast] = useState<string | null>(null);
   const [importToastError, setImportToastError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const inboundStack = useMemo(() => {
+    if (!stackParam) return [];
+    const repos = stackParam.split(",").map((s) => s.trim()).filter(Boolean);
+    const matched: LocalEntry[] = [];
+    for (const r of repos) {
+      const proj = projects.find(
+        (p) => p.id.toLowerCase() === r.toLowerCase() || `${p.owner}/${p.name}`.toLowerCase() === r.toLowerCase()
+      );
+      if (proj) {
+        matched.push({ id: proj.id, name: proj.name, repo: `${proj.owner}/${proj.name}`, genre: proj.genre, source: "local" });
+      } else {
+        const parts = r.split("/");
+        if (parts.length === 2) {
+          matched.push({ id: r, name: parts[1], repo: r, genre: "other", source: "local" });
+        }
+      }
+    }
+    return matched;
+  }, [stackParam, projects]);
 
   useEffect(() => {
     if (!importToast) return;
@@ -277,6 +348,15 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  }
+
+  function shareStack() {
+    if (allApps.length === 0) return;
+    const repos = allApps.map((a) => a.repo ?? a.id).filter(Boolean);
+    const url = `${window.location.origin}/?stack=${encodeURIComponent(repos.join(","))}`;
+    navigator.clipboard.writeText(url);
+    setImportToast("Stack URL copied to clipboard! 📋");
+    setImportToastError(false);
   }
 
   // Server watchlist (empty at launch) merged with each visitor's local tracking.
@@ -331,6 +411,39 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
   return (
     <section id="watchlist" className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
+        {/* Inbound Shared Stack Banner */}
+        {inboundStack.length > 0 && (
+          <div
+            className="glass mb-6 p-4 border flex items-center justify-between flex-wrap gap-3"
+            style={{
+              borderColor: "var(--color-accent)",
+              backgroundColor: "var(--color-accent-dim)",
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-base">📥</span>
+              <p className="font-mono text-xs" style={{ color: "var(--color-text)" }}>
+                Shared Stack detected (<strong>{inboundStack.length}</strong> apps ready to import).
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const count = addStarterPack(inboundStack);
+                setImportToast(count > 0 ? `Imported ${count} apps into your watchlist!` : "Apps already in your watchlist.");
+                setImportToastError(false);
+              }}
+              className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              style={{
+                color: "var(--color-accent)",
+                borderColor: "var(--color-accent-border)",
+                backgroundColor: "var(--color-bg)",
+              }}
+            >
+              Import Shared Stack
+            </button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
@@ -351,19 +464,36 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                   : `${allApps.length} tracked apps. All clear.`}
             </p>
           </div>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? "Expand watchlist" : "Collapse watchlist"}
-            className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            style={{
-              borderColor: "var(--color-border)",
-              color: "var(--color-text-dim)",
-              backgroundColor: "var(--color-surface)",
-            }}
-          >
-            {collapsed ? "EXPAND ↓" : "COLLAPSE ↑"}
-          </button>
+          <div className="flex items-center gap-2">
+            {allApps.length > 0 && (
+              <button
+                onClick={shareStack}
+                aria-label="Share my watchlist stack"
+                className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] flex items-center gap-1"
+                style={{
+                  borderColor: "var(--color-accent-border)",
+                  color: "var(--color-accent)",
+                  backgroundColor: "var(--color-accent-dim)",
+                }}
+              >
+                <span>🔗</span>
+                <span>SHARE STACK</span>
+              </button>
+            )}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              aria-expanded={!collapsed}
+              aria-label={collapsed ? "Expand watchlist" : "Collapse watchlist"}
+              className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              style={{
+                borderColor: "var(--color-border)",
+                color: "var(--color-text-dim)",
+                backgroundColor: "var(--color-surface)",
+              }}
+            >
+              {collapsed ? "EXPAND ↓" : "COLLAPSE ↑"}
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -425,13 +555,41 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                     security issue — it appears here first.
                   </p>
                   <p
-                    className="text-sm max-w-md mx-auto leading-relaxed mb-6"
+                    className="text-sm max-w-md mx-auto leading-relaxed mb-4"
                     style={{ color: "var(--color-text-muted)" }}
                   >
-                    Add apps by clicking <strong>TRACK</strong> on any Fresh Finds card
-                    or project page, or import an existing list.
+                    Load a starter pack to instantly activate your watchlist, or track apps from Fresh Finds below.
                   </p>
-                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+
+                  {/* 1-Click Starter Packs */}
+                  <div className="my-5 flex flex-wrap items-center justify-center gap-2">
+                    {STARTER_PACKS.map((pack) => (
+                      <button
+                        key={pack.name}
+                        onClick={() => {
+                          const count = addStarterPack(pack.items);
+                          if (count > 0) {
+                            setImportToast(`Added ${pack.name} starter pack (${count} apps).`);
+                            setImportToastError(false);
+                          } else {
+                            setImportToast(`${pack.name} apps are already in your watchlist.`);
+                            setImportToastError(false);
+                          }
+                        }}
+                        className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] flex items-center gap-1.5"
+                        style={{
+                          color: "var(--color-accent)",
+                          borderColor: "var(--color-accent-border)",
+                          backgroundColor: "var(--color-accent-dim)",
+                        }}
+                      >
+                        <span>{pack.icon}</span>
+                        <span>{pack.name} Pack</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                     <input
                       ref={fileInputRef}
                       type="file"

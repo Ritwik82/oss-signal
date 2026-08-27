@@ -1,10 +1,12 @@
 // ==UserScript==
-// @name         PulsarOss — GitHub Health Badge
+// @name         PulsarOss — Health & Obtainium Badges
 // @namespace    https://pulsaross.vercel.app/
-// @version      1.1.0
-// @description  Shows PulsarOss health scores on GitHub repository pages
+// @version      1.2.0
+// @description  Shows PulsarOss health scores and Obtainium 1-click install links on GitHub & F-Droid
 // @author       Ritwik
 // @match        https://github.com/*/*
+// @match        https://f-droid.org/*
+// @match        https://*.f-droid.org/*
 // @grant        GM_xmlhttpRequest
 // @connect      pulsaross.vercel.app
 // @run-at       document-idle
@@ -20,9 +22,25 @@
   const API_BASE = "https://pulsaross.vercel.app/api/score";
 
   function getOwnerRepo() {
-    const parts = location.pathname.split("/").filter(Boolean);
-    if (parts.length < 2) return null;
-    return { owner: parts[0], repo: parts[1] };
+    if (location.hostname.includes("github.com")) {
+      const parts = location.pathname.split("/").filter(Boolean);
+      if (parts.length < 2) return null;
+      return { owner: parts[0], repo: parts[1] };
+    }
+
+    if (location.hostname.includes("f-droid.org")) {
+      // Find source code link on F-Droid page pointing to GitHub
+      const links = Array.from(document.querySelectorAll("a[href*='github.com']"));
+      for (const a of links) {
+        const href = a.getAttribute("href");
+        if (!href) continue;
+        const match = href.match(/github\.com\/([^/]+)\/([^/#?]+)/);
+        if (match) {
+          return { owner: match[1], repo: match[2].replace(/\.git$/, "") };
+        }
+      }
+    }
+    return null;
   }
 
   function fetchScore(owner, repo) {

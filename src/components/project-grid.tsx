@@ -174,6 +174,7 @@ export function ProjectGrid({
   const [sort, setSort] = useState<SortField>("score");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [showGeneric, setShowGeneric] = useState(true);
+  const [atRiskOnly, setAtRiskOnly] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const languages = useMemo(() => {
@@ -191,6 +192,7 @@ export function ProjectGrid({
     shizukuFilter,
     activeDays,
     showGeneric,
+    atRiskOnly,
     sort,
     sortDir,
   ]);
@@ -215,6 +217,7 @@ export function ProjectGrid({
     if (minScore !== "all") list = list.filter((p) => p.score >= Number(minScore));
     if (minStars !== "all") list = list.filter((p) => p.stars >= Number(minStars));
     if (!showGeneric) list = list.filter((p) => !p.is_generic);
+    if (atRiskOnly) list = list.filter((p) => p.abandonment_risk >= 0.65 && p.stars >= 50);
     if (activeDays !== "all") {
       list = list.filter((p) => {
         const days = (1 - p.score_breakdown.recency) * 90;
@@ -230,7 +233,7 @@ export function ProjectGrid({
       if (sort === "abandonment") return dir * (a.abandonment_risk - b.abandonment_risk);
       return dir * (a.score - b.score);
     });
-  }, [projects, lang, minScore, minStars, genreFilter, shizukuFilter, activeDays, search, sort, sortDir, showGeneric]);
+  }, [projects, lang, minScore, minStars, genreFilter, shizukuFilter, activeDays, search, sort, sortDir, showGeneric, atRiskOnly]);
 
   const hasActiveFilters =
     search ||
@@ -241,6 +244,7 @@ export function ProjectGrid({
     shizukuFilter !== "all" ||
     activeDays !== "all" ||
     !showGeneric ||
+    atRiskOnly ||
     sort !== "score" ||
     sortDir !== "desc";
 
@@ -317,6 +321,18 @@ export function ProjectGrid({
                   >
                     Instrument Controls
                   </span>
+                  <button
+                    onClick={() => startTransition(() => setAtRiskOnly((v) => !v))}
+                    className="font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                    style={{
+                      borderColor: atRiskOnly ? "var(--terracotta)" : "var(--color-border)",
+                      color: atRiskOnly ? "var(--terracotta)" : "var(--color-text-dim)",
+                      backgroundColor: atRiskOnly ? "rgba(204,85,0,0.12)" : "transparent",
+                    }}
+                  >
+                    <span>🚨</span>
+                    <span>Abandonment Radar {atRiskOnly ? "(ON)" : ""}</span>
+                  </button>
                   {hasActiveFilters && (
                     <button
                       onClick={() => {
@@ -331,6 +347,7 @@ export function ProjectGrid({
                           setSort("score");
                           setSortDir("desc");
                           setShowGeneric(true);
+                          setAtRiskOnly(false);
                         });
                       }}
                       className="ml-auto font-mono text-[10px] tracking-wider px-2.5 py-1 border transition-colors"
