@@ -1,14 +1,34 @@
 {
   "genres": [
     {
+      "id": "shizuku",
+      "label": "Shizuku",
+      "keywords": ["shizuku", "adb", "root", "xposed", "magisk", "dhizuku", "hiddenapi", "privapp", "priv-app", "system permissions", "write_secure_settings", "requires shizuku"]
+    },
+    {
+      "id": "dev-tools",
+      "label": "Dev Tools",
+      "keywords": ["developer", "terminal", "ide", "debug", "ssh", "api client", "regex", "emulator", "device info", "system info", "coding", "programming", "linux", "desktop", "cad", "nvr", "openclaw", "raspberry", "homelab", "docker", "container", "gitea", "forgejo", "self-hosted"]
+    },
+    {
+      "id": "store",
+      "label": "Store",
+      "keywords": ["store", "market", "f-droid", "obtainium", "updater", "package manager", "apk updater", "installer", "app store", "apk manager", "aurora store", "droidify", "neo store", "app manager"]
+    },
+    {
+      "id": "security",
+      "label": "Security & Privacy",
+      "keywords": ["privacy", "vpn", "firewall", "password", "encrypt", "adblock", "blocker", "dns", "2fa", "authenticator", "wallet", "crypto", "bitcoin", "ethereum", "seed", "multisig", "ledger", "mnemonic", "custodial", "onion", "tor", "signer", "shamir", "vault", "passkey", "otp vault"]
+    },
+    {
+      "id": "education",
+      "label": "Education",
+      "keywords": ["learn", "course", "tutorial", "study", "reference", "guide", "wiki", "documentation", "flashcard", "quiz", "language learn", "dictionary", "translate", "translation", "vocabulary", "word", "spell", "math", "alphabet", "geography", "history", "science", "reading", "fact check", "ancient", "egyptian", "practic", "guitar lesson", "song sheet", "campus", "university", "student", "assignment", "exam", "lecture", "school", "college", "metronome", "practice"]
+    },
+    {
       "id": "customization",
       "label": "Customization",
       "keywords": ["wallpaper", "theme", "icon pack", "launcher", "personaliz", "customiz", "status bar", "navigation bar", "lock screen", "widget", "font", "accent color", "quick settings", "notification shade", "tasker"]
-    },
-    {
-      "id": "shizuku",
-      "label": "Shizuku",
-      "keywords": ["shizuku", "adb", "root", "xposed", "magisk", "dhizuku", "hiddenapi", "privapp", "priv-app", "system permissions", "write_secure_settings"]
     },
     {
       "id": "media",
@@ -16,34 +36,14 @@
       "keywords": ["video", "audio", "music", "player", "downloader", "stream", "podcast", "radio", "gallery", "photo", "image", "yt-dlp", "spotify", "manga", "reader", "ebook", "comic", "anime", "game", "gaming", "arcade", "puzzle", "rpg", "chess", "board game", "simulator", "idle", "dungeon", "torrent", "qbittorrent", "screencast", "screen recorder", "wallpaper", "live wallpaper", "youtube", "lyrics", "song", "ringtone", "flac", "text-to-speech", "chord", "brick", "runner", "shooter", "astronomy", "nasa", "night sky", "star map", "android tv", "media content"]
     },
     {
-      "id": "utility",
-      "label": "Utility",
-      "keywords": ["tool", "clean", "backup", "file", "manager", "scanner", "clipboard", "share", "transfer", "converter", "editor", "calculator", "recorder", "extractor", "compressor", "battery", "network", "wifi", "filter", "automation", "shortcut", "weather", "forecast", "keyboard", "ime", "input method", "ir blaster", "infrared", "printer", "bluetooth", "forward", "sms", "mirror", "monitor", "device control", "sensor", "stopwatch", "countdown", "unit converter", "magnifier", "notification", "volume", "qr code", "barcode", "sim card", "usb", "otg", "hdr", "exif", "syncthing", "sync", "send", "remote", "nas", "unraid", "gas station", "signal strength", "wall stud", "magnetometer", "screen awake", "keep awake", "alarm clock", "timer widget", "pantry", "food waste", "pomodoro widget"]
-    },
-    {
       "id": "productivity",
       "label": "Productivity",
       "keywords": ["note", "todo", "task", "timer", "pomodoro", "calendar", "reminder", "journal", "diary", "bookmark", "expense", "track", "habit", "clock", "alarm", "reader", "rss", "news", "email", "mail", "chat", "messenger", "browser", "search", "prayer", "islamic", "finance", "budget", "money", "invoice", "receipt", "shopping list", "grocery", "recipe", "workout", "fitness", "meditation", "mood", "sleep", "telegram", "lemmy", "fediverse", "itinerary", "travel", "project management", "focus", "documents", "voice memo", "logbook", "dialer", "calling", "phone call"]
     },
     {
-      "id": "security",
-      "label": "Security & Privacy",
-      "keywords": ["privacy", "vpn", "firewall", "password", "encrypt", "adblock", "blocker", "dns", "2fa", "authenticator", "tracker", "permission", "scan", "wallet", "crypto", "bitcoin", "ethereum", "seed", "multisig", "ledger", "mnemonic", "custodial", "onion", "tor", "secret", "signer", "deepfake", "screenshot", "spoof", "verify", "shamir"]
-    },
-    {
-      "id": "store",
-      "label": "Store",
-      "keywords": ["store", "market", "f-droid", "obtainium", "updater", "package manager", "apk updater", "installer"]
-    },
-    {
-      "id": "education",
-      "label": "Education",
-      "keywords": ["learn", "course", "tutorial", "study", "reference", "guide", "wiki", "documentation", "flashcard", "quiz", "language learn", "dictionary", "translate", "translation", "vocabulary", "word", "spell", "math", "alphabet", "geography", "history", "science", "reading", "fact check", "ancient", "egyptian", "practic", "guitar lesson", "song sheet"]
-    },
-    {
-      "id": "dev-tools",
-      "label": "Dev Tools",
-      "keywords": ["developer", "adb", "terminal", "ide", "editor", "git", "debug", "ssh", "http", "api client", "json", "regex", "emulator", "device info", "system info", "coding", "programming", "linux", "desktop", "cad", "nvr", "openclaw", "rpi", "raspberry", "homelab", "docker", "container"]
+      "id": "utility",
+      "label": "Utility",
+      "keywords": ["tool", "clean", "backup", "file", "manager", "scanner", "clipboard", "share", "transfer", "converter", "calculator", "recorder", "extractor", "compressor", "battery", "network", "wifi", "filter", "automation", "shortcut", "weather", "forecast", "keyboard", "ime", "input method", "ir blaster", "infrared", "printer", "bluetooth", "forward", "sms", "mirror", "monitor", "device control", "sensor", "stopwatch", "countdown", "unit converter", "magnifier", "notification", "volume", "qr code", "barcode", "sim card", "usb", "otg", "hdr", "exif", "syncthing", "sync", "send", "remote", "nas", "unraid", "gas station", "signal strength", "wall stud", "magnetometer", "screen awake", "keep awake", "alarm clock", "timer widget", "pantry", "food waste", "pomodoro widget"]
     },
     {
       "id": "other",

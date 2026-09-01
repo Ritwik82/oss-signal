@@ -579,23 +579,23 @@ export function ProjectGrid({
                 const visible = filtered.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
                 return (
                   <>
-                    {/* Title row — basic serial + column headers */}
+                    {/* Title row — aligned to table columns */}
                     <div
-                      className="hidden sm:flex items-center gap-3 px-4 py-2 text-[10px] font-mono tracking-[0.15em] uppercase"
-                      style={{ color: "var(--color-text-dim)", borderBottom: "1px solid var(--color-border)" }}
+                      className="hidden sm:flex items-center gap-3 px-4 min-h-[28px] text-[10px] font-mono tracking-[0.12em] uppercase"
+                      style={{ color: "var(--color-text-dim)", opacity: 0.85, borderBottom: "1px solid var(--color-border)" }}
                     >
                       <span className="w-14 shrink-0">#</span>
-                      <span className="flex-1">Project</span>
-                      <span className="hidden lg:inline shrink-0" style={{ width: "5rem" }}>
+                      <span className="flex-1 min-w-0">Project</span>
+                      <span className="hidden lg:inline shrink-0 text-left" style={{ width: "5rem" }}>
                         Genre
                       </span>
                       <span className="shrink-0 flex items-center gap-2" style={{ width: "7.5rem" }}>
-                        <span className="hidden md:inline w-20 text-center">Score</span>
+                        <span className="hidden md:block w-20" aria-hidden="true" />
                         <span className="w-9 text-right">Score</span>
                       </span>
                       <span className="hidden lg:inline w-16 text-right shrink-0">Updated</span>
                       <span className="hidden sm:inline w-12 text-right shrink-0">Stars</span>
-                      <span className="ml-2 w-3 shrink-0" aria-hidden="true" />
+                      <span className="ml-2 w-[14px] shrink-0" aria-hidden="true" />
                     </div>
                     <div className="flex flex-col gap-2">
                       {visible.map((p, i) => (
