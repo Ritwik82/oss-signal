@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { ScrollSection, StaggerGroup, StaggerItem } from "./scroll-section";
-import { useScoreModal } from "./score-modal";
 
 export const signals = [
   {
@@ -73,7 +72,6 @@ export const signals = [
 ];
 
 export function ScoringSection() {
-  const { openScoreModal } = useScoreModal();
   return (
     <ScrollSection
       id="methodology"
@@ -247,16 +245,6 @@ export function ScoringSection() {
           <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
             Higher is healthier. A score of 7+ means actively maintained; below 4 signals risk.
           </p>
-          <button
-            onClick={openScoreModal}
-            className="mt-2 font-mono text-xs border px-3 py-1.5 transition-colors hover:opacity-80"
-            style={{
-              color: "var(--color-accent)",
-              borderColor: "var(--color-accent-border)",
-            }}
-          >
-            Deep dive: weights, thresholds & methodology
-          </button>
         </motion.div>
       </div>
     </ScrollSection>

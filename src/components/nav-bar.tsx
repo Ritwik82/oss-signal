@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useScoreModal } from "./score-modal";
 import { ThemeToggle } from "./theme-toggle";
 import { CatalogSearch } from "./catalog-search";
 import { sections } from "@/lib/nav";
@@ -11,7 +10,6 @@ import type { Project } from "@/lib/data";
 export function NavBar({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const { openScoreModal } = useScoreModal();
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -149,8 +147,8 @@ export function NavBar({ projects }: { projects: Project[] }) {
             <CatalogSearch projects={projects} inputId="desktop-catalog-search" />
           </div>
 
-          <button
-            onClick={openScoreModal}
+          <a
+            href="#methodology"
             className="hidden sm:inline-flex font-mono text-[10px] tracking-widest px-2.5 py-1 border transition-colors hover:opacity-80"
             style={{
               color: "var(--color-accent)",
@@ -159,7 +157,7 @@ export function NavBar({ projects }: { projects: Project[] }) {
             }}
           >
             How is a score made?
-          </button>
+          </a>
 
           <ThemeToggle />
 
@@ -228,19 +226,17 @@ export function NavBar({ projects }: { projects: Project[] }) {
                   {s.label}
                 </a>
               ))}
-              <button
-                onClick={() => {
-                  openScoreModal();
-                  setMenuOpen(false);
-                }}
-                className="font-mono text-[11px] tracking-widest py-2 px-1 border-t mt-1 text-left"
+              <a
+                href="#methodology"
+                onClick={() => setMenuOpen(false)}
+                className="font-mono text-[11px] tracking-widest py-2 px-1 border-t mt-1 text-left block"
                 style={{
                   color: "var(--color-accent)",
                   borderColor: "var(--color-border)",
                 }}
               >
                 How is a score made?
-              </button>
+              </a>
             </div>
           </motion.div>
         )}
