@@ -556,67 +556,9 @@ button, a, [role="button"] {
   font-weight: 700;
 }
 
-/* ── Right-edge scroll tracker ── */
-.scroll-tracker {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgba(10, 10, 10, 0.4);
-  z-index: 80;
-  pointer-events: none;
-  transform-origin: top center;
-}
-.scroll-tracker-fill {
-  width: 100%;
-  height: 100%;
-  background: var(--color-accent);
-  box-shadow: var(--glow-strong);
-  transform-origin: top center;
-}
-/* ── Data pulse riding the tracker line ── */
-@keyframes pulse-ride {
-  0% { top: 0; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { top: calc(100% - 6px); opacity: 0; }
-}
-.scroll-tracker::before {
-  content: "";
-  position: absolute;
-  left: -2px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: var(--glow-accent);
-  animation: pulse-ride 3.2s linear infinite;
-}
-
-/* ── Calibration scan (global, one-shot on load) ── */
-.calibration-scan {
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  pointer-events: none;
-  overflow: hidden;
-}
-.calibration-sweep {
-  position: absolute;
-  top: 42%;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-  animation: sweep 1.1s ease-in-out 0.15s forwards;
-  box-shadow: var(--glow-strong);
-}
-
 /* Page entrance — CSS-only, plays from first paint (no hydration hook).
    Home and project pages both render #main-content. Opacity-only:
-   a transform would make #main-content the containing block for its
-   fixed children (.left-rail, .scroll-tracker, .calibration-scan). */
+   a transform would make #main-content the containing block for fixed children. */
 @keyframes page-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -671,25 +613,6 @@ button, a, [role="button"] {
   animation: sys-pulse 2.4s ease-in-out infinite;
 }
 
-/* ── Data pulse on the nav bottom hairline ── */
-@keyframes pulse-ride-x {
-  0% { left: 0; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { left: calc(100% - 6px); opacity: 0; }
-}
-.nav-pulse {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 6px;
-  height: 2px;
-  background: var(--color-accent);
-  box-shadow: 0 0 6px var(--color-accent);
-  animation: pulse-ride-x 6s linear infinite;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .accent-text { animation: none; }
@@ -697,9 +620,7 @@ button, a, [role="button"] {
   .badge-pulse { animation: none; }
   .wordmark-wave path,
   .wordmark-text,
-  .sys-dot,
-  .nav-pulse,
-  .scroll-tracker::before {
+  .sys-dot {
     animation: none !important;
   }
   #main-content {
@@ -842,10 +763,7 @@ button, a, [role="button"] {
 
 /* ── Print: hide telemetry chrome, force content visible ── */
 @media print {
-  .grid-overlay,
-  .calibration-scan,
-  .scroll-tracker,
-  .nav-pulse {
+  .grid-overlay {
     display: none !important;
   }
   .wordmark-text { animation: none !important; opacity: 1 !important; }

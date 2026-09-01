@@ -217,7 +217,7 @@ export function ProjectGrid({
     if (minScore !== "all") list = list.filter((p) => p.score >= Number(minScore));
     if (minStars !== "all") list = list.filter((p) => p.stars >= Number(minStars));
     if (!showGeneric) list = list.filter((p) => !p.is_generic);
-    if (atRiskOnly) list = list.filter((p) => p.abandonment_risk >= 0.65 && p.stars >= 50);
+    if (atRiskOnly) list = list.filter((p) => p.abandonment_risk >= 0.65);
     if (activeDays !== "all") {
       list = list.filter((p) => {
         const days = (1 - p.score_breakdown.recency) * 90;
@@ -565,6 +565,7 @@ export function ProjectGrid({
                         setSort("score");
                         setSortDir("desc");
                         setShowGeneric(true);
+                        setAtRiskOnly(false);
                       });
                     }}
                     className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"

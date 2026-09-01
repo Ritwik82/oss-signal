@@ -33,17 +33,12 @@ export function toWatchlistAppFallback(l: LocalEntry): WatchlistApp {
 }
 
 // Derive staleness from abandonment_risk (precomputed from pushed_at using
-// the same 14/30/90-day thresholds as refresh-data.mjs computeAbandonmentRisk).
-// Note: computeAbandonmentRisk has a discontinuity at day 30 (risk jumps from
-// 1.0 down to ~0.21), so a risk value in (0,1) could come from either the
-// 14-30d "warning" branch or the 30-90d "stale" branch of the original
-// day-based logic — they can't be told apart after the fact from risk alone.
-// Treat that whole open range as "warning" (documented here, don't silently
-// guess "stale").
+// linear 14/30/90-day thresholds from refresh-data.mjs computeAbandonmentRisk).
 export function stalenessFromAbandonmentRisk(risk: number): "fresh" | "warning" | "stale" | "abandoned" {
   if (risk <= 0) return "fresh";
   if (risk >= 1) return "abandoned";
-  return "warning";
+  if (risk < (30 - 14) / 76) return "warning";
+  return "stale";
 }
 
 // Build a WatchlistApp from a Project for locally tracked apps that exist in the catalog.

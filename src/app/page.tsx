@@ -9,7 +9,6 @@ import { ProjectGrid } from "@/components/project-grid";
 import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
-import { ScoreModalProvider } from "@/components/score-modal";
 import { ExportButtons } from "@/components/export-buttons";
 import { ViewTransition } from "react";
 
@@ -34,9 +33,8 @@ export default function Home() {
       className="w-full min-h-screen font-sans relative"
       style={{ color: "var(--color-text)" }}
     >
-      <ScoreModalProvider>
-        <NavBar projects={data.projects} />
-        <ViewTransition
+      <NavBar projects={data.projects} />
+      <ViewTransition
           enter={{ "nav-forward": "slide-from-right", "nav-back": "slide-from-left", default: "none" }}
           exit={{ "nav-forward": "slide-to-left", "nav-back": "slide-to-right", default: "none" }}
           default="none"
@@ -114,7 +112,6 @@ export default function Home() {
             </div>
           </footer>
         </ViewTransition>
-      </ScoreModalProvider>
     </div>
   );
 }

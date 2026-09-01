@@ -39,17 +39,31 @@ async function retryFetch(url, { extraHeaders = {}, format = "json", retries = 4
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       const res = await fetch(url, { headers: { ...headers, ...extraHeaders }, signal: AbortSignal.timeout(timeoutMs) });
-      if (!res.ok) throw Object.assign(new Error(`${res.status} ${res.statusText} for ${url}`), { httpStatus: res.status });
+      if (!res.ok) {
+        let isRateLimit = res.status === 429 || res.headers.get("x-ratelimit-remaining") === "0";
+        let bodySnippet = "";
+        if (res.status === 403) {
+          bodySnippet = await res.text().catch(() => "");
+          isRateLimit = isRateLimit || /rate limit|secondary|abuse/i.test(bodySnippet);
+        }
+        const retryAfter = Number(res.headers.get("retry-after")) || 0;
+        throw Object.assign(new Error(`${res.status} ${res.statusText} for ${url}: ${bodySnippet.slice(0, 100)}`), {
+          httpStatus: res.status,
+          isRateLimit,
+          retryAfter,
+        });
+      }
       if (format === "text") return { text: await res.text(), link: res.headers.get("link") };
       return { json: await res.json(), link: res.headers.get("link") };
     } catch (e) {
       const code = e?.cause?.code ?? e?.code ?? "";
       const status = e?.httpStatus ?? 0;
-      // 429/403 = GitHub rate-limit / secondary limit — retryable with backoff; 5xx already retried
-      const retriable = RETRYABLE_CODES.has(code) || code === "ABORT_ERR" || status >= 500 || status === 429 || status === 403;
+      const isTimeout = e?.name === "TimeoutError" || code === "ABORT_ERR";
+      const retriable = RETRYABLE_CODES.has(code) || isTimeout || status >= 500 || status === 429 || (status === 403 && e?.isRateLimit);
       if (!retriable) throw e;
       if (attempt === retries - 1) throw e;
-      const delay = 2000 * 2 ** attempt + 1000;
+      const baseDelay = e?.retryAfter ? e.retryAfter * 1000 : 2000 * 2 ** attempt + 1000;
+      const delay = Math.min(60_000, baseDelay) + Math.floor(Math.random() * 500);
       console.log(`  network retry ${attempt + 1}/${retries} in ${Math.ceil(delay / 1000)}s (${code || status || e.message}) for ${url}`);
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -122,7 +136,6 @@ async function scoreContributors(owner, repo) {
 function computeAbandonmentRisk(pushedAt) {
   const days = daysSince(pushedAt);
   if (days < 14) return 0;
-  if (days < 30) return (days - 14) / 16;
   if (days < 90) return (days - 14) / 76;
   return 1;
 }
