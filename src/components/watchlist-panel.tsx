@@ -41,39 +41,6 @@ const STALENESS_OPTIONS: { value: string; label: string }[] = [
   { value: "not_yet_catalogued", label: "Not Catalogued" },
 ];
 
-const STARTER_PACKS: { name: string; icon: string; items: LocalEntry[] }[] = [
-  {
-    name: "Daily Essentials",
-    icon: "⚡",
-    items: [
-      { id: "bikram-agarwal/ObtainX", name: "ObtainX", repo: "bikram-agarwal/ObtainX", genre: "store", source: "local" },
-      { id: "chenxiaolong/BasicSync", name: "BasicSync", repo: "chenxiaolong/BasicSync", genre: "utility", source: "local" },
-      { id: "LeanBitLab/LeanType", name: "LeanType", repo: "LeanBitLab/LeanType", genre: "utility", source: "local" },
-      { id: "InlitX/streak", name: "streak", repo: "InlitX/streak", genre: "productivity", source: "local" },
-    ],
-  },
-  {
-    name: "Security & Privacy",
-    icon: "🛡️",
-    items: [
-      { id: "samyak2403/RepoStore", name: "RepoStore", repo: "samyak2403/RepoStore", genre: "security", source: "local" },
-      { id: "GlassOnTin/Haven", name: "Haven", repo: "GlassOnTin/Haven", genre: "security", source: "local" },
-      { id: "R0b0To/VaultExplorer", name: "VaultExplorer", repo: "R0b0To/VaultExplorer", genre: "security", source: "local" },
-      { id: "ELowry/DNSToggle", name: "DNSToggle", repo: "ELowry/DNSToggle", genre: "customization", source: "local" },
-    ],
-  },
-  {
-    name: "Media & Utilities",
-    icon: "🎵",
-    items: [
-      { id: "AppFuton/Futon", name: "Futon", repo: "AppFuton/Futon", genre: "media", source: "local" },
-      { id: "UsagiApp/Usagi", name: "Usagi", repo: "UsagiApp/Usagi", genre: "media", source: "local" },
-      { id: "s4nj1th/Slauncher", name: "Slauncher", repo: "s4nj1th/Slauncher", genre: "customization", source: "local" },
-      { id: "kitsumed/ShizuCallRecorder", name: "ShizuCallRecorder", repo: "kitsumed/ShizuCallRecorder", genre: "shizuku", source: "local" },
-    ],
-  },
-];
-
 const PlainCard = motion.div;
 
 function StalenessIcon({ staleness, notYetCatalogued }: { staleness?: string; notYetCatalogued?: boolean }) {
@@ -558,36 +525,8 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                     className="text-sm max-w-md mx-auto leading-relaxed mb-4"
                     style={{ color: "var(--color-text-muted)" }}
                   >
-                    Load a starter pack to instantly activate your watchlist, or track apps from Fresh Finds below.
+                    Track apps from Fresh Finds below to build your watchlist.
                   </p>
-
-                  {/* 1-Click Starter Packs */}
-                  <div className="my-5 flex flex-wrap items-center justify-center gap-2">
-                    {STARTER_PACKS.map((pack) => (
-                      <button
-                        key={pack.name}
-                        onClick={() => {
-                          const count = addStarterPack(pack.items);
-                          if (count > 0) {
-                            setImportToast(`Added ${pack.name} starter pack (${count} apps).`);
-                            setImportToastError(false);
-                          } else {
-                            setImportToast(`${pack.name} apps are already in your watchlist.`);
-                            setImportToastError(false);
-                          }
-                        }}
-                        className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] flex items-center gap-1.5"
-                        style={{
-                          color: "var(--color-accent)",
-                          borderColor: "var(--color-accent-border)",
-                          backgroundColor: "var(--color-accent-dim)",
-                        }}
-                      >
-                        <span>{pack.icon}</span>
-                        <span>{pack.name} Pack</span>
-                      </button>
-                    ))}
-                  </div>
 
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                     <input
