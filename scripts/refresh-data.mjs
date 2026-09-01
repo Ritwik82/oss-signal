@@ -31,9 +31,10 @@ const headers = {
 
 const RETRYABLE_CODES = new Set(["ECONNRESET", "ENOTFOUND", "ETIMEDOUT", "EPIPE", "EAI_AGAIN", "ECONNREFUSED"]);
 
-// Shared fetch with retry on flaky-network errors (DNS, resets, timeouts) and 5xx.
+// Shared fetch with retry on flaky-network errors (DNS, resets, timeouts) and 5xx/rate-limit.
 // Body read happens inside the loop so mid-download resets (the F-Droid 52MB case) retry too.
 // AbortSignal.timeout guarantees a hung socket can't block the run forever.
+// ponytail: 12h cadence + actions/cache means F-Droid rarely downloads; 403/429 retries smooth GitHub secondary limits without new deps.
 async function retryFetch(url, { extraHeaders = {}, format = "json", retries = 4, timeoutMs = 60_000 } = {}) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -43,11 +44,13 @@ async function retryFetch(url, { extraHeaders = {}, format = "json", retries = 4
       return { json: await res.json(), link: res.headers.get("link") };
     } catch (e) {
       const code = e?.cause?.code ?? e?.code ?? "";
-      const retriable = RETRYABLE_CODES.has(code) || code === "ABORT_ERR" || (e?.httpStatus ?? 0) >= 500;
+      const status = e?.httpStatus ?? 0;
+      // 429/403 = GitHub rate-limit / secondary limit — retryable with backoff; 5xx already retried
+      const retriable = RETRYABLE_CODES.has(code) || code === "ABORT_ERR" || status >= 500 || status === 429 || status === 403;
       if (!retriable) throw e;
       if (attempt === retries - 1) throw e;
       const delay = 2000 * 2 ** attempt + 1000;
-      console.log(`  network retry ${attempt + 1}/${retries} in ${Math.ceil(delay / 1000)}s (${code || e.message}) for ${url}`);
+      console.log(`  network retry ${attempt + 1}/${retries} in ${Math.ceil(delay / 1000)}s (${code || status || e.message}) for ${url}`);
       await new Promise((r) => setTimeout(r, delay));
     }
   }
@@ -402,6 +405,9 @@ async function main() {
   console.log(`  launch filter: ${beforeLaunchFilter} → ${freshProjects.length} (repos created within ${FRESH_FIND_MAX_AGE_DAYS}d)`);
 
   freshProjects.sort((a, b) => b.score - a.score);
+
+  // ponytail: guard empty write — 12h cache means a bad F-Droid parse shouldn't wipe the catalog
+  if (freshProjects.length === 0) throw new Error("Refusing to write empty projects.json — F-Droid parse or GitHub batch produced 0 results");
 
   const dataDir = join(process.cwd(), "data");
   mkdirSync(dataDir, { recursive: true });

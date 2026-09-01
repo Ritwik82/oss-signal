@@ -77,8 +77,6 @@ export function NavBar({ projects }: { projects: Project[] }) {
         borderColor: "var(--color-border)",
       }}
     >
-      {/* Data pulse riding the nav bottom hairline */}
-      <div className="nav-pulse" aria-hidden="true" />
       <div className="px-4 flex items-center h-10">
         {/* Station identifier — Pulse wordmark */}
         <a href="#main-content" className="flex items-center gap-2 mr-3 no-underline">

@@ -60,12 +60,12 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="midnight"
+      data-theme="terminal"
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} h-full antialiased scroll-smooth`}
     >
       <head>
-        <meta name="theme-color" content="#12161d" />
+        <meta name="theme-color" content="#0a0e13" />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col isolate">

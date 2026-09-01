@@ -2,17 +2,30 @@ name: Refresh project data
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# ponytail: 12h cadence halves API load; single runner prevents overlap, cache keeps F-Droid 52MB off network
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: fdroid-index-v2
+          restore-keys: |
+            fdroid-index-v2
 
       - uses: actions/setup-node@v5
         with:
@@ -23,8 +36,23 @@ jobs:
           # PAT stored as a repo secret named GH_TOKEN (can't use GITHUB_ prefix).
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
+      - name: Validate project data
+        run: |
+          node -e "const j=require('./data/projects.json'); if(!j.projects?.length){console.error('validation failed: empty projects');process.exit(1)}; if(j.projects.some(p=>typeof p.score!=='number'||p.score<0||p.score>1)){console.error('validation failed: bad score');process.exit(1)}; console.log('validated', j.projects.length, 'projects', j.generated_at)"
+
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/projects.json
           git diff --staged --quiet || git commit -m "Refresh project data [skip ci]" && git push
+
+      - name: Upload debug artifact on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: refresh-failure-${{ github.run_id }}
+          path: |
+            data/projects.json
+            .cache/fdroid-index-v2.json
+          if-no-files-found: ignore
+          retention-days: 7

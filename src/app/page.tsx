@@ -11,7 +11,6 @@ import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
 import { ScoreModalProvider } from "@/components/score-modal";
 import { ExportButtons } from "@/components/export-buttons";
-import { ScrollTracker } from "@/components/scroll-tracker";
 import { ViewTransition } from "react";
 
 export default function Home() {
@@ -35,7 +34,6 @@ export default function Home() {
       className="w-full min-h-screen font-sans relative"
       style={{ color: "var(--color-text)" }}
     >
-      <ScrollTracker />
       <ScoreModalProvider>
         <NavBar projects={data.projects} />
         <ViewTransition

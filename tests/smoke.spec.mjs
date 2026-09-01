@@ -25,7 +25,7 @@ test("home page renders all three zones", async ({ page }) => {
   expect(body).toContain("Empty watchlist");
 
   const theme = await page.evaluate(() => document.documentElement.dataset.theme);
-  expect(theme).toBe("midnight");
+  expect(theme).toBe("terminal");
 
   expect(errors).toEqual([]);
 });

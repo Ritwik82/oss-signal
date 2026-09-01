@@ -161,7 +161,7 @@ export function ProjectGrid({
     [genres]
   );
 
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 24;
   const [lang, setLang] = useState("all");

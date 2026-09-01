@@ -28,7 +28,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
   const [page, setPage] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [sort, setSort] = useState<"score" | "newest" | "stars">("score");
-  const PAGE_SIZE = 12;
+  const PAGE_SIZE = 6;
   const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages - 1);
 
