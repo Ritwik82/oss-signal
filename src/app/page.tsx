@@ -10,7 +10,7 @@ import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
 import { ExportButtons } from "@/components/export-buttons";
-import { ViewTransition } from "react";
+import { ViewTransition, Suspense } from "react";
 
 export default function Home() {
   const data = getProjects();
@@ -40,7 +40,9 @@ export default function Home() {
           default="none"
         >
           {/* Zone 1 — Your Watchlist (most important, top) */}
-          <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} projects={data.projects} />
+          <Suspense fallback={null}>
+            <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} projects={data.projects} />
+          </Suspense>
 
           {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
           <FreshFinds projects={freshProjects} genres={genres.genres} />

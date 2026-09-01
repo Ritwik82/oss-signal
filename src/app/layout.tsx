@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Space_Grotesk, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import { themeScript } from "@/lib/theme-script";
 import { MotionProvider } from "@/components/motion-provider";
@@ -49,14 +48,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Nonce set by proxy.ts for the CSP; required for the inline theme script.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-
   return (
     <html
       lang="en"
@@ -66,7 +62,7 @@ export default async function RootLayout({
     >
       <head>
         <meta name="theme-color" content="#0a0e13" />
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col isolate">
         <a href="#main-content" className="skip-link">Skip to main content</a>

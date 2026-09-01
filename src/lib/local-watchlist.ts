@@ -93,7 +93,13 @@ function read(): LocalEntry[] {
     if (
       cached &&
       list.length === cached.length &&
-      list.every((a, i) => a.id === cached![i].id)
+      list.every(
+        (a, i) =>
+          a.id === cached![i].id &&
+          a.name === cached![i].name &&
+          a.repo === cached![i].repo &&
+          a.genre === cached![i].genre
+      )
     ) {
       return cached;
     }
@@ -105,8 +111,18 @@ function read(): LocalEntry[] {
 }
 
 function subscribe(cb: () => void) {
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === KEY || e.key === null) {
+      cached = null;
+      cb();
+    }
+  };
   window.addEventListener(EVENT, cb);
-  return () => window.removeEventListener(EVENT, cb);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(EVENT, cb);
+    window.removeEventListener("storage", onStorage);
+  };
 }
 
 export function useLocalWatchlist(): LocalEntry[] {

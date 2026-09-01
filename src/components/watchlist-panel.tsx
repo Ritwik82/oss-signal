@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
   useLocalWatchlist,
@@ -262,8 +262,14 @@ function AppCard({
 
 export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[]; genres: Genre[]; projects: Project[] }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const stackParam = searchParams.get("stack");
+  const [stackParam, setStackParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("stack");
+      if (p) setStackParam(p);
+    }
+  }, []);
 
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
   const [collapsed, setCollapsed] = useState(false);
