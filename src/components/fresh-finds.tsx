@@ -82,7 +82,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
         {/* Header */}
         <div className="mb-6">
           <h2
-            className="text-3xl md:text-4xl font-bold tracking-tight serif-display"
+            className="text-3xl md:text-4xl font-bold tracking-tight"
             style={{ color: "var(--color-text)" }}
           >
             New &amp; actively maintained
@@ -130,7 +130,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-{visible.map((p) => (
+              {visible.map((p, idx) => (
                 <FreshCard
                   key={p.id}
                   project={p}
@@ -138,6 +138,7 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
                   onCopy={copyLink}
                   tracked={trackedIds.has(p.id)}
                   onToggleTrack={() => toggleTrack(p)}
+                  featured={idx === 0 && clampedPage === 0}
                 />
               ))}
             </div>
@@ -197,12 +198,14 @@ function FreshCard({
   onCopy,
   tracked,
   onToggleTrack,
+  featured = false,
 }: {
   project: Project;
   genreLabel: string;
   onCopy: (url: string) => void;
   tracked: boolean;
   onToggleTrack: () => void;
+  featured?: boolean;
 }) {
   const days = daysSince(project.last_release_at);
   const isFresh = days !== null && days < 14;
@@ -213,9 +216,16 @@ function FreshCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -1 }}
-      className="glass group relative p-5 flex flex-col justify-between transition-colors hover:border-[var(--color-accent-border)]"
+      className={`glass group relative p-5 flex flex-col justify-between transition-all hover:border-[var(--color-accent-border)] ${featured ? "lg:col-span-2 bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-hover)]" : ""}`}
       style={{ boxShadow: "var(--card-shadow)" }}
     >
+      {featured && (
+        <div className="mb-3 inline-flex items-center gap-1.5 self-start px-2 py-0.5 rounded border border-[var(--color-signal-green)]/30 bg-[var(--color-signal-green)]/10 text-[var(--color-signal-green)] font-mono text-[10px] font-medium tracking-wider uppercase">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-signal-green)] animate-pulse" />
+          Spotlight Fresh App
+        </div>
+      )}
+
       {/* Top row: genre + score */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <span
@@ -353,7 +363,7 @@ function FreshCard({
             onClick={onToggleTrack}
             aria-pressed={tracked}
             aria-label={tracked ? `Stop tracking ${project.name}` : `Track ${project.name}`}
-            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-1 border transition-all hover:opacity-80 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               color: tracked ? "var(--color-signal-green)" : "var(--color-accent)",
               borderColor: tracked ? "var(--color-signal-green)" : "var(--color-accent-border)",
@@ -365,7 +375,7 @@ function FreshCard({
           <button
             onClick={() => onCopy(project.url)}
             aria-label={`Copy GitHub link for ${project.name}`}
-            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-1 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="relative z-10 font-mono text-[10px] tracking-wider px-2 py-1 border transition-all hover:opacity-80 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             style={{
               color: "var(--color-accent)",
               borderColor: "var(--color-accent-border)",

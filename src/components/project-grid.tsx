@@ -117,6 +117,15 @@ function ArchiveRow({
         {days != null ? `${days}d ago` : "—"}
       </span>
 
+      {/* Target SDK */}
+      {project.target_sdk != null && (
+        <span
+          className="hidden xl:inline font-mono text-[10px] px-1.5 py-0.5 rounded border border-[var(--color-border)] text-[var(--color-text-dim)] shrink-0"
+        >
+          SDK {project.target_sdk}
+        </span>
+      )}
+
       {/* Stars */}
       <span
         className="hidden sm:inline font-mono text-[10px] w-12 text-right shrink-0"
@@ -255,7 +264,7 @@ export function ProjectGrid({
         {/* Section header */}
         <div className="mb-8">
           <h2
-            className="text-4xl md:text-5xl font-bold tracking-tight mb-4 serif-display"
+            className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
             style={{ color: "var(--color-text)" }}
           >
             Everything we&apos;re tracking
@@ -596,6 +605,7 @@ export function ProjectGrid({
                         <span className="w-9 text-right">Score</span>
                       </span>
                       <span className="hidden lg:inline w-16 text-right shrink-0">Updated</span>
+                      <span className="hidden xl:inline w-14 text-center shrink-0">Target</span>
                       <span className="hidden sm:inline w-12 text-right shrink-0">Stars</span>
                       <span className="ml-2 w-[14px] shrink-0" aria-hidden="true" />
                     </div>

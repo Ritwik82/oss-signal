@@ -11,6 +11,7 @@ import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
 import { ExportButtons } from "@/components/export-buttons";
 import { RepoLookup } from "@/components/repo-lookup";
+import { ObservatoryHero } from "@/components/observatory-hero";
 import { ViewTransition, Suspense } from "react";
 
 export default function Home() {
@@ -40,6 +41,9 @@ export default function Home() {
           exit={{ "nav-forward": "slide-to-left", "nav-back": "slide-to-right", default: "none" }}
           default="none"
         >
+          {/* Observatory Hero: Telemetry HUD & Value Proposition */}
+          <ObservatoryHero projects={data.projects} generatedAt={data.generated_at} />
+
           {/* Zone 1 — Your Watchlist (most important, top) */}
           <Suspense fallback={null}>
             <WatchlistPanel apps={watchlistData.apps} genres={genres.genres} projects={data.projects} />

@@ -344,6 +344,7 @@ body {
 .glass {
   background: var(--color-surface);
   border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
   .glass {
@@ -351,6 +352,10 @@ body {
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
   }
+}
+
+button:active, a[role="button"]:active {
+  transform: scale(0.985);
 }
 
 /* ── Focus ring (both themes) ── */

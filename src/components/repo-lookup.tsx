@@ -126,26 +126,25 @@ export function RepoLookup() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="calibration-marks w-6" />
-        <h2
-          className="font-mono text-[10px] tracking-[0.2em] uppercase"
-          style={{ color: "var(--color-text-dim)" }}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="font-mono text-xs text-[var(--color-accent)] font-bold">{">_"}</span>
+        <h3
+          className="text-sm font-semibold tracking-tight text-[var(--color-text)]"
         >
-          Check Any Repo
-        </h2>
+          Scan Any GitHub Repository
+        </h3>
       </div>
 
-      <div className="glass p-4" style={{ boxShadow: "var(--card-shadow)" }}>
+      <div className="glass p-5 rounded-xl border border-[var(--color-border)]" style={{ boxShadow: "var(--card-shadow)" }}>
         {/* Input row */}
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-2 mb-3">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && lookup()}
-            placeholder="owner/repo or GitHub URL"
-            className="flex-1 border px-3 py-1.5 font-mono text-[11px] outline-none focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+            placeholder="owner/repo or GitHub URL (e.g. obtainium-app/Obtainium)"
+            className="flex-1 rounded-lg border px-3.5 py-2 font-mono text-xs outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)]/60 transition-colors"
             style={{
               borderColor: "var(--color-border)",
               backgroundColor: "var(--color-bg)",
@@ -155,14 +154,14 @@ export function RepoLookup() {
           <button
             onClick={lookup}
             disabled={loading || !input.trim()}
-            className="font-mono text-[10px] tracking-widest uppercase px-4 py-1.5 border transition-colors hover:opacity-80 disabled:opacity-40"
+            className="font-mono text-[11px] tracking-wider font-semibold uppercase px-5 py-2 rounded-lg border transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-40 shadow-sm"
             style={{
               color: "var(--color-accent)",
               borderColor: "var(--color-accent-border)",
               backgroundColor: "var(--color-accent-dim)",
             }}
           >
-            {loading ? "..." : "Check"}
+            {loading ? "Scanning..." : "Check"}
           </button>
         </div>
 

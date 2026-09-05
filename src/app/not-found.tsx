@@ -5,7 +5,7 @@ export default function NotFound() {
       <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-3" style={{ color: "var(--color-text-dim)" }}>
         404 — Specimen not catalogued
       </p>
-      <h1 className="text-3xl font-bold tracking-tight serif-display mb-3" style={{ color: "var(--color-text)" }}>
+      <h1 className="text-3xl font-bold tracking-tight mb-3" style={{ color: "var(--color-text)" }}>
         No record for this ID.
       </h1>
       <p className="text-sm leading-relaxed max-w-lg mx-auto mb-8" style={{ color: "var(--color-text-muted)" }}>

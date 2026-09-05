@@ -148,7 +148,7 @@ export default async function ProjectPage({
 
         {/* Name */}
         <h1
-          className="text-3xl md:text-4xl font-bold tracking-tight scroll-mt-24 mb-4 serif-display"
+          className="text-3xl md:text-4xl font-bold tracking-tight scroll-mt-24 mb-4"
           style={{ color: "var(--color-text)" }}
         >
           {project.name}

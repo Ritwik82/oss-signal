@@ -429,7 +429,7 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2
-              className="text-3xl md:text-4xl font-bold tracking-tight serif-display"
+              className="text-3xl md:text-4xl font-bold tracking-tight"
               style={{ color: "var(--color-text)" }}
             >
               Apps you rely on
@@ -515,34 +515,37 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
             >
               {allApps.length === 0 && (
                 <div
-                  className="glass p-8 text-center"
+                  className="glass p-8 text-center rounded-xl relative overflow-hidden"
                   style={{
                     boxShadow: "var(--card-shadow)",
-                    border: "1px dashed var(--color-signal-amber)",
+                    border: "1px solid var(--color-border)",
                   }}
                 >
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)]/60 mb-3">
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-signal-amber)] animate-pulse" />
+                    <span
+                      className="font-mono text-[10px] tracking-widest uppercase font-medium"
+                      style={{ color: "var(--color-text)" }}
+                    >
+                      Empty watchlist
+                    </span>
+                  </div>
                   <p
-                    className="font-mono text-[10px] tracking-widest uppercase mb-2"
-                    style={{ color: "var(--color-text-dim)" }}
-                  >
-                    Empty watchlist
-                  </p>
-                  <p
-                    className="text-sm max-w-md mx-auto leading-relaxed mb-4"
-                    style={{ color: "var(--color-text-muted)" }}
+                    className="text-sm max-w-md mx-auto leading-relaxed mb-2"
+                    style={{ color: "var(--color-text)" }}
                   >
                     Your watchlist is where apps you care about live. When an app you
                     track needs attention — a new release, stalled development, or
                     security issue — it appears here first.
                   </p>
                   <p
-                    className="text-sm max-w-md mx-auto leading-relaxed mb-4"
+                    className="text-xs max-w-md mx-auto leading-relaxed mb-6"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Track apps from Fresh Finds below to build your watchlist.
                   </p>
 
-                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-3">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -553,7 +556,7 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                      className="font-mono text-[10px] tracking-wider px-3.5 py-2 rounded border transition-all hover:opacity-90 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] font-medium"
                       style={{
                         color: "var(--color-accent)",
                         borderColor: "var(--color-accent-border)",
@@ -564,10 +567,11 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
                     </button>
                     <a
                       href="#fresh-finds"
-                      className="font-mono text-[10px] tracking-wider px-3 py-1.5 border transition-colors hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                      className="font-mono text-[10px] tracking-wider px-3.5 py-2 rounded border transition-all hover:opacity-90 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                       style={{
-                        color: "var(--color-text-dim)",
+                        color: "var(--color-text)",
                         borderColor: "var(--color-border)",
+                        backgroundColor: "var(--color-bg)",
                       }}
                     >
                       Browse Fresh Finds
