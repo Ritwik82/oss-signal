@@ -302,7 +302,11 @@ async function main() {
       const summary = meta?.summary?.["en-US"] ?? (Array.isArray(meta?.summary) ? meta.summary[0] : null) ?? "";
       const license = meta?.license ?? null;
       const source = meta?.sourceCode ?? null; // string URL, not an object
-      return { pkgName, name, summary, license, sourceCode: source, addedAt: new Date(meta?.added ?? 0).toISOString() };
+      const versions = Object.values(pkg?.versions ?? {});
+      const latestManifest = versions[0]?.manifest ?? null;
+      const targetSdk = latestManifest?.targetSdkVersion ?? null;
+      const minSdk = latestManifest?.minSdkVersion ?? null;
+      return { pkgName, name, summary, license, sourceCode: source, addedAt: new Date(meta?.added ?? 0).toISOString(), targetSdk, minSdk };
     });
 
   let freshProjects = [];
@@ -367,6 +371,8 @@ async function main() {
       abandonment_risk: abandonmentRisk,
       last_release_at,
       social_mentions: social.social_mentions,
+      target_sdk: app.targetSdk ?? null,
+      min_sdk: app.minSdk ?? null,
     };
   }
 

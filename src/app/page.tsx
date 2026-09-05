@@ -10,6 +10,7 @@ import { ScoringSection } from "@/components/scoring-section";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { FreshFinds } from "@/components/fresh-finds";
 import { ExportButtons } from "@/components/export-buttons";
+import { RepoLookup } from "@/components/repo-lookup";
 import { ViewTransition, Suspense } from "react";
 
 export default function Home() {
@@ -46,6 +47,13 @@ export default function Home() {
 
           {/* Zone 2 — Fresh Finds (recent, high-score fresh apps) */}
           <FreshFinds projects={freshProjects} genres={genres.genres} />
+
+          {/* Zone 2.5 — Ad-hoc repo lookup for untracked repos */}
+          <div className="px-4">
+            <div className="max-w-4xl mx-auto mb-8">
+              <RepoLookup />
+            </div>
+          </div>
 
           {/* Zone 3 — The rest of the archive with pagination */}
           <ProjectGrid projects={data.projects} genres={genres.genres} />

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getProjects, getHealthStatus } from "@/lib/data";
+import { getProjects, getHealthStatus, getTargetSdkCompatibility } from "@/lib/data";
+import { getSuccessor } from "@/lib/successors";
 import { TrackButton } from "@/components/track-button";
 
 const signalMeta: Record<string, { label: string; dotClass: string }> = {
@@ -53,7 +54,7 @@ function BreakdownBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return getProjects().projects.map((p) => ({ id: p.id.split("/") }));
@@ -102,6 +103,8 @@ export default async function ProjectPage({
     .filter((p) => p.id !== project.id && p.genre === project.genre && p.score >= 0.65)
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
+
+  const successor = getSuccessor(project.id) || getSuccessor(project.name);
 
   return (
     <div id="main-content" className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 scroll-mt-24">
@@ -178,6 +181,24 @@ export default async function ProjectPage({
           <span className="font-mono" style={{ color: "var(--color-text-muted)" }}>
             ★ {project.stars.toLocaleString()}
           </span>
+          {(() => {
+            const compat = getTargetSdkCompatibility(project.target_sdk);
+            return (
+              <span
+                className="font-mono text-[10px] px-2 py-0.5 border inline-flex items-center gap-1"
+                style={{
+                  color: compat.color,
+                  borderColor: compat.color,
+                  backgroundColor: "rgba(255,255,255,0.03)",
+                }}
+                title={compat.warning || compat.label}
+              >
+                {compat.badge === "blocked" && "⚠️ "}
+                {compat.badge === "modern" && "⚡ "}
+                {compat.label}
+              </span>
+            );
+          })()}
           <a
             href={project.url}
             target="_blank"
@@ -202,6 +223,51 @@ export default async function ProjectPage({
           <TrackButton project={project} />
         </div>
       </header>
+
+      {/* Spiritual Successor Banner */}
+      {successor && (
+        <section className="mb-10 p-5 border-2 relative glass" style={{ borderColor: "var(--color-signal-green)" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-base" aria-hidden="true">🔄</span>
+            <h2 className="font-mono text-[11px] tracking-[0.2em] uppercase font-bold" style={{ color: "var(--color-signal-green)" }}>
+              Recommended Spiritual Successor
+            </h2>
+          </div>
+          <p className="text-base font-bold mb-1" style={{ color: "var(--color-text)" }}>
+            {successor.successor_name}{" "}
+            <span className="font-mono text-xs font-normal" style={{ color: "var(--color-text-dim)" }}>
+              ({successor.successor_repo})
+            </span>
+          </p>
+          <p className="text-xs leading-relaxed mb-4" style={{ color: "var(--color-text-muted)" }}>
+            {successor.reason}
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/project/${successor.successor_repo}`}
+              className="font-mono text-[10px] tracking-widest uppercase px-3 py-1.5 border transition-colors hover:opacity-80"
+              style={{
+                color: "var(--color-signal-green)",
+                borderColor: "var(--color-signal-green)",
+                backgroundColor: "rgba(16,185,129,0.08)",
+              }}
+            >
+              View {successor.successor_name} Health ↗
+            </Link>
+            <a
+              href={`obtainium://add/https://github.com/${successor.successor_repo}`}
+              className="font-mono text-[10px] tracking-widest uppercase px-3 py-1.5 border transition-colors hover:opacity-80"
+              style={{
+                color: "var(--color-accent)",
+                borderColor: "var(--color-accent-border)",
+                backgroundColor: "var(--color-accent-dim)",
+              }}
+            >
+              Add {successor.successor_name} to Obtainium 📲
+            </a>
+          </div>
+        </section>
+      )}
 
       {/* Score panel */}
       <section className="mb-10">
@@ -311,7 +377,7 @@ export default async function ProjectPage({
               return (
                 <Link
                   key={alt.id}
-                  href={`/project/${encodeURIComponent(alt.id)}`}
+                  href={`/project/${alt.id}`}
                   className="glass p-4 border block transition-colors hover:border-[var(--color-accent)]"
                   style={{ borderColor: "var(--color-border)" }}
                 >

@@ -85,11 +85,13 @@ export function mergeWatchlist(
 // store actually changed (React throws an infinite-loop error otherwise).
 let cached: LocalEntry[] | null = null;
 
+const EMPTY_STORE: LocalEntry[] = [];
+
 function read(): LocalEntry[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return EMPTY_STORE;
   try {
     const next = JSON.parse(localStorage.getItem(KEY) ?? "[]") as LocalEntry[];
-    const list = Array.isArray(next) ? next : [];
+    const list = Array.isArray(next) ? next : EMPTY_STORE;
     if (
       cached &&
       list.length === cached.length &&
@@ -106,7 +108,7 @@ function read(): LocalEntry[] {
     cached = list;
     return cached;
   } catch {
-    return cached ?? [];
+    return cached ?? EMPTY_STORE;
   }
 }
 
@@ -126,7 +128,7 @@ function subscribe(cb: () => void) {
 }
 
 export function useLocalWatchlist(): LocalEntry[] {
-  return useSyncExternalStore(subscribe, read, () => []);
+  return useSyncExternalStore(subscribe, read, () => EMPTY_STORE);
 }
 
 function safeSave(next: LocalEntry[]): boolean {

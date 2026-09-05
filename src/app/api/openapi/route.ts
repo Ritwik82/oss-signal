@@ -22,9 +22,16 @@ export async function GET() {
           },
         },
       },
-      "/api/tracked": {
-        get: { summary: "List tracked IDs (public, private-cache)", responses: { "200": { description: "{ ids: string[] }" } } },
-        put: { summary: "Replace tracked IDs (ADMIN_TOKEN)", security: [{ bearerAuth: [] }], responses: { "403": { description: "UNAUTHORIZED" } } },
+      "/api/feed": {
+        get: {
+          summary: "RSS 2.0 release & health feed",
+          parameters: [
+            { name: "repos", in: "query", schema: { type: "string" }, description: "Comma-separated repo IDs to filter" },
+          ],
+          responses: {
+            "200": { description: "RSS 2.0 XML feed", headers: { "Content-Type": { schema: { type: "string", example: "application/xml" } } } },
+          },
+        },
       },
     },
   };

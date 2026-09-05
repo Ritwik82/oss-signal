@@ -9,6 +9,11 @@ const WINDOW_MS = 60_000;
 const MAX_REQ = 30;
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
+  if (buckets.size > 500) {
+    for (const [key, val] of buckets) {
+      if (now > val.reset) buckets.delete(key);
+    }
+  }
   const b = buckets.get(ip);
   if (!b || now > b.reset) {
     buckets.set(ip, { count: 1, reset: now + WINDOW_MS });
@@ -45,7 +50,7 @@ export async function GET(
   if (!project) {
     return err(404, "not found", "NOT_FOUND", id);
   }
-  const etag = `"${Buffer.from(JSON.stringify(project)).length.toString(36)}-${project.score.toString(36).slice(2, 8)}"`;
+  const etag = `"${project.score.toString(36)}-${(project.last_release_at ?? project.created_at).replace(/[^0-9]/g, "")}-${project.stars.toString(36)}"`;
   const ifNone = request.headers.get("if-none-match");
   if (ifNone === etag) {
     return new NextResponse(null, { status: 304, headers: { ETag: etag, "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400", "x-request-id": id } });

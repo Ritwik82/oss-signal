@@ -12,17 +12,12 @@ export const config = {
   ],
 };
 
-// SHA256 of themeScript in src/lib/theme-script.ts to allow the static pre-paint theme script
-// without requiring dynamic per-request nonces in RootLayout, enabling 100% static prerendering.
-const THEME_SCRIPT_HASH = "'sha256-0SlCCh6C3MZwHZ/IoitUkKy/7HMA7uPiJWGViTLMCIE='";
-
 export function proxy(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  const isDev = process.env.NODE_ENV === "development";
 
   const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' ${THEME_SCRIPT_HASH}${isDev ? " 'unsafe-eval'" : ""}`,
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",

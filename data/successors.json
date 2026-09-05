@@ -1,0 +1,82 @@
+[
+  {
+    "original_repo": "SimpleMobileTools/Simple-Gallery",
+    "original_name": "Simple Gallery",
+    "successor_repo": "FossifyOrg/Gallery",
+    "successor_name": "Fossify Gallery",
+    "reason": "Original SimpleMobileTools suite was acquired by adware broker ZipoApps. Fossify is the official community-maintained, privacy-respecting FOSS fork.",
+    "migration_type": "fork_handoff"
+  },
+  {
+    "original_repo": "SimpleMobileTools/Simple-Calendar",
+    "original_name": "Simple Calendar",
+    "successor_repo": "FossifyOrg/Calendar",
+    "successor_name": "Fossify Calendar",
+    "reason": "Acquired by ZipoApps. Fossify Calendar is the active community fork.",
+    "migration_type": "fork_handoff"
+  },
+  {
+    "original_repo": "SimpleMobileTools/Simple-Contacts",
+    "original_name": "Simple Contacts",
+    "successor_repo": "FossifyOrg/Contacts",
+    "successor_name": "Fossify Contacts",
+    "reason": "Acquired by ZipoApps. Fossify Contacts is the active community fork.",
+    "migration_type": "fork_handoff"
+  },
+  {
+    "original_repo": "SimpleMobileTools/Simple-Notes",
+    "original_name": "Simple Notes",
+    "successor_repo": "FossifyOrg/Notes",
+    "successor_name": "Fossify Notes",
+    "reason": "Acquired by ZipoApps. Fossify Notes is the active community fork.",
+    "migration_type": "fork_handoff"
+  },
+  {
+    "original_repo": "SimpleMobileTools/Simple-File-Manager",
+    "original_name": "Simple File Manager",
+    "successor_repo": "FossifyOrg/File-Manager",
+    "successor_name": "Fossify File Manager",
+    "reason": "Acquired by ZipoApps. Fossify File Manager is the active community fork.",
+    "migration_type": "fork_handoff"
+  },
+  {
+    "original_repo": "tachiyomiorg/tachiyomi",
+    "original_name": "Tachiyomi",
+    "successor_repo": "mihonapp/mihon",
+    "successor_name": "Mihon",
+    "reason": "Tachiyomi ceased development due to legal pressure. Mihon is the direct official spiritual successor created by the core team.",
+    "migration_type": "successor"
+  },
+  {
+    "original_repo": "bromite/bromite",
+    "original_name": "Bromite",
+    "successor_repo": "uazo/cromite",
+    "successor_name": "Cromite",
+    "reason": "Bromite development halted in 2022. Cromite is the actively maintained Chromium-based ad-blocking successor with weekly updates.",
+    "migration_type": "successor"
+  },
+  {
+    "original_repo": "TeamVanced/VancedManager",
+    "original_name": "Vanced Manager",
+    "successor_repo": "ReVanced/revanced-manager",
+    "successor_name": "ReVanced Manager",
+    "reason": "Vanced project was discontinued. ReVanced is the open-source patching platform successor.",
+    "migration_type": "successor"
+  },
+  {
+    "original_repo": "TeamNewPipe/NewPipeLegacy",
+    "original_name": "NewPipe Legacy",
+    "successor_repo": "TeamNewPipe/NewPipe",
+    "successor_name": "NewPipe",
+    "reason": "Legacy build for older Android 4.x devices is deprecated. Use modern NewPipe for Android 5.0+.",
+    "migration_type": "upgrade"
+  },
+  {
+    "original_repo": "k-9mail/k-9",
+    "original_name": "K-9 Mail",
+    "successor_repo": "thunderbird/thunderbird-android",
+    "successor_name": "Thunderbird for Android",
+    "reason": "K-9 Mail joined the Mozilla Thunderbird family and has officially transitioned into Thunderbird for Android.",
+    "migration_type": "rebrand"
+  }
+]

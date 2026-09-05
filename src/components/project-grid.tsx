@@ -3,7 +3,6 @@
 import { useState, useMemo, startTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { Project, Genre, GenreId } from "@/lib/data";
 import { FilterChipGroup } from "./filter-chip";
 
@@ -65,7 +64,7 @@ function ArchiveRow({
 
       {/* Name + owner link */}
       <Link
-        href={`/project/${encodeURIComponent(project.id)}`}
+        href={`/project/${project.id}`}
         className="min-w-0 flex-1 flex items-baseline gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         aria-label={`Open ${project.name} on PulsarOss`}
       >
@@ -148,7 +147,6 @@ export function ProjectGrid({
   projects: Project[];
   genres: Genre[];
 }) {
-  const router = useRouter();
   const genreMap = useMemo(
     () => new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label])),
     [genres]
@@ -162,7 +160,6 @@ export function ProjectGrid({
   );
 
   const [collapsed, setCollapsed] = useState(false);
-  const [page, setPage] = useState(0);
   const PAGE_SIZE = 24;
   const [lang, setLang] = useState("all");
   const [minScore, setMinScore] = useState("all");
@@ -182,7 +179,7 @@ export function ProjectGrid({
     return [...new Set(langs)].sort();
   }, [projects]);
 
-  // Reset to page 1 whenever the user changes any filter/sort/search
+  // Derive page reset automatically whenever filters/sort/search change
   const filtersKey = JSON.stringify([
     search,
     lang,
@@ -196,11 +193,15 @@ export function ProjectGrid({
     sort,
     sortDir,
   ]);
-  const [prevFilters, setPrevFilters] = useState(filtersKey);
-  if (filtersKey !== prevFilters) {
-    setPrevFilters(filtersKey);
-    setPage(0);
-  }
+  const [pageState, setPageState] = useState<{ key: string; page: number }>({ key: "", page: 0 });
+  const page = pageState.key === filtersKey ? pageState.page : 0;
+  const setPage = (updater: number | ((p: number) => number)) => {
+    setPageState((prev) => {
+      const current = prev.key === filtersKey ? prev.page : 0;
+      const next = typeof updater === "function" ? updater(current) : updater;
+      return { key: filtersKey, page: next };
+    });
+  };
 
   const filtered = useMemo(() => {
     let list = projects;
@@ -413,6 +414,16 @@ export function ProjectGrid({
                     value={lang}
                     onChange={setLang}
                   />
+                  <FilterChipGroup
+                    label="Access"
+                    options={[
+                      { value: "all", label: "ALL" },
+                      { value: "shizuku", label: "⚡ SHIZUKU" },
+                      { value: "non-shizuku", label: "STANDARD" },
+                    ]}
+                    value={shizukuFilter}
+                    onChange={setShizukuFilter}
+                  />
                   <div className="flex flex-wrap gap-4 items-center">
                     <FilterChipGroup
                       label="Sort"
@@ -498,16 +509,6 @@ export function ProjectGrid({
                           />
                         </div>
                         <div className="flex flex-wrap gap-4">
-                          <FilterChipGroup
-                            label="Access"
-                            options={[
-                              { value: "all", label: "ALL" },
-                              { value: "shizuku", label: "SHIZUKU" },
-                              { value: "non-shizuku", label: "STANDARD" },
-                            ]}
-                            value={shizukuFilter}
-                            onChange={setShizukuFilter}
-                          />
                           <FilterChipGroup
                             label="Generic"
                             options={[

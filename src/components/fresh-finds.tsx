@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useMemo, startTransition } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { Project, Genre, GenreId } from "@/lib/data";
 import { useLocalWatchlist, toggleLocalWatchlist } from "@/lib/local-watchlist";
 import { FilterChipGroup } from "./filter-chip";
@@ -23,7 +22,6 @@ function scoreColor(score: number): string {
 }
 
 export function FreshFinds({ projects, genres }: { projects: Project[]; genres: Genre[] }) {
-  const router = useRouter();
   const genreMap = new Map<GenreId, string>(genres.map((g) => [g.id as GenreId, g.label]));
   const [page, setPage] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -140,7 +138,6 @@ export function FreshFinds({ projects, genres }: { projects: Project[]; genres: 
                   onCopy={copyLink}
                   tracked={trackedIds.has(p.id)}
                   onToggleTrack={() => toggleTrack(p)}
-                  router={router}
                 />
               ))}
             </div>
@@ -200,14 +197,12 @@ function FreshCard({
   onCopy,
   tracked,
   onToggleTrack,
-  router,
 }: {
   project: Project;
   genreLabel: string;
   onCopy: (url: string) => void;
   tracked: boolean;
   onToggleTrack: () => void;
-  router: ReturnType<typeof useRouter>;
 }) {
   const days = daysSince(project.last_release_at);
   const isFresh = days !== null && days < 14;
@@ -278,7 +273,7 @@ function FreshCard({
 
       {/* Name + owner link */}
       <Link
-        href={`/project/${encodeURIComponent(project.id)}`}
+        href={`/project/${project.id}`}
         className="block mb-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         aria-label={`Open ${project.name} on PulsarOss`}
       >

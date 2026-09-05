@@ -130,7 +130,7 @@ export function CatalogSearch({
               <a
                 key={p.id}
                 id={`search-option-${p.id}`}
-                href={`/project/${encodeURIComponent(p.id)}`}
+                href={`/project/${p.id}`}
                 onClick={() => onNavigate?.()}
                 role="option"
                 aria-selected={i === activeIndex}

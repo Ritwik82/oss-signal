@@ -73,4 +73,6 @@ decisions.md
 artifacts/
 skills-lock.json
 
-
+# brainstorm logs
+pulsaross_brainstorm_*
+*.jsonl

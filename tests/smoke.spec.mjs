@@ -111,7 +111,7 @@ test("mobile drawer search finds a project", async ({ page }) => {
   await drawerSearch.fill(p.name.slice(0, 6));
   await page.getByRole("option").first().click();
   await page.waitForURL(/\/project\//);
-  await expect(page).toHaveURL(new RegExp(`/project/${encodeURIComponent(p.id)}`));
+  await expect(page).toHaveURL(new RegExp(`/project/${p.id}`));
 });
 
 test("track from Fresh Finds adds to watchlist, untrack removes it", async ({ page }) => {

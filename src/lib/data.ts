@@ -55,6 +55,8 @@ export interface Project {
   abandonment_risk: number;
   last_release_at: string | null;
   social_mentions: number;
+  target_sdk?: number | null;
+  min_sdk?: number | null;
 }
 
 export interface ProjectsData {
@@ -82,6 +84,58 @@ export function getHealthStatus(score: number, staleness?: string): HealthStatus
   return { label: "Active & Maintained", color: "var(--color-signal-green)", badgeStyle: "fresh" };
 }
 
+export interface TargetSdkCompatibility {
+  label: string;
+  badge: "blocked" | "legacy" | "compatible" | "modern" | "unknown";
+  color: string;
+  warning?: string;
+}
+
+export function getTargetSdkCompatibility(targetSdk?: number | null): TargetSdkCompatibility {
+  if (targetSdk == null) {
+    return { label: "Target SDK Unknown", badge: "unknown", color: "var(--color-text-dim)" };
+  }
+  if (targetSdk < 24) {
+    return {
+      label: `Android 14+ Blocked (SDK ${targetSdk})`,
+      badge: "blocked",
+      color: "var(--color-signal-red)",
+      warning: "Android 14+ enforces a hard install-time block on apps targeting SDK < 24.",
+    };
+  }
+  if (targetSdk < 30) {
+    return {
+      label: `Legacy Storage (SDK ${targetSdk})`,
+      badge: "legacy",
+      color: "var(--color-signal-amber)",
+      warning: "Targets Android 10 or older before Scoped Storage enforcement.",
+    };
+  }
+  if (targetSdk >= 34) {
+    return {
+      label: `Android 14/15 Ready (SDK ${targetSdk})`,
+      badge: "modern",
+      color: "var(--color-signal-green)",
+    };
+  }
+  const sdkToAndroid: Record<number, string> = {
+    35: "15",
+    34: "14",
+    33: "13",
+    32: "12L",
+    31: "12",
+    30: "11",
+    29: "10",
+    28: "9",
+  };
+  const androidVersion = sdkToAndroid[targetSdk] ?? (targetSdk >= 21 ? `${targetSdk - 20}` : "Legacy");
+  return {
+    label: `Targets Android ${androidVersion} (SDK ${targetSdk})`,
+    badge: "compatible",
+    color: "var(--color-text-muted)",
+  };
+}
+
 export interface WatchlistApp {
   id: string;
   name: string;
@@ -93,6 +147,8 @@ export interface WatchlistApp {
   installed: boolean;
   trackOnly: boolean;
   fdroid: boolean;
+  target_sdk?: number | null;
+  min_sdk?: number | null;
   // community-derived fields (written by refresh-data)
   pushed_at?: string | null;
   last_release_at?: string | null;

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, startTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import type { WatchlistApp, GenreId, Genre, Project } from "@/lib/data";
 import {
   useLocalWatchlist,
@@ -13,6 +13,7 @@ import {
   mergeWatchlist,
   LocalEntry,
 } from "@/lib/local-watchlist";
+import { getSuccessor } from "@/lib/successors";
 import { FilterChipGroup } from "./filter-chip";
 
 function stalenessColor(staleness?: string) {
@@ -110,6 +111,7 @@ function AppCard({
   const hasRepo = Boolean(app.repo);
   const isUnknown = app.staleness === "unknown";
   const notYetCatalogued = app.notYetCatalogued === true;
+  const successor = getSuccessor(app.repo ?? app.id);
   const borderStyle = notYetCatalogued
     ? "1px dashed var(--color-signal-blue)"
     : isUnknown
@@ -168,7 +170,7 @@ function AppCard({
 
       {hasRepo ? (
         <Link
-          href={`/project/${encodeURIComponent(app.repo!)}`}
+          href={`/project/${app.repo}`}
           className="font-semibold text-sm tracking-tight line-clamp-1 mb-1 transition-colors hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           style={{ color: "var(--color-text)" }}
           aria-label={`Open ${app.name} on PulsarOss`}
@@ -190,6 +192,19 @@ function AppCard({
         <p className="font-mono text-[10px] mb-2" style={{ color: "var(--color-signal-blue)" }}>
           Not yet scanned — picked up in the next catalog refresh
         </p>
+      )}
+      {successor && (
+        <div className="mb-3 p-2 border border-emerald-800/60 bg-emerald-950/30 flex items-center justify-between text-[10px] font-mono">
+          <span className="text-emerald-400 truncate">
+            🔄 Successor: <strong>{successor.successor_name}</strong>
+          </span>
+          <Link
+            href={`/project/${successor.successor_repo}`}
+            className="text-emerald-300 underline shrink-0 ml-1 hover:text-emerald-100"
+          >
+            View
+          </Link>
+        </div>
       )}
 
       <div className="flex items-center justify-between mt-auto pt-2 border-t"
@@ -261,15 +276,8 @@ function AppCard({
 }
 
 export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[]; genres: Genre[]; projects: Project[] }) {
-  const router = useRouter();
-  const [stackParam, setStackParam] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("stack");
-      if (p) setStackParam(p);
-    }
-  }, []);
+  const searchParams = useSearchParams();
+  const stackParam = searchParams.get("stack");
 
   const genreMap = useMemo(() => new Map(genres.map((g) => [g.id as GenreId, g.label])), [genres]);
   const [collapsed, setCollapsed] = useState(false);
@@ -323,6 +331,10 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
     }
   }
 
+  // Server watchlist (empty at launch) merged with each visitor's local tracking.
+  const local = useLocalWatchlist();
+  const allApps = mergeWatchlist(apps, local, projects);
+
   function shareStack() {
     if (allApps.length === 0) return;
     const repos = allApps.map((a) => a.repo ?? a.id).filter(Boolean);
@@ -331,10 +343,6 @@ export function WatchlistPanel({ apps, genres, projects }: { apps: WatchlistApp[
     setImportToast("Stack URL copied to clipboard! 📋");
     setImportToastError(false);
   }
-
-  // Server watchlist (empty at launch) merged with each visitor's local tracking.
-  const local = useLocalWatchlist();
-  const allApps = useMemo(() => mergeWatchlist(apps, local, projects), [apps, local, projects]);
 
   const filtered = useMemo(() => {
     let list = allApps;
